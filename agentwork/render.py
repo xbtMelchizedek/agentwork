@@ -83,6 +83,8 @@ def sentence(m: dict, tz: str = "UTC", soc=None) -> str:
         verb = {"settled": "paid", "refunded": "refunded", "cancelled": "cancelled with", "disputed": "disputes payment to"}[b["outcome"]]
         s = (f"{w} {verb} {W(b['payee'])} {amount(b['amount'])} · rail {safe.sanitize(b['rail'], 32)} "
              f"ref {safe.sanitize(b['railRef'], 24)} (claimed; check the rail to verify)")
+        if b.get("supersedes"):
+            s += f" · corrects receipt `{b['supersedes'][:18]}…`"
         if b.get("score"):
             s += f" · rating {b['score']}/5"
     elif t == "attest":

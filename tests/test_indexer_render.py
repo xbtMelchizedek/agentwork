@@ -100,3 +100,31 @@ def test_safe_helpers():
     assert "[redacted]" in safe.sanitize("password: hunter2")
     assert safe.FENCE_CLOSE not in safe.sanitize("x " + safe.FENCE_CLOSE + " y")
     assert safe.sanitize("a\u202eb\u200bc") == "abc"
+
+
+def _job_with_correction(keys, outcome):
+    a, b, c = keys["a"], keys["b"], keys["c"]
+    R, F = "core/jobs", 10**18
+    ask = codec.build(a, "ask", R, {"task": "t", "budget": {"asset": "FLOP", "max": str(F)}}, ts=T)
+    off = codec.build(b, "offer", R, {"price": {"asset": "FLOP", "amt": str(F)}}, ref=ask["cid"], ts=T + 1)
+    acc = codec.build(a, "accept", R, {"payee": b.did}, ref=off["cid"], ts=T + 2)
+    clm = codec.build(b, "claim", R, {"deliverable": "d"}, ref=acc["cid"], ts=T + 3)
+    rb = {"outcome": "settled", "payee": b.did, "amount": {"asset": "FLOP", "amt": str(F)}, "rail": "flop-htlc", "railRef": "tx-1"}
+    rc = codec.build(a, "receipt", R, rb, ref=clm["cid"], ts=T + 4)
+    att = codec.build(c, "attest", R, {"verdict": "valid", "method": "rerun"}, ref=rc["cid"], ts=T + 5)
+    msgs = [ask, off, acc, clm, rc, att]
+    if outcome:
+        msgs.append(codec.build(a, "receipt", R, dict(rb, outcome=outcome, supersedes=rc["cid"]), ref=clm["cid"], ts=T + 6))
+    idx = Index()
+    for m in msgs:
+        idx.add_line(codec.encode(m))
+    return idx
+
+
+def test_job_status_follows_receipt_chain(keys):
+    assert Index.jobs(_job_with_correction(keys, None), T + 10)[0]["status"] == "settled+attested"
+    idx = _job_with_correction(keys, "refunded")
+    job = idx.jobs(T + 10)[0]
+    assert job["status"] == "refunded" and job["tip"]["b"]["supersedes"] == job["receipts"][0]["cid"]
+    assert "corrects receipt `" + job["receipts"][0]["cid"][:18] in render.sentence(job["tip"], "UTC")
+    assert idx.jobs(T + 5)[0]["status"] == "settled+attested"  # correction dated later is not yet current

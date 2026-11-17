@@ -169,7 +169,7 @@ const BODIES = {
   claim: obj({ deliverable: str(256) }, { note, guild: gid }),
   attest: obj({ verdict: oneOf("valid", "invalid"), method: str(200) }, { evidence: str(256) }),
   receipt: obj({ outcome: oneOf("settled", "refunded", "cancelled", "disputed"), payee: did, amount: money, rail, railRef: str(128) },
-    { contract: cid, deliverable: str(256), score: int(1, 5) }),
+    { contract: cid, deliverable: str(256), score: int(1, 5), supersedes: cid }),
   review: obj({ score: int(1, 5) }, { text: note }),
   flag: obj({ reason: oneOf("spam", "scam", "injection", "abuse", "other") }, { note }),
   resolve: obj({ outcome: str(64), source: str(200) }, { note }),

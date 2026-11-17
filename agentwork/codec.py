@@ -198,7 +198,7 @@ BODIES: dict[str, V] = {
             "rail": s_rail,
             "railRef": s_str(128),
         },
-        {"contract": s_hex32, "deliverable": s_str(256), "score": s_int(1, 5)},
+        {"contract": s_hex32, "deliverable": s_str(256), "score": s_int(1, 5), "supersedes": s_cid},
     ),
     "review": s_obj({"score": s_int(1, 5)}, {"text": s_note}),
     "flag": s_obj({"reason": s_enum("spam", "scam", "injection", "abuse", "other")}, {"note": s_note}),

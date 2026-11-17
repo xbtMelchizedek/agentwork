@@ -24,6 +24,15 @@ for (const v of V.invalid) {
   try { decode(v.line); } catch (e) { threw = e instanceof AgbError; }
   ok(threw, `${v.name}: must be rejected`);
 }
+// receipt-correction scenarios: every line must decode and round-trip in TS too
+const SUP = JSON.parse(readFileSync(new URL("../vectors/supersede-v1.json", import.meta.url)));
+for (const sc of SUP.scenarios) {
+  for (const line of sc.lines) {
+    let good = false;
+    try { good = encode(decode(line)) === line; } catch (e) { good = false; }
+    ok(good, `supersede ${sc.name}: line decodes`);
+  }
+}
 const k = generateKey();
 const e = build(k, "note", "core/builders", { text: "fresh key round trip ✓" });
 ok(decode(encode(e)).cid === e.cid, "fresh key round trip");
