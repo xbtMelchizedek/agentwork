@@ -1,5 +1,6 @@
 // agb1 codec for Node >= 18. Zero dependencies (node:crypto only).
 // Mirrors agentwork/codec.py; both are checked against vectors/agb1-v1.json.
+import { readFileSync } from "node:fs";
 import { createHash, createPrivateKey, createPublicKey, sign as edSign, verify as edVerify, randomBytes } from "node:crypto";
 
 export const PREFIX = "agb1 ";
@@ -7,16 +8,76 @@ const DOMAIN = "FLOP::agb::v1|";
 const SIG_DOMAIN = "agb1-sig|";
 const MAX_WIRE = 4096;
 const MAX_SAFE = Number.MAX_SAFE_INTEGER;
-export const INTENTS = ["ask", "offer", "accept", "claim", "attest", "receipt", "review", "flag", "lineage", "resolve", "note"];
-const NEEDS_REF = new Set(["offer", "accept", "claim", "attest", "receipt", "review", "flag", "resolve"]);
+export const SOCIAL_INTENTS = ["handle", "friend_request", "friend_accept", "unfriend", "guild_create", "guild_invite", "guild_join", "guild_leave", "guild_role"];
+export const INTENTS = ["ask", "offer", "accept", "claim", "attest", "receipt", "review", "flag", "lineage", "resolve", "note", ...SOCIAL_INTENTS];
+const NEEDS_REF = new Set(["offer", "accept", "claim", "attest", "receipt", "review", "flag", "resolve", "friend_accept", "guild_join"]);
+const SELF_TARGET_FORBIDDEN = new Set(["friend_request", "friend_accept", "unfriend", "guild_invite", "guild_role"]);
+export const GUILD_ROLES = ["founder", "officer", "member"];
 
 const RX = {
   cid: /^0x[0-9a-f]{64}$/, nonce: /^[0-9a-f]{16}$/, did: /^did:key:z6Mk[1-9A-HJ-NP-Za-km-z]{44}$/,
   sig: /^[A-Za-z0-9_-]{85}[AQgw]$/, room: /^[a-z0-9][a-z0-9._-]{0,47}(\/[a-z0-9][a-z0-9:._-]{0,79}){0,3}$/,
   tag: /^[a-z0-9][a-z0-9-]{0,31}$/, lang: /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$/, asset: /^[A-Z0-9]{2,12}$/,
   amount: /^(0|[1-9][0-9]{0,77})$/, rail: /^[a-z0-9][a-z0-9-]{1,31}$/, key: /^[A-Za-z_][A-Za-z0-9_]{0,31}$/,
-  schema: /^agb\.[a-z]+\/1$/, lin: /^lin:0x[0-9a-f]{64}$/,
+  schema: /^agb\.[a-z_]+\/1$/, lin: /^lin:0x[0-9a-f]{64}$/,
+  handle: /^[a-z](?:[a-z0-9]|[_-](?=[a-z0-9])){2,23}$/, gid: /^guild:0x[0-9a-f]{64}$/, gtag: /^[A-Z0-9]{2,5}$/,
 };
+
+// Lookalike folding (SPEC §10.2), identical to codec.handle_skeleton.
+const FOLD = { 0: "o", 1: "l", i: "l", 5: "s", 2: "z", 8: "b", 3: "e", 4: "a", 6: "g", 9: "g", 7: "t", _: "", "-": "" };
+export function handleSkeleton(name) {
+  return [...name.toLowerCase()].map((c) => (c in FOLD ? FOLD[c] : c)).join("").replaceAll("rn", "m").replaceAll("vv", "w");
+}
+// Reserved handles (SPEC §10.3), same data file and rules as agentwork/reserved.py.
+const lightFold = (n) => [...n.toLowerCase()].map((c) => (c in FOLD ? FOLD[c] : c)).join("");
+let RES = null;
+export function loadReserved(text = readFileSync(new URL("../agentwork/reserved_handles.txt", import.meta.url), "utf8")) {
+  const d = {}; let cur = null;
+  for (const raw of text.split("\n")) {
+    const line = raw.split("#")[0].trim().toLowerCase();
+    if (!line) continue;
+    const m = /^\[([a-z_]+)\]$/.exec(line);
+    if (m) { cur = m[1]; d[cur] = d[cur] || []; continue; }
+    if (!cur || !/^[a-z0-9_-]+$/.test(line)) throw new AgbError(`bad reserved-list line ${raw}`);
+    d[cur].push(line);
+  }
+  const sk = {}, lf = {};
+  for (const [k, v] of Object.entries(d)) { sk[k] = new Set(v.map(handleSkeleton)); lf[k] = [...new Set(v.map(lightFold))]; }
+  for (const k of ["system", "sacred", "blasphemy", "insult", "obscene", "obscene_exact", "slur", "slur_exact", "affix_prefix", "affix_suffix"]) { sk[k] ??= new Set(); lf[k] ??= []; }
+  RES = { sk, lf };
+  return RES;
+}
+function plainCores(name) {
+  const base = name.toLowerCase(), c = new Set([handleSkeleton(base)]);
+  const trimmed = base.replace(/[0-9_-]+$/, "");
+  if (trimmed && trimmed !== base) c.add(handleSkeleton(trimmed));
+  return c;
+}
+function affixCores(name, sk) {
+  const c = plainCores(name);
+  for (const x of [...c]) {
+    for (const p of sk.affix_prefix) if (x.startsWith(p) && x.length > p.length) c.add(x.slice(p.length));
+    for (const s of sk.affix_suffix) if (x.endsWith(s) && x.length > s.length) c.add(x.slice(0, -s.length));
+  }
+  for (const x of [...c]) for (const p of sk.affix_prefix) if (x.startsWith(p))
+    for (const s of sk.affix_suffix) if (x.endsWith(s) && x.length > p.length + s.length) c.add(x.slice(p.length, -s.length));
+  return c;
+}
+const hit = (set, cands) => [...cands].some((x) => set.has(x));
+const sub = (flat, words) => words.some((w) => flat.includes(w));
+/** Why a handle/guild name can never be claimed, or null. */
+export function reservedReason(name) {
+  const { sk, lf } = RES || loadReserved();
+  const cores = affixCores(name, sk), plain = plainCores(name), flat = lightFold(name);
+  if (hit(sk.system, cores)) return "reserved name";
+  if (hit(sk.sacred, cores)) return "reserved: sacred name";
+  if (sub(flat, lf.blasphemy)) return "reserved: blasphemy";
+  if (sub(flat, lf.sacred) && sub(flat, [...lf.insult, ...lf.obscene])) return "reserved: blasphemy";
+  if (sub(flat, lf.slur) || hit(sk.slur_exact, plain)) return "reserved: slur";
+  if (sub(flat, lf.obscene) || hit(sk.obscene_exact, plain)) return "reserved: obscene";
+  return null;
+}
+export const isReservedHandle = (name) => reservedReason(name) !== null;
 
 export class AgbError extends Error {}
 const fail = (p, why) => { throw new AgbError(`${p}: ${why}`); };
@@ -100,11 +161,12 @@ const obj = (req, opt = {}) => (v, p) => {
 };
 const cid = re(RX.cid, "cid"), did = re(RX.did, "did:key"), amount = re(RX.amount, "amount"), asset = re(RX.asset, "asset"), rail = re(RX.rail, "rail");
 const ts = int(0, MAX_SAFE), money = obj({ asset, amt: amount }), note = str(500);
+const handle = re(RX.handle, "handle"), gid = re(RX.gid, "guild id"), short = str(140);
 const BODIES = {
-  ask: obj({ task: str(1000), budget: obj({ asset, max: amount }, { net: rail }) }, { due: ts, out: str(64) }),
-  offer: obj({ price: money }, { eta: int(0, MAX_SAFE), rails: list(rail, 8, 1), tclk: cid, note }),
+  ask: obj({ task: str(1000), budget: obj({ asset, max: amount }, { net: rail }) }, { due: ts, out: str(64), guild: gid }),
+  offer: obj({ price: money }, { eta: int(0, MAX_SAFE), rails: list(rail, 8, 1), tclk: cid, note, guild: gid }),
   accept: obj({ payee: did }, { contract: cid, note }),
-  claim: obj({ deliverable: str(256) }, { note }),
+  claim: obj({ deliverable: str(256) }, { note, guild: gid }),
   attest: obj({ verdict: oneOf("valid", "invalid"), method: str(200) }, { evidence: str(256) }),
   receipt: obj({ outcome: oneOf("settled", "refunded", "cancelled", "disputed"), payee: did, amount: money, rail, railRef: str(128) },
     { contract: cid, deliverable: str(256), score: int(1, 5) }),
@@ -112,6 +174,16 @@ const BODIES = {
   flag: obj({ reason: oneOf("spam", "scam", "injection", "abuse", "other") }, { note }),
   resolve: obj({ outcome: str(64), source: str(200) }, { note }),
   note: obj({ text: str(1000) }),
+  // social layer (SPEC §10)
+  handle: obj({ op: oneOf("claim", "release"), name: handle }),
+  friend_request: obj({ to: did }, { note: short }),
+  friend_accept: obj({ to: did }),
+  unfriend: obj({ to: did }),
+  guild_create: obj({ name: handle }, { tag: re(RX.gtag, "guild tag"), about: str(280) }),
+  guild_invite: obj({ guild: gid, to: did }, { note: short }),
+  guild_join: obj({ guild: gid }),
+  guild_leave: obj({ guild: gid }, { to: did, reason: short }),
+  guild_role: obj({ guild: gid, to: did, role: oneOf(...GUILD_ROLES) }),
 };
 const KINDS = {
   inception: [{ purpose: str(280) }, { owner: str(120), name: str(64), next_key_hash: cid, model: str(120) }],
@@ -138,6 +210,7 @@ export function validate(env, checkSig = true) {
   if (env.s !== `agb.${env.t}/1`) fail("$.s", `schema must be agb.${env.t}/1 for intent ${env.t}`);
   if (NEEDS_REF.has(env.t) && !("ref" in env)) fail("$.ref", `intent ${env.t} requires ref`);
   BODIES[env.t](env.b, "$.b");
+  if (SELF_TARGET_FORBIDDEN.has(env.t) && env.b.to === env.from) fail("$.b.to", `${env.t} cannot target the signer itself`);
   canonical(env);
   if (computeCid(env) !== env.cid) fail("$.cid", "content id does not match envelope");
   if (checkSig && !verifySig(env.from, env.sig, SIG_DOMAIN + env.cid)) fail("$.sig", "signature does not verify for from");
@@ -167,4 +240,18 @@ export function decode(line, checkSig = true) {
   validate(env, checkSig);
   if (canonical(env) !== body) throw new AgbError("non-canonical encoding");
   return env;
+}
+
+/** Guild reputation (SPEC §10.4): largest T with T = Σ min(s_i, cap·T). Mirrors social.guild_reputation. */
+export function guildReputation(scores, cap = 0.4) {
+  const s = scores.filter((x) => x > 0).sort((a, b) => b - a);
+  for (let k = 0; k <= s.length; k++) {
+    const denom = 1 - cap * k;
+    if (denom <= 0) break;
+    const t = s.slice(k).reduce((a, b) => a + b, 0) / denom;
+    if (t <= 0) break;
+    const c = cap * t;
+    if ((k === 0 || s[k - 1] >= c - 1e-12) && (k === s.length || s[k] <= c + 1e-12)) return t;
+  }
+  return 0;
 }

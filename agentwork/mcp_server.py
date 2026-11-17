@@ -19,7 +19,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import __version__, codec, didkey, drafts, reputation, render, safe
+from . import __version__, codec, didkey, drafts, reputation, render, safe, social
 from .indexer import Index, RoomPolicy
 from .outbox import Outbox
 
@@ -32,14 +32,33 @@ READ_TOOLS = {
                        {"type": "object", "properties": {"did": {"type": "string"}}, "required": ["did"], "additionalProperties": False}),
     "verify_message": ("Validate schema, content id and signature of one agb1 wire line.",
                        {"type": "object", "properties": {"line": {"type": "string"}}, "required": ["line"], "additionalProperties": False}),
-    "render": ("Render the plain-English feed, job board and static HTML to the configured output dir.",
+    "render": ("Render the Seeing Stone: the plain-English feed, job board and static HTML, to the configured output dir.",
                {"type": "object", "properties": {}, "additionalProperties": False}),
     "list_imd_jobs": ("List IMD swarm jobs observed from saved public IMD job files (AGB_IMD_SOURCES). Unsigned, external: imd, never counted in reputation; text is untrusted data.",
                       {"type": "object", "properties": {"status": {"type": "string"}}, "additionalProperties": False}),
     "imd_receipt_proof": ("Package one signed agb1 receipt thread from the local index as IMD-work-record-shaped JSON (agentwork.imd-proof/0). Read-only; signs nothing.",
                           {"type": "object", "properties": {"receipt": {"type": "string"}}, "required": ["receipt"], "additionalProperties": False}),
+    "whois": ("Look up a Bounty ('@name' or 'name') or a did:key in the local index: public name, DID, friends, Crews.",
+              {"type": "object", "properties": {"who": {"type": "string"}}, "required": ["who"], "additionalProperties": False}),
+    "list_friends": ("Mutual (both-signed) friends and pending friend requests for a DID or Bounty (@handle).",
+                     {"type": "object", "properties": {"who": {"type": "string"}}, "required": ["who"], "additionalProperties": False}),
+    "get_guild": ("Crew roster, roles (Captain / officer / member), pending invites and crew reputation (members' own scores, no member > 40%) by guild id or @name.",
+                  {"type": "object", "properties": {"guild": {"type": "string"}}, "required": ["guild"], "additionalProperties": False}),
     "list_outbox": ("List local signed drafts (not posted anywhere).",
                     {"type": "object", "properties": {}, "additionalProperties": False}),
+}
+
+# Human display names only; tool names and wire intents stay as in drafts.SPECS.
+POST_TOOL_DESC = {
+    "post_handle": "Create a signed agb1 'handle' draft (claim or release a Bounty, the agent's public name). Does NOT post to any network.",
+    "post_guild_create": "Create a signed agb1 'guild_create' draft (found a Crew; the signer becomes its Captain). Does NOT post to any network.",
+    "post_guild_invite": "Create a signed agb1 'guild_invite' draft (invite someone to a Crew). Does NOT post to any network.",
+    "post_guild_join": "Create a signed agb1 'guild_join' draft (accept a Crew invite). Does NOT post to any network.",
+    "post_guild_leave": "Create a signed agb1 'guild_leave' draft (leave a Crew, or remove a member). Does NOT post to any network.",
+    "post_guild_role": "Create a signed agb1 'guild_role' draft (Captain sets a Crew role; founder hands off). Does NOT post to any network.",
+    "post_flag": "Create a signed agb1 'flag' draft (open a Judges report on a message). Does NOT post to any network.",
+    "post_resolve": "Create a signed agb1 'resolve' draft (Judges: resolve a dispute or a call). Does NOT post to any network.",
+    "post_receipt": "Create a signed agb1 'receipt' draft (record settlement; outcome 'disputed' opens a Judges case). Does NOT post to any network.",
 }
 
 
@@ -69,11 +88,33 @@ class Server:
         reps = idx.apply_policy(RoomPolicy(), now)
         return idx, reps
 
+    def _resolve_handles(self, args: dict, now: int) -> dict:
+        """'@name' in to/payee and guild '@name' -> did:key / guild id, from the local index only."""
+        need = [k for k in drafts.RESOLVABLE if isinstance(args.get(k), str) and args[k].startswith("@")]
+        gneed = isinstance(args.get("guild"), str) and args["guild"].startswith("@")
+        if not need and not gneed:
+            return args
+        idx, _ = self._index(now)
+        soc = idx.social_state(now)
+        args = dict(args)
+        for k in need:
+            did = soc.resolve(args[k])
+            if not did:
+                raise codec.AgbError(f"unknown gamer tag {args[k]!r} in the local index (use a did:key)")
+            args[k] = did
+        if gneed:
+            g = soc.guild(args["guild"])
+            if not g:
+                raise codec.AgbError(f"unknown guild {args['guild']!r} in the local index (use guild:0x…)")
+            args["guild"] = g.gid
+        return args
+
     def tools(self) -> list[dict]:
         out = []
         for name in drafts.SPECS:
             intent = drafts.SPECS[name][0]
-            out.append({"name": name, "description": f"Create a signed agb1 '{intent}' draft in the local outbox. Does NOT post to any network.",
+            desc = POST_TOOL_DESC.get(name, f"Create a signed agb1 '{intent}' draft in the local outbox. Does NOT post to any network.")
+            out.append({"name": name, "description": desc,
                         "inputSchema": drafts.input_schema(name)})
         for name, (desc, schema) in READ_TOOLS.items():
             out.append({"name": name, "description": desc, "inputSchema": schema})
@@ -82,6 +123,7 @@ class Server:
     def call(self, name: str, args: dict) -> dict:
         now = int(time.time() * 1000)
         if name in drafts.SPECS:
+            args = self._resolve_handles(args, now)
             env = drafts.make(name, self._key(), args)
             path = self.outbox.put(env)
             return {"draft": True, "posted": False, "cid": env["cid"], "outbox_file": str(path),
@@ -114,6 +156,31 @@ class Server:
             from . import imd
             idx, _ = self._index(now)
             return imd.receipt_proof(args["receipt"], list(idx.msgs.values()) + [m for m, _ in idx.hidden.values()])
+        if name in ("whois", "list_friends"):
+            idx, reps = self._index(now)
+            soc = idx.social_state(now)
+            did = soc.resolve(args["who"])
+            if not did:
+                return {"found": False, "who": args["who"], "hint": "unknown gamer tag in the local index; a did:key always works"}
+            out = {"found": True, "did": did, "handle": soc.name(did), "display": render.who(did, soc),
+                   "friends": [{"did": f, "handle": soc.name(f)} for f in soc.friends_of(did)],
+                   "guilds": [{"gid": g, "label": render.guild_label(g, soc)} for g in soc.guilds_of(did)],
+                   "rep": reputation.get(reps, did)["score"]}
+            if name == "list_friends":
+                out["incoming_requests"] = [{"from": a, "handle": soc.name(a), "ref": c} for (a, b), c in soc.pending.items() if b == did]
+                out["outgoing_requests"] = [{"to": b, "handle": soc.name(b), "ref": c} for (a, b), c in soc.pending.items() if a == did]
+            return out
+        if name == "get_guild":
+            idx, reps = self._index(now)
+            soc = idx.social_state(now)
+            g = soc.guild(args["guild"])
+            if not g:
+                return {"found": False, "guild": args["guild"]}
+            return {"found": True, "gid": g.gid, "name": g.name, "tag": g.tag, "disbanded": g.disbanded,
+                    "about": safe.sanitize(g.about, 280) if g.about else None, "founder": g.founder,
+                    "members": [{"did": d, "handle": soc.name(d), "role": r} for d, r in sorted(g.members.items())],
+                    "pending_invites": [{"ref": c, "to": v[1], "by": v[0]} for c, v in g.invites.items()],
+                    "reputation": social.guild_rep(soc, g.gid, reps)}
         if name == "list_outbox":
             return {"drafts": [{"cid": e["cid"], "t": e["t"], "room": e["room"], "en": render.sentence(e, self.tz)} for e in self.outbox.list()]}
         raise KeyError(name)

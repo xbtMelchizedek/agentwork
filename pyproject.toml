@@ -12,13 +12,16 @@ requires-python = ">=3.10"
 dependencies = ["cryptography>=41"]
 
 [project.optional-dependencies]
-test = ["pytest>=7"]
+test = ["pytest>=7", "eth-account>=0.13"]
 
 [project.scripts]
 agentwork = "agentwork.cli:main"
 
 [tool.setuptools]
 packages = ["agentwork"]
+
+[tool.setuptools.package-data]
+agentwork = ["reserved_handles.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
