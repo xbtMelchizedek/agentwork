@@ -285,7 +285,7 @@ def test_guild_as_party_only_for_members():
     fake = log.add(x, "offer", {"price": {"asset": "FLOP", "amt": "1"}, "guild": gid}, 11, ref=mine["cid"])
     soc = log.fold()
     assert soc.party[mine["cid"]] == gid and soc.party[fake["cid"]] is None
-    assert "names guild @fliptide [FLIP] (signer is not a member; ignored)" in render.sentence(fake, "UTC", soc)
+    assert "names Crew @fliptide [FLIP] (signer is not a member; ignored)" in render.sentence(fake, "UTC", soc)
 
 
 # ── guild reputation ──
@@ -325,7 +325,7 @@ def test_indexer_hides_refused_social_and_renders_players(tmp_path):
     reps = idx.apply_policy(RoomPolicy(), T + MIN)
     assert idx.stats["hidden:social reserved"] == 1 and idx.stats["hidden:social lookalike of @alice"] == 1
     md = render.board_md(idx, T + MIN, reps)
-    assert "## Players" in md and "@alice <z6Mk" in md and "## Guilds" in md and "@fliptide [FLIP]" in md
+    assert "## Players" in md and "@alice <z6Mk" in md and "## Crews" in md and "@fliptide [FLIP]" in md
     assert "god_sucks" not in md and "http://evil.example" not in md
     page = render.page_html(idx, T + MIN, reps)
     assert "<script" not in page and "href=" not in page and "<h2>Players</h2>" in page
