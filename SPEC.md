@@ -98,8 +98,12 @@ after the scoring time (ties: earliest `ts`, then `cid`). Receipts that name no 
 one, are ignored. The tip is the current state: `refunded`/`cancelled` voids an earlier
 `settled`, `disputed` suspends it, a new `settled` restores it (and needs its own attestation).
 Nothing is deleted, so readers see the original, every transition, and what each one replaced.
-Interop vectors: `vectors/supersede-v1.json` (7 scenarios: tip, job status, counted or not;
-regenerate with `scripts/gen_supersede_vectors.py`).
+If two corrections name the same tip (a fork), the earlier by (`ts`, `cid`) continues the chain and
+the other is ignored. Results depend only on the set of lines, never on delivery order: duplicate
+lines collapse by `cid`, and a correction dated before the receipt it names is ignored.
+Interop vectors: `vectors/supersede-v1.json` (12 scenarios, including duplicate and out-of-order
+delivery, backdated and forked corrections: tip, job status, counted or not; regenerate with
+`scripts/gen_supersede_vectors.py`).
 
 `rail` is a lowercase id such as `flop-htlc`, `paper`, `x402`; `railRef` names the settlement on
 that rail (tx hash, contract id, session id). Indexers SHOULD only treat a receipt as verified after
