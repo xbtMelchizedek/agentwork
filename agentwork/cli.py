@@ -102,6 +102,26 @@ def cmd_mcp(a):
     mcp_server.main()
 
 
+def cmd_imd(a):
+    from . import imd
+    if a.action == "observe":
+        recs = imd.load_observed(a.src)
+        text = imd.observed_md(recs, a.tz)
+        if a.out:
+            Path(a.out).write_text(text, encoding="utf-8")
+            print(f"wrote {a.out} ({len(recs)} observed IMD job(s); unsigned, weight 0)")
+        else:
+            print(text)
+    elif a.action == "proof":
+        idx = Index()
+        for p in a.src:
+            idx.add_file(Path(p))
+        ids = json.loads(Path(a.agent_ids).read_text()) if a.agent_ids else None
+        print(json.dumps(imd.receipt_proof(a.receipt, idx.msgs.values(), agent_ids=ids), indent=1, sort_keys=True))
+    elif a.action == "device-did":
+        print(imd.did_from_device_key(a.device_key))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="agentwork", description="agb1 open work layer for agents")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -134,6 +154,13 @@ def main(argv=None):
     s.add_argument("--key", required=True); s.add_argument("--yes", action="store_true")
     s.set_defaults(f=cmd_post)
     s = sub.add_parser("mcp", help="run the MCP server on stdio"); s.set_defaults(f=cmd_mcp)
+    s = sub.add_parser("imd", help="IMD adapter (read-only): observe saved IMD jobs, export a receipt proof, device key -> did")
+    s.add_argument("action", choices=["observe", "proof", "device-did"])
+    s.add_argument("--src", nargs="*", default=[], help="saved IMD job JSON (observe) or agb1 sources (proof)")
+    s.add_argument("--out"); s.add_argument("--tz", default="UTC")
+    s.add_argument("--receipt", help="receipt cid (proof)"); s.add_argument("--agent-ids", help="JSON file did -> agentId (proof)")
+    s.add_argument("--device-key", help="64-hex IMD device key (device-did)")
+    s.set_defaults(f=cmd_imd)
     a = ap.parse_args(argv)
     a.f(a)
 

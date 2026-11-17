@@ -1,0 +1,32 @@
+{
+ "complete": true,
+ "delivery": {
+  "commit": "9aaf04aea0e1ebc5075138b487927ad338d332ac",
+  "deliveredAt": "2026-11-17T12:22:34.404Z",
+  "failure": null,
+  "mode": "repository",
+  "repoUrl": "https://github.com/identity-md-launches/launch-3289-build-website-routr-network",
+  "requested": true
+ },
+ "files": [],
+ "jobId": "593d50fd-c801-4ac7-a85a-c4941ad2e101",
+ "launch": {
+  "chainId": null,
+  "id": null,
+  "kind": null,
+  "requested": false,
+  "status": null
+ },
+ "projectId": "593d50fd-c801-4ac7-a85a-c4941ad2e101",
+ "source": [
+  {
+   "evaluation": "structural",
+   "hash": "412945b508a430709dd27bcb389e940e216d125bbaf0beb5f0ba1303c40d175f",
+   "node": "build_website",
+   "profile": "none",
+   "submissionHash": "f6b8ed8f85579fff154790894d540c690a0d3d8c19f72c8c3e6b367d69638a0a",
+   "url": "https://api.imd.fun/bundles/412945b508a430709dd27bcb389e940e216d125bbaf0beb5f0ba1303c40d175f"
+  }
+ ],
+ "state": "completed"
+}
