@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
-from . import codec, didkey, reputation, safe
+from . import codec, didkey, reputation, safe, social as social_mod
 
 TECHNOCORE = "https://technocore.chat"
 
@@ -31,6 +31,7 @@ class RoomPolicy:
     template_dids: int = 3          # identical body from >= this many DIDs = template spam
     min_score_to_show: float = 0.0  # reputation gate for asks/offers (0 = open room)
     hide_flagged: bool = True       # hide targets flagged by DIDs with score > 0
+    social: social_mod.Params = social_mod.Params()   # handle/friend/guild rules and rate limits (SPEC §10)
 
 
 @dataclass
@@ -41,6 +42,8 @@ class Index:
     stats: Counter = field(default_factory=Counter)
     rejects: list = field(default_factory=list)       # (reason, sanitized preview)
     seen: set = field(default_factory=set)
+    arrival: dict = field(default_factory=dict)       # cid -> ingest ordinal
+    social: social_mod.Social | None = None           # set by apply_policy / social_state()
 
     # ── ingest ────────────────────────────────────────────────────────────
     def add_line(self, line: str, transport_from: str | None = None, room: str | None = None, seq=None) -> str | None:
@@ -62,6 +65,7 @@ class Index:
             self.stats["duplicate"] += 1
             return env["cid"]
         self.seen.add(env["cid"])
+        self.arrival[env["cid"]] = len(self.arrival)
         self.msgs[env["cid"]] = env
         self.transport[env["cid"]] = {"room": room, "seq": seq, "signed": bool(transport_from and didkey.is_did(transport_from))}
         self.stats["valid"] += 1
@@ -146,7 +150,29 @@ class Index:
         for cid, why in hide.items():
             self.hidden[cid] = (self.msgs.pop(cid), why)
             self.stats["hidden:" + why.split(" by ")[0]] += 1
+        # social layer: fold the remaining log; refused/rate-limited social messages are hidden
+        self.social = social_mod.compute(self.msgs.values(), now_ms, self.order_key, policy.social)
+        for cid, why in self.social.ignored.items():
+            self.hidden[cid] = (self.msgs.pop(cid), "social: " + why)
+            self.stats["hidden:social " + why.split(":")[0]] += 1
         return reps
+
+    # ── order / social ────────────────────────────────────────────────────
+    def order_key(self, m: dict) -> tuple:
+        """Indexer order (SPEC §10.1): transport sequence when known, else ingest order.
+
+        The signer's own `ts` never decides who was first, so a backdated claim cannot win.
+        """
+        arr = self.arrival.get(m["cid"], 1 << 62)
+        seq = (self.transport.get(m["cid"]) or {}).get("seq")
+        if isinstance(seq, int) and not isinstance(seq, bool):
+            return (0, seq, arr)
+        return (1, arr, 0)
+
+    def social_state(self, now_ms: int, params: social_mod.Params | None = None) -> social_mod.Social:
+        if self.social is None:
+            self.social = social_mod.compute(self.msgs.values(), now_ms, self.order_key, params)
+        return self.social
 
     # ── threads / job board ───────────────────────────────────────────────
     def children(self) -> dict[str, list[dict]]:

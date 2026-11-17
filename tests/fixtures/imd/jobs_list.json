@@ -1,0 +1,80 @@
+{
+ "count": 5,
+ "jobs": [
+  {
+   "blockedReason": null,
+   "createdAt": "2026-11-17T17:07:04.831Z",
+   "delivery": null,
+   "id": "42757da3-67b9-4b0b-be50-7be38b3ea819",
+   "launchKind": null,
+   "objective": "Reading the IdentityMD control plane at https://api.imd.fun/swarm, what is the network health index of the swarm, defined as the weighted mean of three ratios\u2026",
+   "originalRequest": "Reading the IdentityMD control plane at https://api.imd.fun/swarm, what is the network health index of the swarm, defined as the weighted mean of three ratios\u2026",
+   "project": null,
+   "state": "completed",
+   "template": "skill:oracle-assess",
+   "updatedAt": "2026-11-17T17:08:19.769Z",
+   "via": null
+  },
+  {
+   "blockedReason": null,
+   "createdAt": "2026-11-17T14:38:59.427Z",
+   "delivery": null,
+   "id": "513dc4e5-75e3-4147-82b6-f75143d63955",
+   "launchKind": null,
+   "objective": "Across the pinned block window on Ethereum mainnet, what is the median Uniswap v4 spot price of the IMD token 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7\u2026",
+   "originalRequest": "Across the pinned block window on Ethereum mainnet, what is the median Uniswap v4 spot price of the IMD token 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7\u2026",
+   "project": null,
+   "state": "completed",
+   "template": "skill:oracle-assess",
+   "updatedAt": "2026-11-17T14:41:24.076Z",
+   "via": null
+  },
+  {
+   "blockedReason": null,
+   "createdAt": "2026-11-17T14:37:42.039Z",
+   "delivery": null,
+   "id": "0d5723c0-2f4d-438e-bcc6-c2477e4d4771",
+   "launchKind": null,
+   "objective": "At the last block of the pinned window on Ethereum mainnet, what is the Uniswap v4 spot price of the IMD token 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7\u2026",
+   "originalRequest": "At the last block of the pinned window on Ethereum mainnet, what is the Uniswap v4 spot price of the IMD token 0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7\u2026",
+   "project": null,
+   "state": "completed",
+   "template": "skill:oracle-assess",
+   "updatedAt": "2026-11-17T14:39:40.384Z",
+   "via": null
+  },
+  {
+   "blockedReason": null,
+   "createdAt": "2026-11-17T12:01:28.055Z",
+   "delivery": {
+    "commit": "9aaf04aea0e1ebc5075138b487927ad338d332ac",
+    "deliveredAt": "2026-11-17T12:22:34.404Z",
+    "pullRequestUrl": "https://github.com/identity-md-launches/launch-3289-build-website-routr-network/pull/1",
+    "repoUrl": "https://github.com/identity-md-launches/launch-3289-build-website-routr-network"
+   },
+   "id": "593d50fd-c801-4ac7-a85a-c4941ad2e101",
+   "launchKind": null,
+   "objective": "Build the website for Routr Network ($ROUTR), a token on Ethereum mainnet paired with IMD on Uniswap v4. Site label: routr-network.\n\nDo NOT show the contract\u2026",
+   "originalRequest": null,
+   "project": null,
+   "state": "completed",
+   "template": "skill:build-website",
+   "updatedAt": "2026-11-17T12:22:20.780Z",
+   "via": "explorer.imd.fun"
+  },
+  {
+   "blockedReason": null,
+   "createdAt": "2026-11-17T11:53:03.868Z",
+   "delivery": null,
+   "id": "e7e8dbb3-40b9-4e1f-985e-1f9ae43f1938",
+   "launchKind": null,
+   "objective": "Draw the logo of the token Routr Network ($ROUTR), which the identity.md swarm is launching.\n\nOne square PNG at artifacts/logo.png, at least 512 pixels wide.\u2026",
+   "originalRequest": null,
+   "project": null,
+   "state": "completed",
+   "template": "skill:token-logo",
+   "updatedAt": "2026-11-17T11:55:53.577Z",
+   "via": null
+  }
+ ]
+}
