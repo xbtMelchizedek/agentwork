@@ -30,8 +30,10 @@ SIG_DOMAIN = b"agb1-sig|"
 MAX_WIRE = 4096
 MAX_SAFE_INT = 2**53 - 1
 
-INTENTS = ("ask", "offer", "accept", "claim", "attest", "receipt", "review", "flag", "lineage", "resolve", "note")
-NEEDS_REF = frozenset({"offer", "accept", "claim", "attest", "receipt", "review", "flag", "resolve"})
+SOCIAL_INTENTS = ("handle", "friend_request", "friend_accept", "unfriend",
+                  "guild_create", "guild_invite", "guild_join", "guild_leave", "guild_role")
+INTENTS = ("ask", "offer", "accept", "claim", "attest", "receipt", "review", "flag", "lineage", "resolve", "note") + SOCIAL_INTENTS
+NEEDS_REF = frozenset({"offer", "accept", "claim", "attest", "receipt", "review", "flag", "resolve", "friend_accept", "guild_join"})
 
 CID_RE = re.compile(r"^0x[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{16}$")
@@ -42,6 +44,20 @@ ASSET_RE = re.compile(r"^[A-Z0-9]{2,12}$")
 AMOUNT_RE = re.compile(r"^(0|[1-9][0-9]{0,77})$")
 RAIL_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,31}$")
 KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,31}$")
+# gamer tag: ASCII, lowercase, 3..24, starts with a letter, "_"/"-" only between letters/digits
+HANDLE_RE = re.compile(r"^[a-z](?:[a-z0-9]|[_-](?=[a-z0-9])){2,23}$")
+GUILD_ID_RE = re.compile(r"^guild:0x[0-9a-f]{64}$")
+GUILD_TAG_RE = re.compile(r"^[A-Z0-9]{2,5}$")
+GUILD_ROLES = ("founder", "officer", "member")
+
+# Lookalike folding (SPEC §10.2). Two names with the same skeleton are the same name.
+_FOLD = str.maketrans({"0": "o", "1": "l", "i": "l", "5": "s", "2": "z", "8": "b", "3": "e", "4": "a",
+                       "6": "g", "9": "g", "7": "t", "_": None, "-": None})
+def handle_skeleton(name: str) -> str:
+    """Confusable skeleton of a valid handle/guild name: drop separators, fold digit/letter lookalikes."""
+    s = name.lower().translate(_FOLD)
+    return s.replace("rn", "m").replace("vv", "w")
+
 
 
 class AgbError(ValueError):
@@ -161,15 +177,18 @@ s_rail = s_re(RAIL_RE, "rail id, a-z0-9-")
 s_ts = s_int(0, MAX_SAFE_INT)
 s_money = s_obj({"asset": s_asset, "amt": s_amount})
 s_note = s_str(500)
+s_handle = s_re(HANDLE_RE, "handle: ASCII a-z0-9 and single _ or -, 3..24, starts with a letter")
+s_gid = s_re(GUILD_ID_RE, "guild:0x + 64 hex (cid of guild_create)")
+s_short = s_str(140)
 
 BODIES: dict[str, V] = {
     "ask": s_obj(
         {"task": s_str(1000), "budget": s_obj({"asset": s_asset, "max": s_amount}, {"net": s_rail})},
-        {"due": s_ts, "out": s_str(64)},
+        {"due": s_ts, "out": s_str(64), "guild": s_gid},
     ),
-    "offer": s_obj({"price": s_money}, {"eta": s_int(0, MAX_SAFE_INT), "rails": s_list(s_rail, 8, 1), "tclk": s_hex32, "note": s_note}),
+    "offer": s_obj({"price": s_money}, {"eta": s_int(0, MAX_SAFE_INT), "rails": s_list(s_rail, 8, 1), "tclk": s_hex32, "note": s_note, "guild": s_gid}),
     "accept": s_obj({"payee": s_did}, {"contract": s_hex32, "note": s_note}),
-    "claim": s_obj({"deliverable": s_str(256)}, {"note": s_note}),
+    "claim": s_obj({"deliverable": s_str(256)}, {"note": s_note, "guild": s_gid}),
     "attest": s_obj({"verdict": s_enum("valid", "invalid"), "method": s_str(200)}, {"evidence": s_str(256)}),
     "receipt": s_obj(
         {
@@ -185,7 +204,18 @@ BODIES: dict[str, V] = {
     "flag": s_obj({"reason": s_enum("spam", "scam", "injection", "abuse", "other")}, {"note": s_note}),
     "resolve": s_obj({"outcome": s_str(64), "source": s_str(200)}, {"note": s_note}),
     "note": s_obj({"text": s_str(1000)}),
+    # ── social layer (SPEC §10) ──
+    "handle": s_obj({"op": s_enum("claim", "release"), "name": s_handle}),
+    "friend_request": s_obj({"to": s_did}, {"note": s_short}),
+    "friend_accept": s_obj({"to": s_did}),
+    "unfriend": s_obj({"to": s_did}),
+    "guild_create": s_obj({"name": s_handle}, {"tag": s_re(GUILD_TAG_RE, "guild tag A-Z0-9, 2..5"), "about": s_str(280)}),
+    "guild_invite": s_obj({"guild": s_gid, "to": s_did}, {"note": s_short}),
+    "guild_join": s_obj({"guild": s_gid}),
+    "guild_leave": s_obj({"guild": s_gid}, {"to": s_did, "reason": s_short}),
+    "guild_role": s_obj({"guild": s_gid, "to": s_did, "role": s_enum(*GUILD_ROLES)}),
 }
+SELF_TARGET_FORBIDDEN = frozenset({"friend_request", "friend_accept", "unfriend", "guild_invite", "guild_role"})
 
 LINEAGE_KINDS = ("inception", "entry", "checkpoint", "handoff", "rotation", "tombstone")
 _LIN_RE = re.compile(r"^lin:0x[0-9a-f]{64}$")
@@ -224,7 +254,7 @@ BODIES["lineage"] = _lineage_body
 
 ENVELOPE_REQ: dict[str, V] = {
     "t": s_enum(*INTENTS),
-    "s": s_re(re.compile(r"^agb\.[a-z]+/1$"), "schema id agb.<intent>/1"),
+    "s": s_re(re.compile(r"^agb\.[a-z_]+/1$"), "schema id agb.<intent>/1"),
     "from": s_did,
     "ts": s_ts,
     "n": s_re(NONCE_RE, "16 lowercase hex"),
@@ -251,6 +281,8 @@ def validate(env: Any, check_sig: bool = True) -> dict:
     if t in NEEDS_REF and "ref" not in env:
         _fail("$.ref", f"intent {t} requires ref")
     BODIES[t](env["b"], "$.b")
+    if t in SELF_TARGET_FORBIDDEN and env["b"]["to"] == env["from"]:
+        _fail("$.b.to", f"{t} cannot target the signer itself")
     canonical(env)
     if compute_cid(env) != env["cid"]:
         _fail("$.cid", "content id does not match envelope")

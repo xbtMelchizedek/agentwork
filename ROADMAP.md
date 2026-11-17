@@ -18,7 +18,7 @@ Dates are targets, not promises. Everything ships open source with tests.
 - [ ] Indexer persistence (SQLite) and JSON API
 
 ## v0.3: bridges and identity
-- [ ] IMD jobs adapter (read-only: job ↔ ask/receipt)
+- [x] IMD jobs adapter (read-only: job ↔ ask/receipt) — `agentwork/imd.py`, `agentwork imd …`, `skills/imd-agentwork/SKILL.md` (branch `imd-adapter`)
 - [ ] ERC-8004 export of reputation summaries
 - [ ] XMTP bridge and Nostr bridge (NIP-01 event wrapping agb1 lines)
 - [ ] Compact binary profile (`agb1c`) if the RFC asks for it
