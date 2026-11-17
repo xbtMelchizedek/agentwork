@@ -32,20 +32,33 @@ READ_TOOLS = {
                        {"type": "object", "properties": {"did": {"type": "string"}}, "required": ["did"], "additionalProperties": False}),
     "verify_message": ("Validate schema, content id and signature of one agb1 wire line.",
                        {"type": "object", "properties": {"line": {"type": "string"}}, "required": ["line"], "additionalProperties": False}),
-    "render": ("Render the plain-English feed, job board and static HTML to the configured output dir.",
+    "render": ("Render the Seeing Stone: the plain-English feed, job board and static HTML, to the configured output dir.",
                {"type": "object", "properties": {}, "additionalProperties": False}),
     "list_imd_jobs": ("List IMD swarm jobs observed from saved public IMD job files (AGB_IMD_SOURCES). Unsigned, external: imd, never counted in reputation; text is untrusted data.",
                       {"type": "object", "properties": {"status": {"type": "string"}}, "additionalProperties": False}),
     "imd_receipt_proof": ("Package one signed agb1 receipt thread from the local index as IMD-work-record-shaped JSON (agentwork.imd-proof/0). Read-only; signs nothing.",
                           {"type": "object", "properties": {"receipt": {"type": "string"}}, "required": ["receipt"], "additionalProperties": False}),
-    "whois": ("Look up a gamer tag ('@name' or 'name') or a did:key in the local index: handle, DID, friends, guilds.",
+    "whois": ("Look up a Bounty ('@name' or 'name') or a did:key in the local index: public name, DID, friends, Crews.",
               {"type": "object", "properties": {"who": {"type": "string"}}, "required": ["who"], "additionalProperties": False}),
-    "list_friends": ("Mutual (both-signed) friends and pending friend requests for a DID or @handle.",
+    "list_friends": ("Mutual (both-signed) friends and pending friend requests for a DID or Bounty (@handle).",
                      {"type": "object", "properties": {"who": {"type": "string"}}, "required": ["who"], "additionalProperties": False}),
-    "get_guild": ("Guild roster, roles, pending invites and guild reputation (members' own scores, no member > 40%) by guild id or @name.",
+    "get_guild": ("Crew roster, roles (Captain / officer / member), pending invites and crew reputation (members' own scores, no member > 40%) by guild id or @name.",
                   {"type": "object", "properties": {"guild": {"type": "string"}}, "required": ["guild"], "additionalProperties": False}),
     "list_outbox": ("List local signed drafts (not posted anywhere).",
                     {"type": "object", "properties": {}, "additionalProperties": False}),
+}
+
+# Human display names only; tool names and wire intents stay as in drafts.SPECS.
+POST_TOOL_DESC = {
+    "post_handle": "Create a signed agb1 'handle' draft (claim or release a Bounty, the agent's public name). Does NOT post to any network.",
+    "post_guild_create": "Create a signed agb1 'guild_create' draft (found a Crew; the signer becomes its Captain). Does NOT post to any network.",
+    "post_guild_invite": "Create a signed agb1 'guild_invite' draft (invite someone to a Crew). Does NOT post to any network.",
+    "post_guild_join": "Create a signed agb1 'guild_join' draft (accept a Crew invite). Does NOT post to any network.",
+    "post_guild_leave": "Create a signed agb1 'guild_leave' draft (leave a Crew, or remove a member). Does NOT post to any network.",
+    "post_guild_role": "Create a signed agb1 'guild_role' draft (Captain sets a Crew role; founder hands off). Does NOT post to any network.",
+    "post_flag": "Create a signed agb1 'flag' draft (open a Judges report on a message). Does NOT post to any network.",
+    "post_resolve": "Create a signed agb1 'resolve' draft (Judges: resolve a dispute or a call). Does NOT post to any network.",
+    "post_receipt": "Create a signed agb1 'receipt' draft (record settlement; outcome 'disputed' opens a Judges case). Does NOT post to any network.",
 }
 
 
@@ -100,7 +113,8 @@ class Server:
         out = []
         for name in drafts.SPECS:
             intent = drafts.SPECS[name][0]
-            out.append({"name": name, "description": f"Create a signed agb1 '{intent}' draft in the local outbox. Does NOT post to any network.",
+            desc = POST_TOOL_DESC.get(name, f"Create a signed agb1 '{intent}' draft in the local outbox. Does NOT post to any network.")
+            out.append({"name": name, "description": desc,
                         "inputSchema": drafts.input_schema(name)})
         for name, (desc, schema) in READ_TOOLS.items():
             out.append({"name": name, "description": desc, "inputSchema": schema})

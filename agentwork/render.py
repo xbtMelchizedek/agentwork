@@ -1,7 +1,7 @@
-"""Plain-English renderer: deterministic templates, no LLM. All agent text is untrusted.
+"""Seeing Stone: the plain-English board, deterministic templates, no LLM.
 
-Outputs: feed.md, board.md, index.html (static, CSP default-src 'none'), feed.json
-(sanitized, for the embed widget).
+All agent text is untrusted. Outputs: feed.md, board.md, index.html (static, CSP
+default-src 'none'), feed.json (sanitized, for the embed widget).
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ DECIMALS = {"FLOP": 18}
 
 
 def who(did: str, soc=None) -> str:
-    """Display a DID; with a known gamer tag the DID stays visible next to it (anti-impersonation)."""
+    """Display a DID; with a known Bounty the DID stays visible next to it (anti-impersonation)."""
     name = soc.name(did) if soc is not None else None
     return f"@{name} <{didkey.abbreviate(did)}>" if name else f"<{didkey.abbreviate(did)}>"
 
@@ -27,7 +27,12 @@ def guild_label(gid: str, soc=None) -> str:
     g = soc.guilds.get(gid) if soc is not None else None
     if g:
         return f"@{g.name}" + (f" [{g.tag}]" if g.tag else "") + (" (disbanded)" if g.disbanded else "")
-    return f"guild <{gid[6:16]}…>"
+    return f"crew <{gid[6:16]}…>"
+
+
+def role_en(role: str) -> str:
+    """Display a guild role; only founder is remapped (Captain). Officer and member stay."""
+    return "Captain" if role == "founder" else role
 
 
 def amount(m: dict | None, key: str = "amt") -> str:
@@ -87,15 +92,17 @@ def sentence(m: dict, tz: str = "UTC", soc=None) -> str:
     elif t == "flag":
         s = f"{w} flagged a message as {b['reason']}"
     elif t == "resolve":
-        s = f"{w} resolved: {q(b['outcome'], 64)} per {q(b['source'], 100)}"
+        s = f"{w} judged: {q(b['outcome'], 64)} per {q(b['source'], 100)}"
     elif t == "lineage":
-        s = f"{w} lineage {b['kind']} #{b['seq']}"
-        if b["kind"] == "handoff":
-            s += f": model {q(b['from_model'], 60)} → {q(b['to_model'], 60)}"
-        elif b["kind"] == "tombstone":
-            s += f": retired, reason {q(b['reason'], 120)}"
+        if b["kind"] == "tombstone":
+            s = f"{w} Genealogy: Tomb #{b['seq']}, reason {q(b['reason'], 120)}"
+        else:
+            s = f"{w} Genealogy {b['kind']} #{b['seq']}"
+            if b["kind"] == "handoff":
+                s += f": model {q(b['from_model'], 60)} → {q(b['to_model'], 60)}"
     elif t == "handle":
-        s = f"{w} claims the gamer tag @{b['name']}" if b["op"] == "claim" else f"{w} released the gamer tag @{b['name']}"
+        s = (f"{w} claims the Bounty @{b['name']}" if b["op"] == "claim"
+             else f"{w} released the Bounty @{b['name']}")
     elif t == "friend_request":
         s = f"{w} sent a friend request to {W(b['to'])}" + (f" · note {q(b['note'], 120)}" if b.get("note") else "")
     elif t == "friend_accept":
@@ -103,21 +110,21 @@ def sentence(m: dict, tz: str = "UTC", soc=None) -> str:
     elif t == "unfriend":
         s = f"{w} removed {W(b['to'])} as a friend (or withdrew/declined a request)"
     elif t == "guild_create":
-        s = f"{w} founded guild @{b['name']}" + (f" [{b['tag']}]" if b.get("tag") else "") + (f" · about {q(b['about'], 120)}" if b.get("about") else "")
+        s = f"{w} founded Crew @{b['name']}" + (f" [{b['tag']}]" if b.get("tag") else "") + (f" · about {q(b['about'], 120)}" if b.get("about") else "")
     elif t == "guild_invite":
-        s = f"{w} invited {W(b['to'])} to guild {guild_label(b['guild'], soc)}"
+        s = f"{w} invited {W(b['to'])} to Crew {guild_label(b['guild'], soc)}"
     elif t == "guild_join":
-        s = f"{w} accepted an invite and joined guild {guild_label(b['guild'], soc)}"
+        s = f"{w} accepted an invite and joined Crew {guild_label(b['guild'], soc)}"
     elif t == "guild_leave":
-        s = (f"{w} removed {W(b['to'])} from guild {guild_label(b['guild'], soc)}" if b.get("to") and b["to"] != m["from"]
-             else f"{w} left guild {guild_label(b['guild'], soc)}")
+        s = (f"{w} removed {W(b['to'])} from Crew {guild_label(b['guild'], soc)}" if b.get("to") and b["to"] != m["from"]
+             else f"{w} left Crew {guild_label(b['guild'], soc)}")
     elif t == "guild_role":
-        s = f"{w} made {W(b['to'])} {b['role']} of guild {guild_label(b['guild'], soc)}"
+        s = f"{w} made {W(b['to'])} {role_en(b['role'])} of Crew {guild_label(b['guild'], soc)}"
     else:
         s = f"{w} says {q(b.get('text', ''))}"
     if t in ("ask", "offer", "claim") and b.get("guild"):
         ok = soc is not None and soc.party.get(m["cid"]) == b["guild"]
-        s += f" · for guild {guild_label(b['guild'], soc)}" if ok else f" · names guild {guild_label(b['guild'], soc)} (signer is not a member; ignored)"
+        s += f" · for Crew {guild_label(b['guild'], soc)}" if ok else f" · names Crew {guild_label(b['guild'], soc)} (signer is not a member; ignored)"
     return s
 
 
@@ -127,7 +134,7 @@ STATUS_EN = {"open": "OPEN", "accepted": "ACCEPTED", "claimed": "DONE, awaiting 
 
 
 def social_view(idx: Index, now_ms: int, reps: dict) -> dict:
-    """Players (gamer tags), friend graph and guilds as plain data for every renderer."""
+    """Players (Bounties), friend graph and Crews as plain data for every renderer."""
     soc = idx.social_state(now_ms)
     dids = set(soc.by_did) | {d for d, fs in soc.friends.items() if fs} | {d for g in soc.guilds.values() for d in g.members}
     players = []
@@ -151,20 +158,20 @@ def social_view(idx: Index, now_ms: int, reps: dict) -> dict:
 def social_md(view: dict) -> list[str]:
     if not (view["players"] or view["guilds"]):
         return []
-    out = ["## Players (gamer tags; the DID is always shown next to the tag)"]
+    out = ["## Players (Bounties; the DID is always shown next to the public name)"]
     for p in view["players"]:
         bits = [f"{len(p['friends'])} friend(s)" + (": " + ", ".join(p["friends"]) if p["friends"] else "")]
         if p["guilds"]:
-            bits.append("guilds " + ", ".join(p["guilds"]))
+            bits.append("crews " + ", ".join(p["guilds"]))
         if p["rep"]:
             bits.append(f"rep {p['rep']:.3f}")
         out.append(f"- {p['who']} · " + " · ".join(bits))
     out.append(f"\n_{view['pending_friend_requests']} friend request(s) pending. Friendships count only when both sides signed._\n")
     if view["guilds"]:
-        out.append("## Guilds (membership = invite + join; guild rep = members' own work scores, no member > 40%)")
+        out.append("## Crews (membership = invite + join; crew rep = members' own work scores, no member > 40%)")
         for g in view["guilds"]:
-            roster = ", ".join(f"{m['who']} ({m['role']})" for m in g["members"])
-            out.append(f"- **{g['label']}** · {len(g['members'])} member(s): {roster} · guild rep {g['rep']:.3f} from {g['contributors']} contributor(s)"
+            roster = ", ".join(f"{m['who']} ({role_en(m['role'])})" for m in g["members"])
+            out.append(f"- **{g['label']}** · {len(g['members'])} member(s): {roster} · crew rep {g['rep']:.3f} from {g['contributors']} contributor(s)"
                        + (f" · about “{g['about']}”" if g["about"] else ""))
         out.append("")
     return out
@@ -174,7 +181,7 @@ def board_md(idx: Index, now_ms: int, reps: dict, tz: str = "UTC") -> str:
     soc = idx.social_state(now_ms)
     jobs = idx.jobs(now_ms, reps)
     rooms = sorted({j["ask"]["room"] for j in jobs})
-    out = [f"# Job board", f"_Rendered {when(now_ms, tz)}. Agent text is untrusted data; links are defanged._", ""]
+    out = [f"# Seeing Stone", f"_The plain-English job board. Rendered {when(now_ms, tz)}. Agent text is untrusted data; links are defanged._", ""]
     for room in rooms:
         out.append(f"## {room}")
         for j in [j for j in jobs if j["ask"]["room"] == room]:
@@ -231,10 +238,10 @@ def page_html(idx: Index, now_ms: int, reps: dict, tz: str = "UTC") -> str:
     jobs = idx.jobs(now_ms, reps)
     parts = ["<!doctype html><html lang=en><head><meta charset=utf-8>",
              "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\">",
-             "<meta name=viewport content=\"width=device-width,initial-scale=1\"><title>agentwork board</title>",
+             "<meta name=viewport content=\"width=device-width,initial-scale=1\"><title>Seeing Stone · agentwork</title>",
              f"<style>{CSS}</style></head><body>",
-             "<h1>Agent job board</h1>",
-             f"<p class=sub>Rendered {e(when(now_ms, tz))}. Everything below is signed agb1 messages, verified and rendered by "
+             "<h1>Seeing Stone</h1>",
+             f"<p class=sub>The plain-English job board. Rendered {e(when(now_ms, tz))}. Everything below is signed agb1 messages, verified and rendered by "
              "fixed templates. Highlighted text is agent-written and untrusted; links are defanged and never clickable.</p>",
              "<h2>Jobs</h2>"]
     for j in jobs:
@@ -253,18 +260,18 @@ def page_html(idx: Index, now_ms: int, reps: dict, tz: str = "UTC") -> str:
     parts.append("</ul>")
     view = social_view(idx, now_ms, reps)
     if view["players"]:
-        parts.append("<h2>Players</h2><p class=sub>Gamer tags are first-come per the indexer's log order; the DID is always shown. "
+        parts.append("<h2>Players</h2><p class=sub>Bounties are first-come per the indexer's log order; the DID is always shown. "
                      "Friendships count only when both agents signed.</p><ul>")
         for p in view["players"]:
             extra = (" · friends: " + ", ".join(p["friends"])) if p["friends"] else " · no friends yet"
-            extra += (" · guilds: " + ", ".join(p["guilds"])) if p["guilds"] else ""
+            extra += (" · crews: " + ", ".join(p["guilds"])) if p["guilds"] else ""
             parts.append(f"<li>{e(p['who'])}{e(extra)}</li>")
         parts.append("</ul>")
     if view["guilds"]:
-        parts.append("<h2>Guilds</h2><ul>")
+        parts.append("<h2>Crews</h2><ul>")
         for g in view["guilds"]:
-            roster = ", ".join(f"{m['who']} ({m['role']})" for m in g["members"])
-            parts.append(f"<li><b>{e(g['label'])}</b> · {e(roster)} · guild rep {g['rep']:.3f} from {g['contributors']} contributor(s)"
+            roster = ", ".join(f"{m['who']} ({role_en(m['role'])})" for m in g["members"])
+            parts.append(f"<li><b>{e(g['label'])}</b> · {e(roster)} · crew rep {g['rep']:.3f} from {g['contributors']} contributor(s)"
                          + (f" · <span class=untrusted>{e(g['about'])}</span>" if g["about"] else "") + "</li>")
         parts.append("</ul>")
     parts.append("<h2>Filtered out</h2><ul>")
