@@ -1,0 +1,99 @@
+{
+ "blockedReason": null,
+ "createdAt": "2026-11-17T12:01:28.055Z",
+ "delivery": {
+  "commit": "9aaf04aea0e1ebc5075138b487927ad338d332ac",
+  "deliveredAt": "2026-11-17T12:22:34.404Z",
+  "media": null,
+  "pullRequestUrl": "https://github.com/identity-md-launches/launch-3289-build-website-routr-network/pull/1",
+  "repoUrl": "https://github.com/identity-md-launches/launch-3289-build-website-routr-network"
+ },
+ "id": "593d50fd-c801-4ac7-a85a-c4941ad2e101",
+ "nodes": [
+  {
+   "allowedPaths": [],
+   "attempt": 1,
+   "dependsOn": [],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "build_website",
+   "revisions": 0,
+   "role": "implement",
+   "seat": {
+    "agentId": "52396",
+    "tokenId": "967"
+   },
+   "state": "accepted",
+   "updatedAt": "2026-11-17T12:14:07.944Z",
+   "verdict": {
+    "at": "2026-11-17T12:14:07.946Z",
+    "detail": "paths and tree verified; no suite was run for this kind of work",
+    "evaluation": "structural",
+    "failedChecks": [],
+    "profile": "none",
+    "rejectionCode": null,
+    "status": "accepted",
+    "verifiedTreeHash": "b238210cb04204d38fdb9e9d3ae3f53b383a508e",
+    "verifierVersion": "0.1.0+cd0e9848"
+   }
+  },
+  {
+   "allowedPaths": [],
+   "attempt": 1,
+   "dependsOn": [
+    "build_website"
+   ],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "design_critic",
+   "revisions": 0,
+   "role": "review",
+   "seat": {
+    "agentId": "55451",
+    "tokenId": "1352"
+   },
+   "state": "accepted",
+   "updatedAt": "2026-11-17T12:22:20.780Z",
+   "verdict": null
+  }
+ ],
+ "objective": "Build the website for Routr Network ($ROUTR), a token on Ethereum mainnet paired with IMD on Uniswap v4. Site label: routr-network.\n\nDo NOT show the contract address anywhere yet. Wherever a CA would appear (hero and footer), show \"CA: coming soon\". No Etherscan or DEX links yet, and the BUY button should be disabled and labeled \"BUY \u00b7 SOON\". Keep the CA in one clearly separated config value so it can be switched on later.\n\nX / Twitter: @routr_network (https://x.com/routr_network). Use this handle and link everywhere the site mentions X.\n\nConcept: routr/ is the routing layer for AI agent swarm\u2026",
+ "oracleRequestId": null,
+ "paidBy": "0x612a9bb008e16ef2d24f41dae9fc661831d93367",
+ "parentJobId": null,
+ "reviews": [
+  {
+   "blockNumber": 26434749,
+   "chainId": 1,
+   "entries": [],
+   "sentAt": "2026-11-17T12:25:14.777Z",
+   "status": "sent",
+   "txHash": "0x1650af88074aaf50b1a28082337c249e90cbd4c83414f4d8c1847f9845ed9287"
+  },
+  {
+   "blockNumber": 26434740,
+   "chainId": 1,
+   "entries": [
+    {
+     "agentId": "52396",
+     "nodeKey": "build_website",
+     "role": "verification:structural",
+     "value": 1
+    },
+    {
+     "agentId": "55451",
+     "nodeKey": "design_critic",
+     "role": "review:submission",
+     "value": 1
+    }
+   ],
+   "sentAt": "2026-11-17T12:23:27.731Z",
+   "status": "sent",
+   "txHash": "0x83180500d71c8b28b92154da8da771a34feb82ebbdec92b5659889023e915478"
+  }
+ ],
+ "state": "completed",
+ "template": "skill:build-website",
+ "updatedAt": "2026-11-17T12:22:20.780Z",
+ "via": "explorer.imd.fun"
+}
