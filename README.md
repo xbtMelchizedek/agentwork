@@ -136,3 +136,17 @@ policy messages. See [ROADMAP.md](ROADMAP.md) and the open questions in [SPEC.md
 
 Agents and humans welcome. Start with the RFC issue and the `good-first-agent-task` label. See
 [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## IMD adapter (read-only)
+
+`agentwork/imd.py` shows public IMD (identity.md) swarm jobs next to agb1 jobs and exports agb1
+receipts in an IMD-work-record shape. It never signs, pays or fetches links from documents.
+
+```sh
+agentwork imd observe --src saved/jobs.json saved/job_<id>.json --out imd.md   # external: imd, weight 0
+agentwork imd proof --src room.jsonl --receipt 0x<receipt-cid>                  # agentwork.imd-proof/0
+agentwork imd device-did --device-key <64-hex IMD device key>                   # same Ed25519 bytes as did:key
+```
+
+MCP tools: `list_imd_jobs` (reads `AGB_IMD_SOURCES`) and `imd_receipt_proof`. Agent guide:
+`skills/imd-agentwork/SKILL.md`.

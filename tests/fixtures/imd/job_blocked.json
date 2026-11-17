@@ -1,0 +1,174 @@
+{
+ "blockedReason": "node manifest: needs_input: The required test repair is outside the permitted write paths. forge build succeeds; forge test with the specified fuzz seed reports 78 passed, 1 failed, 11 skipped. test/DisperseV2.t.sol:741 deterministically measures 8511 gas per row against an 8000 limit. A disposable ",
+ "createdAt": "2026-11-12T18:13:32.474Z",
+ "delivery": null,
+ "id": "3e218c3d-c870-4161-8a92-33b32112abdc",
+ "nodes": [
+  {
+   "allowedPaths": [],
+   "attempt": 0,
+   "dependsOn": [
+    "manifest"
+   ],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "audit_economics",
+   "revisions": 0,
+   "role": "review",
+   "seat": null,
+   "state": "waiting",
+   "updatedAt": "2026-11-12T18:13:32.474Z",
+   "verdict": null
+  },
+  {
+   "allowedPaths": [],
+   "attempt": 0,
+   "dependsOn": [
+    "manifest"
+   ],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "audit_flow",
+   "revisions": 0,
+   "role": "review",
+   "seat": null,
+   "state": "waiting",
+   "updatedAt": "2026-11-12T18:13:32.474Z",
+   "verdict": null
+  },
+  {
+   "allowedPaths": [],
+   "attempt": 1,
+   "dependsOn": [],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "audit_imported_code",
+   "revisions": 0,
+   "role": "review",
+   "seat": {
+    "agentId": "51082",
+    "tokenId": "1514"
+   },
+   "state": "accepted",
+   "updatedAt": "2026-11-12T18:22:30.489Z",
+   "verdict": null
+  },
+  {
+   "allowedPaths": [],
+   "attempt": 0,
+   "dependsOn": [
+    "manifest",
+    "audit_math",
+    "audit_permissions",
+    "audit_economics",
+    "audit_flow"
+   ],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "audit_judge",
+   "revisions": 0,
+   "role": "review",
+   "seat": null,
+   "state": "waiting",
+   "updatedAt": "2026-11-12T18:13:32.474Z",
+   "verdict": null
+  },
+  {
+   "allowedPaths": [],
+   "attempt": 0,
+   "dependsOn": [
+    "manifest"
+   ],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "audit_math",
+   "revisions": 0,
+   "role": "review",
+   "seat": null,
+   "state": "waiting",
+   "updatedAt": "2026-11-12T18:13:32.474Z",
+   "verdict": null
+  },
+  {
+   "allowedPaths": [],
+   "attempt": 0,
+   "dependsOn": [
+    "manifest"
+   ],
+   "failureReason": null,
+   "judgeRevisions": 0,
+   "key": "audit_permissions",
+   "revisions": 0,
+   "role": "review",
+   "seat": null,
+   "state": "waiting",
+   "updatedAt": "2026-11-12T18:13:32.474Z",
+   "verdict": null
+  },
+  {
+   "allowedPaths": [
+    "launch.json"
+   ],
+   "attempt": 3,
+   "dependsOn": [
+    "audit_imported_code"
+   ],
+   "failureReason": "needs_input: The required test repair is outside the permitted write paths. forge build succeeds; forge test with the specified fuzz seed reports 78 passed, 1 failed, 11 skipped. test/DisperseV2.t.sol:741 deterministically measures 8511 gas per row against an 8000 limit. A disposable scratch copy ch",
+   "judgeRevisions": 0,
+   "key": "manifest",
+   "revisions": 0,
+   "role": "integrate",
+   "seat": null,
+   "state": "failed",
+   "updatedAt": "2026-11-12T18:50:12.539Z",
+   "verdict": {
+    "at": "2026-11-12T18:40:16.269Z",
+    "detail": "test failed with exit code 1",
+    "evaluation": "checks",
+    "failedChecks": [
+     {
+      "exitCode": 1,
+      "name": "test",
+      "output": "\u2026s, each with a 140-byte memo: 9067425\n\n[PASS] test_memoPermit_expired_bubblesTheTokensReason() (gas: 79590)\n[PASS] test_memoPermit_frontRunStillSucceeds() (gas: 261250)\n[PASS] test_memoPermit_happy() (gas: 263960)\n[PASS] test_memoPermit_tokenWithoutPermit_fallsBackToAllowance() (gas: 835260)\n[PASS] test_memoPermit_zeroDeadlineMeansNoPermit() (gas: 266790)\n[PASS] test_memo_arbitraryBytesAreCarriedExactly() (gas: 239034)\n[PASS] test_memo_lengthLimits_atAndOverTheBoundary() (gas: 444078)\n[PASS] test_memo_malformedCalldata_neverChangesAPayment() (gas: 292371)\n[PASS] test_memo_noReturnToken_oneRecipient_andDuplicates() (gas: 698282)\n[PASS] test_memo_nothingGiven_emitsOnlyDispersed() (gas: 209616)\n[PASS] test_memo_payoutMemoAndRef() (gas: 254946)\n[PASS] test_memo_perRecipient_emitsPaidOnlyForNonEmpty() (gas: 258822)\n[PASS] test_memo_refOnly_andMemoOnly_eachEmitMemo() (gas: 290312)\n[PASS] test_memo_revert_wrongNumberOfRowMemos() (gas: 147033)\n[PASS] test_memo_sameInputChecksAsDisperse() (gas: 260174)\n[PASS] test_noEthAccepted() (gas: 77316)\n[PASS] test_reentrantToken_cannotSpendAVictimsApproval() (gas: 1327050)\n[PASS] test_refused_frozenRecipient_namesTheRow_andMovesNothing() (gas: 1012395)\n[PASS] test_refused_hugeRevertDataIsCutTo256Bytes() (gas: 382135)\n[PASS] test_refused_oddAnswersFromTheToken() (gas: 559295)\n[PASS] test_refused_onlyTheFirstBadRowIsNamed() (gas: 885339)\n[PASS] test_refused_plainTokenShortBalance_inMemoPath() (gas: 750860)\n[PASS] test_refused_shortBalance_namesTheRowWhereMoneyRanOut() (gas: 266744)\n[PASS] test_thirdPartyAllowance_unusableThroughMemoPath() (gas: 204596)\n[PASS] test_tokenAsRecipient_refusedByEveryEntryPoint() (gas: 192009)\nSuite result: FAILED. 27 passed; 1 failed; 0 skipped; finished in 75.00ms (42.43ms CPU time)\n\nRan 25 tests for test/DisperseV2Compat.t.sol:DisperseV2CompatTest\n[PASS] testFuzz_disperse_conserves(uint96[8]) (runs: 256, \u03bc: 436224, ~: 436236)\n[PASS] testFuzz_disperse_lengths(uint8,uint64) (runs: 256, \u03bc: 1788495, ~: 472849)\n[PASS] test_disperse_duplicateRecipientSums() (gas: 136884)\n[PASS] test_disperse_happy() (gas: 245066)\n[PASS] test_disperse_noReturnToken() (gas: 651182)\n[PASS] test_disperse_reentrantTokenCannotAmplify() (gas: 1366968)\n[PASS] test_disperse_revert_empty() (gas: 36065)\n[PASS] test_disperse_revert_insufficientAllowance() (gas: 103352)\n[PASS] test_disperse_revert_insufficientBalance() (gas: 159714)\n[PASS] test_disperse_revert_lengthMismatch() (gas: 41951)\n[PASS] test_disperse_revert_noCodeToken() (gas: 80343)\n[PASS] test_disperse_revert_selfRecipient() (gas: 47526)\n[PASS] test_disperse_revert_sumOverflow() (gas: 44097)\n[PASS] test_disperse_revert_tokenAsRecipient() (gas: 100267)\n[PASS] test_disperse_revert_zeroAmount() (gas: 47492)\n[PASS] test_disperse_revert_zeroRecipient() (gas: 46419)\n[PASS] test_gas_250recipients() (gas: 7168451)\nLogs:\n  gas for 250 recipients (fresh balances): 7035536\n\n[PASS] test_permit_existingAllowanceIgnoresPermit() (gas: 204403)\n[PASS] test_permit_frontRunStillSucceeds() (gas: 274014)\n[PASS] test_permit_happy() (gas: 243357)\n[PASS] test_permit_revert_expired_bubblesReason() (gas: 78715)\n[PASS] test_permit_revert_wrongSigner_bubblesSignerError() (gas: 158701)\n[PASS] test_permit_revert_wrongValue_bubblesSignerError() (gas: 111047)\n[PASS] test_permit_tokenWithoutPermit_fallsBackToAllowance() (gas: 827137)\n[PASS] test_sumOf() (gas: 15946)\nSuite result: ok. 25 passed; 0 failed; 0 skipped; finished in 75.09ms (115.71ms CPU time)\n\nRan 5 test suites in 76.36ms (300.54ms CPU time): 78 tests passed, 1 failed, 11 skipped (90 total tests)\n\nFailing tests:\nEncountered 1 failing test in test/DisperseV2.t.sol:DisperseV2Test\n[FAIL: a row memo costs one event and its calldata: 8511 >= 8000] test_gas_250recipients_threeWays() (gas: 23275805)\n\nEncountered a total of 1 failing tests, 78 tests succeeded\n\nTip: Run `forge test --rerun` to retry only the 1 failed test\nTip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger\n"
+     }
+    ],
+    "profile": "foundry",
+    "rejectionCode": "tests_failed",
+    "status": "rejected",
+    "verifiedTreeHash": "f8abb91749f8a65a8a1872c3e6e19652cdce715c",
+    "verifierVersion": "0.1.0+0026a23a"
+   }
+  }
+ ],
+ "objective": "Weir DisperseV2: deploy the DisperseV2 contract from this repository as a NEW contract on Robinhood Chain (chainId 4663, Arbitrum Orbit, cancun). Contracts only: NO launch token, NO pool, NO distributor, NO website. The code is already written and tested (90 Foundry tests: 79 unit and fuzz, 11 fork tests that skip without RH_RPC_URL) and was adversarially reviewed by its owner; this job audits it as it arrived, builds it and deploys it UNCHANGED. Do not edit src/, test/, script/, lib/, README.md, launch.json or foundry.toml. Build: forge build && forge test; the root foundry.toml pins solc 0.8\u2026",
+ "oracleRequestId": null,
+ "paidBy": "0x0244d14cfb6ca3e2c6575e0aacc9d6bba9389064",
+ "parentJobId": null,
+ "reviews": [
+  {
+   "blockNumber": 26400774,
+   "chainId": 1,
+   "entries": [
+    {
+     "agentId": "51082",
+     "nodeKey": "audit_imported_code",
+     "role": "review:submission",
+     "value": 1
+    },
+    {
+     "agentId": "51131",
+     "nodeKey": "manifest",
+     "role": "verification:checks",
+     "value": 0
+    }
+   ],
+   "sentAt": "2026-11-12T18:52:15.237Z",
+   "status": "sent",
+   "txHash": "0x04ce606cd3e82fe21e63f4167e55017f5ef165a149a735d13b74cf94cfa6c735"
+  }
+ ],
+ "state": "blocked",
+ "template": "shape:chain",
+ "updatedAt": "2026-11-12T18:50:12.539Z",
+ "via": "api.imd.fun"
+}
