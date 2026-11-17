@@ -216,15 +216,29 @@ class Index:
         return jobs
 
 
-def fetch_room(room: str, limit: int = 200, origin: str = TECHNOCORE, timeout: float = 15.0) -> dict:
-    """Read-only GET of one Technocore room as JSON. Redirects are refused."""
-    url = safe.assert_read_url(f"{origin}/r/{room}?format=json&limit={int(limit)}")
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
 
-    class _NoRedirect(urllib.request.HTTPRedirectHandler):
-        def redirect_request(self, *a, **k):
-            return None
 
-    opener = urllib.request.build_opener(_NoRedirect)
+def room_url(room: str, limit: int = 200, origin: str = TECHNOCORE, since: int | None = None) -> str:
+    """Build and allowlist-check the read URL for one room (optionally `since=<seq>`)."""
+    url = f"{origin}/r/{room}?format=json&limit={int(limit)}"
+    if since is not None:
+        if int(since) < 0:
+            raise ValueError("since must be >= 0")
+        url += f"&since={int(since)}"
+    return safe.assert_read_url(url)
+
+
+def fetch_room(room: str, limit: int = 200, origin: str = TECHNOCORE, timeout: float = 15.0,
+               since: int | None = None, opener=None) -> dict:
+    """Read-only GET of one Technocore room as JSON. Redirects are refused.
+
+    `opener` is injectable for tests; it must expose `.open(req, timeout=)`.
+    """
+    url = room_url(room, limit, origin, since)
+    opener = opener or urllib.request.build_opener(_NoRedirect)
     req = urllib.request.Request(url, headers={"User-Agent": "agentwork-indexer/0.1 (read-only)"})
     with opener.open(req, timeout=timeout) as r:
         data = r.read(4_000_000)
@@ -233,6 +247,84 @@ def fetch_room(room: str, limit: int = 200, origin: str = TECHNOCORE, timeout: f
         raise ValueError("unexpected response shape")
     obj["room"] = room
     return obj
+
+
+# ── incremental reads: per-room cursors (room -> last_seq) ───────────────────
+
+def _seq(m) -> int | None:
+    try:
+        v = m.get("seq") if isinstance(m, dict) else None
+        return int(v) if v is not None and not isinstance(v, bool) else None
+    except (TypeError, ValueError):
+        return None
+
+
+def load_cursors(path: Path) -> dict[str, int]:
+    """Read a cursor file; a missing or corrupt file is an empty cursor set."""
+    try:
+        obj = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(obj, dict):
+        return {}
+    out = {}
+    for k, v in obj.items():
+        if isinstance(k, str) and isinstance(v, int) and not isinstance(v, bool) and v >= 0:
+            out[k] = v
+    return out
+
+
+def save_cursors(path: Path, cursors: dict[str, int]) -> None:
+    """Atomic write: temp file in the same dir, fsync, then rename over the target."""
+    import os
+    import tempfile
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".cursors-", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(dict(sorted(cursors.items())), f, indent=1)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def fetch_room_since(room: str, cursor_path: Path, limit: int = 200, origin: str = TECHNOCORE,
+                     timeout: float = 15.0, opener=None, log=None) -> dict:
+    """Fetch only messages newer than the stored cursor, then advance the cursor.
+
+    Messages with seq <= cursor are dropped client-side even if the server ignores
+    `since`. If the room was reaped or reset (its newest seq is below our cursor),
+    the cursor is reset to 0, a note is logged, and the room is re-read in full.
+    The returned dump carries `cursor_reset: bool` and `last_seq`.
+    """
+    log = log or (lambda msg: None)
+    cursors = load_cursors(cursor_path)
+    last = cursors.get(room, 0)
+    dump = fetch_room(room, limit, origin, timeout, since=last or None, opener=opener)
+    msgs = [m for m in (dump.get("messages") or []) if isinstance(m, dict)]
+    seqs = [s for s in map(_seq, msgs) if s is not None]
+    reset = False
+    if last and seqs and max(seqs) < last:
+        log(f"room {room!r}: newest seq {max(seqs)} < cursor {last}; room reaped or reset, re-reading")
+        reset, last = True, 0
+        dump = fetch_room(room, limit, origin, timeout, since=None, opener=opener)
+        msgs = [m for m in (dump.get("messages") or []) if isinstance(m, dict)]
+        seqs = [s for s in map(_seq, msgs) if s is not None]
+    new = [m for m in msgs if (_seq(m) or 0) > last]
+    new_last = max([last] + [s for s in seqs if s > last])
+    cursors[room] = new_last
+    save_cursors(cursor_path, cursors)
+    dump["messages"] = new
+    dump["cursor_reset"] = reset
+    dump["last_seq"] = new_last
+    return dump
 
 
 def build_index(sources: Iterable[Path] = (), dumps: Iterable[dict] = ()) -> Index:

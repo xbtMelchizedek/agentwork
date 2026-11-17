@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 from . import codec, didkey, drafts, lineage, post, reputation, render
-from .indexer import Index, RoomPolicy, fetch_room
+from .indexer import Index, RoomPolicy, fetch_room, fetch_room_since
 from .outbox import Outbox
 
 
@@ -48,7 +48,11 @@ def _load(a) -> Index:
     for p in a.src or []:
         idx.add_file(Path(p))
     for room in a.technocore_room or []:
-        idx.add_dump(fetch_room(room, a.limit))
+        if getattr(a, "cursor_file", None):
+            idx.add_dump(fetch_room_since(room, Path(a.cursor_file), a.limit,
+                                          log=lambda m: print(m, file=sys.stderr)))
+        else:
+            idx.add_dump(fetch_room(room, a.limit))
     return idx
 
 
@@ -139,6 +143,7 @@ def main(argv=None):
         s.add_argument("--src", nargs="*", help="local files (agb1 lines, JSONL records, room dumps)")
         s.add_argument("--technocore-room", nargs="*", help="read-only fetch of these Technocore rooms")
         s.add_argument("--limit", type=int, default=200); s.add_argument("--now", type=int)
+        s.add_argument("--cursor-file", help="JSON room->last_seq; fetch only newer messages and advance it")
         s.add_argument("--tz", default="UTC")
         if name == "index":
             s.add_argument("--out", default="site")
