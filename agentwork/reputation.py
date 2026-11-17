@@ -24,8 +24,8 @@ than `window_ms` are ignored. Scores are keyed by DID and are not transferable: 
 message type moves score between DIDs, and reviews/notes/posts add nothing.
 
 Corrections: the log is append-only, so nothing is edited or deleted. A payer corrects a
-receipt by posting a newer receipt with the same `ref` and `payee`. Only the newest one
-(by ts, then cid) is current: a later `refunded` or `cancelled` voids an earlier `settled`,
+receipt by posting a newer receipt with the same `ref` and `payee` and `supersedes` set to
+the cid it replaces (an explicit transition; see SPEC §3). Only the chain tip is current: a later `refunded` or `cancelled` voids an earlier `settled`,
 a later `disputed` suspends it, and a later `settled` restores it. A later `invalid`
 attestation majority drops a receipt the same way. Both the original and the correction
 stay in the log, so the history shows what was claimed and what replaced it. A payer can
@@ -91,23 +91,44 @@ def _valid(messages: Iterable[dict]) -> dict[str, dict]:
     return out
 
 
+def _receipt_key(m: dict) -> tuple:
+    return (m["from"], m.get("ref"), m["b"]["payee"])
+
+
+def _receipt_tips(idx: dict[str, dict], now_ms: int) -> dict[tuple, dict]:
+    """Current receipt per (payer, ref, payee): walk the explicit `supersedes` chain."""
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for m in idx.values():
+        if m["t"] == "receipt" and m["ts"] <= now_ms:
+            groups[_receipt_key(m)].append(m)
+    tips: dict[tuple, dict] = {}
+    for key, rs in groups.items():
+        rs.sort(key=lambda r: (r["ts"], r["cid"]))
+        roots = [r for r in rs if "supersedes" not in r["b"]]
+        if not roots:
+            continue
+        tip = roots[0]
+        while True:
+            nxt = next((r for r in rs if r["b"].get("supersedes") == tip["cid"]
+                        and (r["ts"], r["cid"]) > (tip["ts"], tip["cid"])), None)
+            if nxt is None:
+                break
+            tip = nxt
+        tips[key] = tip
+    return tips
+
+
 def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_ok) -> list[dict]:
     attests: dict[str, list[dict]] = defaultdict(list)
     for m in idx.values():
         if m["t"] == "attest":
             attests[m["ref"]].append(m)
-    current: dict[tuple, dict] = {}
-    for m in idx.values():
-        if m["t"] == "receipt" and m["ts"] <= now_ms:
-            key = (m["from"], m.get("ref"), m["b"]["payee"])
-            prev = current.get(key)
-            if prev is None or (m["ts"], m["cid"]) > (prev["ts"], prev["cid"]):
-                current[key] = m
+    current = _receipt_tips(idx, now_ms)
     out = []
     for m in idx.values():
         if m["t"] != "receipt":
             continue
-        if current.get((m["from"], m.get("ref"), m["b"]["payee"])) is not m:
+        if current.get(_receipt_key(m)) is not m:
             continue  # superseded by a newer receipt from the same payer for the same claim
         b = m["b"]
         payer, payee = m["from"], b["payee"]

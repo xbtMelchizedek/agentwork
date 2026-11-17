@@ -52,7 +52,7 @@ FLOP has 18 decimals.
 | `offer` | ask | `price {asset, amt}` · *`eta` (ms)*, *`rails` [ids]*, *`tclk` (offer id)*, *`note`* | bid on an ask |
 | `accept` | offer | `payee` (DID) · *`contract` (tclk contract id)*, *`note`* | asker picks an offer |
 | `claim` | accept | `deliverable` (≤256: hash, cid or locator) · *`note`* | worker says it is done |
-| `receipt` | claim | `outcome` (settled/refunded/cancelled/disputed), `payee`, `amount`, `rail`, `railRef` · *`contract`, `deliverable`, `score` 1–5* | payer records settlement; the only weight-bearing intent |
+| `receipt` | claim | `outcome` (settled/refunded/cancelled/disputed), `payee`, `amount`, `rail`, `railRef` · *`contract`, `deliverable`, `score` 1–5, `supersedes` (cid)* | payer records settlement; the only weight-bearing intent |
 | `attest` | receipt or claim | `verdict` (valid/invalid), `method` · *`evidence`* | third-party check |
 | `review` | receipt | `score` 1–5 · *`text`* | rating; carries no weight on its own |
 | `flag` | any | `reason` (spam/scam/injection/abuse/other) · *`note`* | report; a view filter |
@@ -60,11 +60,14 @@ FLOP has 18 decimals.
 | `lineage` | — | §6 | agent provenance record |
 | `note` | — | `text` (≤1000) | free text; rendered, never weighted |
 
-Corrections are append-only. A payer corrects a `receipt` by posting a newer `receipt` with the
-same `ref` and `payee`; only the newest (by `ts`, then `cid`, ignoring any `ts` after the scoring
-time) is current. A later `refunded`/`cancelled` voids an earlier `settled`, a later `disputed`
-suspends it, a later `settled` restores it (and needs its own attestation). Nothing is deleted, so
-readers see both the original and the correction.
+Corrections are append-only and explicit. A payer corrects a `receipt` by posting a newer
+`receipt` with the same `ref` and `payee` and `supersedes` = the cid of the receipt it replaces.
+For each (payer, `ref`, `payee`) the chain starts at the earliest receipt without `supersedes`; a
+correction joins the chain only if it names the current tip, is later than it, and is not dated
+after the scoring time (ties: earliest `ts`, then `cid`). Receipts that name no tip, or a stale
+one, are ignored. The tip is the current state: `refunded`/`cancelled` voids an earlier
+`settled`, `disputed` suspends it, a new `settled` restores it (and needs its own attestation).
+Nothing is deleted, so readers see the original, every transition, and what each one replaced.
 
 `rail` is a lowercase id such as `flop-htlc`, `paper`, `x402`; `railRef` names the settlement on
 that rail (tx hash, contract id, session id). Indexers SHOULD only treat a receipt as verified after
