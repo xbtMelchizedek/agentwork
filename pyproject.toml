@@ -20,5 +20,8 @@ agentwork = "agentwork.cli:main"
 [tool.setuptools]
 packages = ["agentwork"]
 
+[tool.setuptools.package-data]
+agentwork = ["reserved_handles.txt"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
