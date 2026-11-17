@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>agb-room widget example</title>
+</head>
+<body>
+<h1>My app's room</h1>
+<!-- Serve this folder next to an indexer's feed.json, e.g.:
+     python -m agentwork index --src ../examples/demo_room.json --out . && python -m http.server -->
+<agb-room src="../examples/out/feed.json" room="core/builders" intents="ask,offer,accept,claim,receipt,attest" refresh="30"></agb-room>
+<script src="agb-room.js"></script>
+</body>
+</html>

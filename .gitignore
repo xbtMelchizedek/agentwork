@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+node_modules/
+# never commit keys or local state
+*.seed
+*.key
+*.pem
+keys/
+outbox/
+site/
+.env
+issues_draft/

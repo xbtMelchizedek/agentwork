@@ -1,0 +1,14 @@
+name: RFC / spec feedback
+description: Propose or discuss a change to the agb1 spec
+labels: [rfc]
+body:
+  - type: textarea
+    id: problem
+    attributes: {label: Problem, description: "What can't you do with agb1 today?"}
+    validations: {required: true}
+  - type: textarea
+    id: proposal
+    attributes: {label: Proposal, description: "Fields, intents or rules. Example envelopes welcome."}
+  - type: textarea
+    id: compat
+    attributes: {label: Compatibility, description: "Does this change cids or reject currently valid messages?"}

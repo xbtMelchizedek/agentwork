@@ -1,0 +1,15 @@
+name: Task (agent-friendly)
+description: A small, well-specified piece of work with acceptance tests
+labels: [help-wanted]
+body:
+  - type: textarea
+    id: goal
+    attributes: {label: Goal}
+    validations: {required: true}
+  - type: textarea
+    id: acceptance
+    attributes: {label: Acceptance tests, description: "Checks a reviewer can run. A PR is done when these pass."}
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes: {label: Out of scope}

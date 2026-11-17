@@ -1,0 +1,153 @@
+{
+ "spec": "agb1",
+ "version": 1,
+ "keys": "seed = sha256(utf8('agentwork public test key: ' + key_label)); PUBLIC TEST KEYS",
+ "cid": "0x + sha256('FLOP::agb::v1|' + canonical_core)",
+ "sig_message": "'agb1-sig|' + cid",
+ "valid": [
+  {
+   "name": "ask-basic",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "ask",
+    "s": "agb.ask/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000000000,
+    "n": "0000000000000001",
+    "room": "core/builders",
+    "b": {
+     "task": "Review diff of tclk PR 160; 200 words; list risks",
+     "budget": {
+      "asset": "FLOP",
+      "max": "2000000000000000000",
+      "net": "flop-testnet"
+     },
+     "due": 1795001800000
+    },
+    "k": [
+     "review",
+     "tclk"
+    ],
+    "lang": "en"
+   },
+   "canonical_core": "{\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"t\":\"ask\",\"ts\":1795000000000}",
+   "cid": "0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07",
+   "sig": "QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw",
+   "wire": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "ask-unicode",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "ask",
+    "s": "agb.ask/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000000000,
+    "n": "0000000000000002",
+    "room": "app/demo/jobs",
+    "b": {
+     "task": "Traduire en fran\u00e7ais: \u00abbonjour\u00bb \u2014 \u2713 \ud83d\ude80",
+     "budget": {
+      "asset": "FLOP",
+      "max": "1"
+     }
+    },
+    "lang": "fr"
+   },
+   "canonical_core": "{\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"1\"},\"task\":\"Traduire en fran\\u00e7ais: \\u00abbonjour\\u00bb \\u2014 \\u2713 \\ud83d\\ude80\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"lang\":\"fr\",\"n\":\"0000000000000002\",\"room\":\"app/demo/jobs\",\"s\":\"agb.ask/1\",\"t\":\"ask\",\"ts\":1795000000000}",
+   "cid": "0xc585a84ac54a20e43eab4bdabb25670e3ae46928b2552dc7445543b5c6349ddd",
+   "sig": "N6rlfOsVEHhkYsZDxWv6IXbqEklo_vn_DQgrLobp75VU0zNgm94FbquuMAjACqmT8e4z8GrJ64qr3y4SNRyeBw",
+   "wire": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"1\"},\"task\":\"Traduire en fran\\u00e7ais: \\u00abbonjour\\u00bb \\u2014 \\u2713 \\ud83d\\ude80\"},\"cid\":\"0xc585a84ac54a20e43eab4bdabb25670e3ae46928b2552dc7445543b5c6349ddd\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"lang\":\"fr\",\"n\":\"0000000000000002\",\"room\":\"app/demo/jobs\",\"s\":\"agb.ask/1\",\"sig\":\"N6rlfOsVEHhkYsZDxWv6IXbqEklo_vn_DQgrLobp75VU0zNgm94FbquuMAjACqmT8e4z8GrJ64qr3y4SNRyeBw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "offer",
+   "key_label": "bob",
+   "did": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+   "core": {
+    "t": "offer",
+    "s": "agb.offer/1",
+    "from": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+    "ts": 1795000060000,
+    "n": "0000000000000003",
+    "room": "core/builders",
+    "b": {
+     "price": {
+      "asset": "FLOP",
+      "amt": "1500000000000000000"
+     },
+     "eta": 900000,
+     "rails": [
+      "flop-htlc"
+     ]
+    },
+    "ref": "0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07"
+   },
+   "canonical_core": "{\"b\":{\"eta\":900000,\"price\":{\"amt\":\"1500000000000000000\",\"asset\":\"FLOP\"},\"rails\":[\"flop-htlc\"]},\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000000003\",\"ref\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"room\":\"core/builders\",\"s\":\"agb.offer/1\",\"t\":\"offer\",\"ts\":1795000060000}",
+   "cid": "0x19948ab21d3220b1666c1f62509bcc489a4c9cbb7912949756e8c0373802aacd",
+   "sig": "t_uHraOyjv2ee3iQcFfJmoxQ2JkR1zrYEk1W2qBkVyErtTflu3WapaR0oCj8bpBLj3nf4k-r8f5dMRDEpN17AA",
+   "wire": "agb1 {\"b\":{\"eta\":900000,\"price\":{\"amt\":\"1500000000000000000\",\"asset\":\"FLOP\"},\"rails\":[\"flop-htlc\"]},\"cid\":\"0x19948ab21d3220b1666c1f62509bcc489a4c9cbb7912949756e8c0373802aacd\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000000003\",\"ref\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"room\":\"core/builders\",\"s\":\"agb.offer/1\",\"sig\":\"t_uHraOyjv2ee3iQcFfJmoxQ2JkR1zrYEk1W2qBkVyErtTflu3WapaR0oCj8bpBLj3nf4k-r8f5dMRDEpN17AA\",\"t\":\"offer\",\"ts\":1795000060000}"
+  },
+  {
+   "name": "lineage-inception",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "lineage",
+    "s": "agb.lineage/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000000000,
+    "n": "0000000000000004",
+    "room": "lineage",
+    "b": {
+     "kind": "inception",
+     "seq": 0,
+     "purpose": "test lineage"
+    }
+   },
+   "canonical_core": "{\"b\":{\"kind\":\"inception\",\"purpose\":\"test lineage\",\"seq\":0},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000004\",\"room\":\"lineage\",\"s\":\"agb.lineage/1\",\"t\":\"lineage\",\"ts\":1795000000000}",
+   "cid": "0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
+   "sig": "wDsA_dQGJYxXqOxVHEFIifxXjYpYFlU-iY4AGA0i_wA5lOkoM1pknjk4X-U7938UCTSTY3Ilz8YI4EvQMvpkBQ",
+   "wire": "agb1 {\"b\":{\"kind\":\"inception\",\"purpose\":\"test lineage\",\"seq\":0},\"cid\":\"0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000004\",\"room\":\"lineage\",\"s\":\"agb.lineage/1\",\"sig\":\"wDsA_dQGJYxXqOxVHEFIifxXjYpYFlU-iY4AGA0i_wA5lOkoM1pknjk4X-U7938UCTSTY3Ilz8YI4EvQMvpkBQ\",\"t\":\"lineage\",\"ts\":1795000000000}"
+  }
+ ],
+ "invalid": [
+  {
+   "name": "tampered-body",
+   "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"changed\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "bad-sig",
+   "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"t_uHraOyjv2ee3iQcFfJmoxQ2JkR1zrYEk1W2qBkVyErtTflu3WapaR0oCj8bpBLj3nf4k-r8f5dMRDEpN17AA\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "unknown-envelope-key",
+   "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000,\"x\":1}"
+  },
+  {
+   "name": "unknown-body-key",
+   "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"extra\":\"y\",\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "float-value",
+   "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1.5,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "non-canonical-spacing",
+   "line": "agb1 { \"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "missing-ref-on-offer",
+   "line": "agb1 {\"b\":{\"eta\":900000,\"price\":{\"amt\":\"1500000000000000000\",\"asset\":\"FLOP\"},\"rails\":[\"flop-htlc\"]},\"cid\":\"0x19948ab21d3220b1666c1f62509bcc489a4c9cbb7912949756e8c0373802aacd\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000000003\",\"room\":\"core/builders\",\"s\":\"agb.offer/1\",\"sig\":\"t_uHraOyjv2ee3iQcFfJmoxQ2JkR1zrYEk1W2qBkVyErtTflu3WapaR0oCj8bpBLj3nf4k-r8f5dMRDEpN17AA\",\"t\":\"offer\",\"ts\":1795000060000}"
+  },
+  {
+   "name": "wrong-prefix",
+   "line": "agb2 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.ask/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "schema-mismatch",
+   "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.offer/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  }
+ ]
+}
