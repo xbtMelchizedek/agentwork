@@ -118,6 +118,9 @@ def _receipt_tips(idx: dict[str, dict], now_ms: int) -> dict[tuple, dict]:
     return tips
 
 
+receipt_tips = _receipt_tips  # public: the indexer uses the same chain rule for job status
+
+
 def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_ok) -> list[dict]:
     attests: dict[str, list[dict]] = defaultdict(list)
     for m in idx.values():

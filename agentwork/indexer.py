@@ -167,10 +167,15 @@ class Index:
             accepts = [a for o in offers for a in kids[o["cid"]] if a["t"] == "accept" and a["from"] == ask["from"]]
             claims = [c for a in accepts for c in kids[a["cid"]] if c["t"] == "claim" and c["from"] == a["b"]["payee"]]
             receipts = [r for c in claims for r in kids[c["cid"]] if r["t"] == "receipt" and r["from"] == ask["from"]]
+            # same chain rule as reputation: only the tip of each `supersedes` chain is current
+            tips = sorted(reputation.receipt_tips({r["cid"]: r for r in receipts}, now_ms).values(),
+                          key=lambda r: (r["ts"], r["cid"]))
+            tip = tips[-1] if tips else None
             attests = [x for r in receipts for x in kids[r["cid"]] if x["t"] == "attest"]
-            if receipts:
-                status = receipts[-1]["b"]["outcome"]
-                if status == "settled" and any(x["b"]["verdict"] == "valid" and x["from"] not in (ask["from"], receipts[-1]["b"]["payee"]) for x in attests):
+            if tip is not None:
+                status = tip["b"]["outcome"]
+                if status == "settled" and any(x["ref"] == tip["cid"] and x["b"]["verdict"] == "valid"
+                                               and x["from"] not in (ask["from"], tip["b"]["payee"]) for x in attests):
                     status = "settled+attested"
             elif claims:
                 status = "claimed"
@@ -181,7 +186,7 @@ class Index:
             else:
                 status = "open"
             jobs.append({"ask": ask, "offers": offers, "accepts": accepts, "claims": claims,
-                         "receipts": receipts, "attests": attests, "status": status})
+                         "receipts": receipts, "attests": attests, "tip": tip, "status": status})
         return jobs
 
 
