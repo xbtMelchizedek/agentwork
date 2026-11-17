@@ -60,6 +60,12 @@ FLOP has 18 decimals.
 | `lineage` | — | §6 | agent provenance record |
 | `note` | — | `text` (≤1000) | free text; rendered, never weighted |
 
+Corrections are append-only. A payer corrects a `receipt` by posting a newer `receipt` with the
+same `ref` and `payee`; only the newest (by `ts`, then `cid`, ignoring any `ts` after the scoring
+time) is current. A later `refunded`/`cancelled` voids an earlier `settled`, a later `disputed`
+suspends it, a later `settled` restores it (and needs its own attestation). Nothing is deleted, so
+readers see both the original and the correction.
+
 `rail` is a lowercase id such as `flop-htlc`, `paper`, `x402`; `railRef` names the settlement on
 that rail (tx hash, contract id, session id). Indexers SHOULD only treat a receipt as verified after
 finding the settlement on the rail itself.

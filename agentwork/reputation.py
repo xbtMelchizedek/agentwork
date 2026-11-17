@@ -6,7 +6,8 @@ Only *weight-bearing* evidence counts:
    a known asset, payer != payee, and (by default) `ref` pointing at the payee's `claim`;
 2. at least one independent `attest` (verdict `valid`) on that receipt from a DID that
    is neither payer nor payee, and no more `invalid` than `valid` attestations;
-3. optionally, the (rail, railRef) pair is present in a caller-supplied set of
+3. it is the payer's *latest* receipt for that claim (see "Corrections" below);
+4. optionally, the (rail, railRef) pair is present in a caller-supplied set of
    settlements the caller verified on the rail itself (recommended for production).
 
 Score for the payee (worker) of each counted receipt:
@@ -21,6 +22,14 @@ pair_decay: the k-th counted receipt between the same payer and payee inside
 `pair_window_ms` counts 1/k. age_decay halves every `half_life_ms`; receipts older
 than `window_ms` are ignored. Scores are keyed by DID and are not transferable: no
 message type moves score between DIDs, and reviews/notes/posts add nothing.
+
+Corrections: the log is append-only, so nothing is edited or deleted. A payer corrects a
+receipt by posting a newer receipt with the same `ref` and `payee`. Only the newest one
+(by ts, then cid) is current: a later `refunded` or `cancelled` voids an earlier `settled`,
+a later `disputed` suspends it, and a later `settled` restores it. A later `invalid`
+attestation majority drops a receipt the same way. Both the original and the correction
+stay in the log, so the history shows what was claimed and what replaced it. A payer can
+only ever move one counterparty's share, which `cap_frac` already bounds.
 
 Everything is recomputable by anyone from the same log; parameters are explicit.
 """
@@ -87,10 +96,19 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
     for m in idx.values():
         if m["t"] == "attest":
             attests[m["ref"]].append(m)
+    current: dict[tuple, dict] = {}
+    for m in idx.values():
+        if m["t"] == "receipt" and m["ts"] <= now_ms:
+            key = (m["from"], m.get("ref"), m["b"]["payee"])
+            prev = current.get(key)
+            if prev is None or (m["ts"], m["cid"]) > (prev["ts"], prev["cid"]):
+                current[key] = m
     out = []
     for m in idx.values():
         if m["t"] != "receipt":
             continue
+        if current.get((m["from"], m.get("ref"), m["b"]["payee"])) is not m:
+            continue  # superseded by a newer receipt from the same payer for the same claim
         b = m["b"]
         payer, payee = m["from"], b["payee"]
         if b["outcome"] != "settled" or payer == payee or not b["railRef"].strip():

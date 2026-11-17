@@ -161,3 +161,43 @@ def test_pure_and_non_transferable(keys):
     assert r1[keys["b"].did].to_json() == r2[keys["b"].did].to_json()
     assert r1[keys["b"].did].to_json()["transferable"] is False
     assert "transfer" not in codec.INTENTS
+
+
+def _correct(w, payer, payee, rc, outcome, dt=1000):
+    nr = codec.build(payer, "receipt", R, {"outcome": outcome, "payee": payee.did, "amount": rc["b"]["amount"],
+                                            "rail": "flop-htlc", "railRef": rc["b"]["railRef"]},
+                     ref=rc["ref"], ts=rc["ts"] + dt)
+    w.msgs.append(nr)
+    return nr
+
+
+def test_later_refund_voids_settled(keys):
+    w = World(); rc = w.job(keys["a"], keys["b"], attesters=[keys["c"]])
+    assert score(w.scores(), keys["b"]) > 0
+    _correct(w, keys["a"], keys["b"], rc, "refunded")
+    assert score(w.scores(), keys["b"]) == 0
+    assert rc in w.msgs  # original stays in the log
+
+
+def test_later_dispute_suspends_and_settle_restores(keys):
+    w = World(); rc = w.job(keys["a"], keys["b"], attesters=[keys["c"]])
+    before = score(w.scores(), keys["b"])
+    _correct(w, keys["a"], keys["b"], rc, "disputed")
+    assert score(w.scores(), keys["b"]) == 0
+    again = _correct(w, keys["a"], keys["b"], rc, "settled", dt=2000)
+    w.msgs.append(codec.build(keys["c"], "attest", R, {"verdict": "valid", "method": "rerun"}, ref=again["cid"], ts=again["ts"] + 1))
+    assert math.isclose(score(w.scores(), keys["b"]), before, rel_tol=1e-3)
+
+
+def test_correction_from_non_payer_is_ignored(keys):
+    w = World(); rc = w.job(keys["a"], keys["b"], attesters=[keys["c"]])
+    before = score(w.scores(), keys["b"])
+    _correct(w, keys["d"], keys["b"], rc, "refunded")
+    assert score(w.scores(), keys["b"]) == before
+
+
+def test_future_correction_not_applied_yet(keys):
+    w = World(); rc = w.job(keys["a"], keys["b"], attesters=[keys["c"]])
+    before = score(w.scores(), keys["b"])
+    _correct(w, keys["a"], keys["b"], rc, "refunded", dt=NOW - rc["ts"] + DAY)
+    assert score(w.scores(), keys["b"]) == before
