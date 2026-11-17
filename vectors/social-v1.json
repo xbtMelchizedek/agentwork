@@ -1,0 +1,866 @@
+{
+ "spec": "agb1 social",
+ "version": 1,
+ "section": "SPEC.md \u00a710",
+ "keys": "seed = sha256(utf8('agentwork public test key: ' + key_label)); PUBLIC TEST KEYS",
+ "valid": [
+  {
+   "name": "alice claims alice",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "handle",
+    "s": "agb.handle/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000000000,
+    "n": "0000000000005001",
+    "room": "core/social",
+    "b": {
+     "op": "claim",
+     "name": "alice"
+    }
+   },
+   "canonical_core": "{\"b\":{\"name\":\"alice\",\"op\":\"claim\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005001\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"t\":\"handle\",\"ts\":1795000000000}",
+   "cid": "0x488fbf30f994c803e80677ca1860c1b5af12550ec33b4a2fd3abff4e06eda3f4",
+   "sig": "gbhua5WtZKp7JvYbKkqFjbw1mIF-QAzQiydtHvzNUqibMXCPkma-jChyYURqBYbrlrGAr4Y8h3Ek9yjH8fHDDQ",
+   "wire": "agb1 {\"b\":{\"name\":\"alice\",\"op\":\"claim\"},\"cid\":\"0x488fbf30f994c803e80677ca1860c1b5af12550ec33b4a2fd3abff4e06eda3f4\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005001\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"gbhua5WtZKp7JvYbKkqFjbw1mIF-QAzQiydtHvzNUqibMXCPkma-jChyYURqBYbrlrGAr4Y8h3Ek9yjH8fHDDQ\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "mallory lookalike a1ice",
+   "key_label": "mallory",
+   "did": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+   "core": {
+    "t": "handle",
+    "s": "agb.handle/1",
+    "from": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+    "ts": 1795000060000,
+    "n": "0000000000005002",
+    "room": "core/social",
+    "b": {
+     "op": "claim",
+     "name": "a1ice"
+    }
+   },
+   "canonical_core": "{\"b\":{\"name\":\"a1ice\",\"op\":\"claim\"},\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005002\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"t\":\"handle\",\"ts\":1795000060000}",
+   "cid": "0x6dbd48ee0c397d0769f7b973b05794aa5f5bf982533a10cd4bbad803fa4bc0d6",
+   "sig": "e9G1PsOUj7TiINSsHfyRtThX12dzOzstB6knUIF-qtpSWBWCNDtJpGemo-iI2qiElFUA9Hc4Q1rHX1UoNz4NBQ",
+   "wire": "agb1 {\"b\":{\"name\":\"a1ice\",\"op\":\"claim\"},\"cid\":\"0x6dbd48ee0c397d0769f7b973b05794aa5f5bf982533a10cd4bbad803fa4bc0d6\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005002\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"e9G1PsOUj7TiINSsHfyRtThX12dzOzstB6knUIF-qtpSWBWCNDtJpGemo-iI2qiElFUA9Hc4Q1rHX1UoNz4NBQ\",\"t\":\"handle\",\"ts\":1795000060000}"
+  },
+  {
+   "name": "mallory reserved admin",
+   "key_label": "mallory",
+   "did": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+   "core": {
+    "t": "handle",
+    "s": "agb.handle/1",
+    "from": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+    "ts": 1795000120000,
+    "n": "0000000000005003",
+    "room": "core/social",
+    "b": {
+     "op": "claim",
+     "name": "adm1n"
+    }
+   },
+   "canonical_core": "{\"b\":{\"name\":\"adm1n\",\"op\":\"claim\"},\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005003\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"t\":\"handle\",\"ts\":1795000120000}",
+   "cid": "0x8d9447297b32efbb0bac7aafe801bb0db82b662e5411169815e6f5cfc5ebbad8",
+   "sig": "2uFyTYsSp2QhM6AoPJO0zsRJg4auEhhIG-5iZUAz_O68hfwvw6EqMlKXf-xiIvJ1t5_kEARti4dikfAfMNdMAw",
+   "wire": "agb1 {\"b\":{\"name\":\"adm1n\",\"op\":\"claim\"},\"cid\":\"0x8d9447297b32efbb0bac7aafe801bb0db82b662e5411169815e6f5cfc5ebbad8\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005003\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"2uFyTYsSp2QhM6AoPJO0zsRJg4auEhhIG-5iZUAz_O68hfwvw6EqMlKXf-xiIvJ1t5_kEARti4dikfAfMNdMAw\",\"t\":\"handle\",\"ts\":1795000120000}"
+  },
+  {
+   "name": "bob claims bob_the_builder",
+   "key_label": "bob",
+   "did": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+   "core": {
+    "t": "handle",
+    "s": "agb.handle/1",
+    "from": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+    "ts": 1795000180000,
+    "n": "0000000000005004",
+    "room": "core/social",
+    "b": {
+     "op": "claim",
+     "name": "bob_the_builder"
+    }
+   },
+   "canonical_core": "{\"b\":{\"name\":\"bob_the_builder\",\"op\":\"claim\"},\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005004\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"t\":\"handle\",\"ts\":1795000180000}",
+   "cid": "0x40dcf72ad50aaaae2699542c6d70607741e317b7b006f84bf9096d1503f506a1",
+   "sig": "SdlAPOgcq7Y32vJIDI2s4V0h1Q8lnzlHUnO6Ht3KYnvTpqXiwZyzDQjmUW4iCcZCR90rFy6ljGRcvS4Y7RB2AQ",
+   "wire": "agb1 {\"b\":{\"name\":\"bob_the_builder\",\"op\":\"claim\"},\"cid\":\"0x40dcf72ad50aaaae2699542c6d70607741e317b7b006f84bf9096d1503f506a1\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005004\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"SdlAPOgcq7Y32vJIDI2s4V0h1Q8lnzlHUnO6Ht3KYnvTpqXiwZyzDQjmUW4iCcZCR90rFy6ljGRcvS4Y7RB2AQ\",\"t\":\"handle\",\"ts\":1795000180000}"
+  },
+  {
+   "name": "alice requests bob",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "friend_request",
+    "s": "agb.friend_request/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000240000,
+    "n": "0000000000005005",
+    "room": "core/social",
+    "b": {
+     "to": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+     "note": "worked together on PR 16"
+    }
+   },
+   "canonical_core": "{\"b\":{\"note\":\"worked together on PR 16\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005005\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"t\":\"friend_request\",\"ts\":1795000240000}",
+   "cid": "0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1",
+   "sig": "ECAzczBZi88eFttbc-ET8HHqNTJKg4JwEpHdsibOCbfBSgZX-HODFwVkeHzwJNrMEGFm4Ixm2djfAYSZm4GDAg",
+   "wire": "agb1 {\"b\":{\"note\":\"worked together on PR 16\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005005\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"ECAzczBZi88eFttbc-ET8HHqNTJKg4JwEpHdsibOCbfBSgZX-HODFwVkeHzwJNrMEGFm4Ixm2djfAYSZm4GDAg\",\"t\":\"friend_request\",\"ts\":1795000240000}"
+  },
+  {
+   "name": "bob accepts alice",
+   "key_label": "bob",
+   "did": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+   "core": {
+    "t": "friend_accept",
+    "s": "agb.friend_accept/1",
+    "from": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY",
+    "ts": 1795000300000,
+    "n": "0000000000005006",
+    "room": "core/social",
+    "b": {
+     "to": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o"
+    },
+    "ref": "0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1"
+   },
+   "canonical_core": "{\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005006\",\"ref\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"t\":\"friend_accept\",\"ts\":1795000300000}",
+   "cid": "0x1b15390127c00be73c94d5922353602275dea33a7e0026d159dcb02d87876bf0",
+   "sig": "qrEcqGLhi-UzZijGo3uuhRCCF_HU7t8_telwFJPRou1i-RXFnLiK9eibQbEzXfilu-99YJRU1Wz5gIIGA9JHAg",
+   "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0x1b15390127c00be73c94d5922353602275dea33a7e0026d159dcb02d87876bf0\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005006\",\"ref\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"sig\":\"qrEcqGLhi-UzZijGo3uuhRCCF_HU7t8_telwFJPRou1i-RXFnLiK9eibQbEzXfilu-99YJRU1Wz5gIIGA9JHAg\",\"t\":\"friend_accept\",\"ts\":1795000300000}"
+  },
+  {
+   "name": "carol requests alice",
+   "key_label": "carol",
+   "did": "did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n",
+   "core": {
+    "t": "friend_request",
+    "s": "agb.friend_request/1",
+    "from": "did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n",
+    "ts": 1795000360000,
+    "n": "0000000000005007",
+    "room": "core/social",
+    "b": {
+     "to": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o"
+    }
+   },
+   "canonical_core": "{\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"from\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\",\"n\":\"0000000000005007\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"t\":\"friend_request\",\"ts\":1795000360000}",
+   "cid": "0xb327452b1842203e7f78859830dc04b13cf4205f8eeb41dea2bf2462bddbf0b4",
+   "sig": "go3Lpy_zZ4UoCG93LYm3SvC0XNoC2jJYkdUC_3ixllfF8OV_0yd1DNrknVtfiWSe3-3jNAH3Pnb8AMQu-Vy5CQ",
+   "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0xb327452b1842203e7f78859830dc04b13cf4205f8eeb41dea2bf2462bddbf0b4\",\"from\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\",\"n\":\"0000000000005007\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"go3Lpy_zZ4UoCG93LYm3SvC0XNoC2jJYkdUC_3ixllfF8OV_0yd1DNrknVtfiWSe3-3jNAH3Pnb8AMQu-Vy5CQ\",\"t\":\"friend_request\",\"ts\":1795000360000}"
+  },
+  {
+   "name": "alice requests carol (crossed)",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "friend_request",
+    "s": "agb.friend_request/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000420000,
+    "n": "0000000000005008",
+    "room": "core/social",
+    "b": {
+     "to": "did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n"
+    }
+   },
+   "canonical_core": "{\"b\":{\"to\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005008\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"t\":\"friend_request\",\"ts\":1795000420000}",
+   "cid": "0x50447f679c5be6de3f281cdea53714c1d4cbb8f3504de36e6279c3b943c50b50",
+   "sig": "NppsbaAzQapGJXLpfA4_lUpsV-hY34PuY1qUrExGviQqjEusJr7rb8xvTcNxwVb3q0MMJeGfy5xVdvx4skGVCg",
+   "wire": "agb1 {\"b\":{\"to\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\"},\"cid\":\"0x50447f679c5be6de3f281cdea53714c1d4cbb8f3504de36e6279c3b943c50b50\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005008\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"NppsbaAzQapGJXLpfA4_lUpsV-hY34PuY1qUrExGviQqjEusJr7rb8xvTcNxwVb3q0MMJeGfy5xVdvx4skGVCg\",\"t\":\"friend_request\",\"ts\":1795000420000}"
+  },
+  {
+   "name": "mallory forged accept",
+   "key_label": "mallory",
+   "did": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+   "core": {
+    "t": "friend_accept",
+    "s": "agb.friend_accept/1",
+    "from": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+    "ts": 1795000480000,
+    "n": "0000000000005009",
+    "room": "core/social",
+    "b": {
+     "to": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o"
+    },
+    "ref": "0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1"
+   },
+   "canonical_core": "{\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005009\",\"ref\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"t\":\"friend_accept\",\"ts\":1795000480000}",
+   "cid": "0x47cb95fa712d76efc3f913763577c8925af744dfc6ab10b9868144df3eabb58a",
+   "sig": "izRWRlQQSc7yoD8aeWgbtMOOyjwb7BtlGqRlWOqKiM3H_mK28apX4U3PtlZRUBCBiC8Yun-VGl8Tfuc2sWtpBA",
+   "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0x47cb95fa712d76efc3f913763577c8925af744dfc6ab10b9868144df3eabb58a\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005009\",\"ref\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"sig\":\"izRWRlQQSc7yoD8aeWgbtMOOyjwb7BtlGqRlWOqKiM3H_mK28apX4U3PtlZRUBCBiC8Yun-VGl8Tfuc2sWtpBA\",\"t\":\"friend_accept\",\"ts\":1795000480000}"
+  },
+  {
+   "name": "alice founds fliptide",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "guild_create",
+    "s": "agb.guild_create/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000600000,
+    "n": "000000000000500a",
+    "room": "core/social",
+    "b": {
+     "name": "fliptide",
+     "tag": "FLIP",
+     "about": "testnet work crew"
+    }
+   },
+   "canonical_core": "{\"b\":{\"about\":\"testnet work crew\",\"name\":\"fliptide\",\"tag\":\"FLIP\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500a\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"t\":\"guild_create\",\"ts\":1795000600000}",
+   "cid": "0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17",
+   "sig": "R7Qs4nVIMnwN9nZIiCM7_C4sTUSh7acJSJnaOA2g_3bTWfunF0eN6swNXGrl3tHe4m8ajypMQRMlMG-wEzniAg",
+   "wire": "agb1 {\"b\":{\"about\":\"testnet work crew\",\"name\":\"fliptide\",\"tag\":\"FLIP\"},\"cid\":\"0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500a\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"sig\":\"R7Qs4nVIMnwN9nZIiCM7_C4sTUSh7acJSJnaOA2g_3bTWfunF0eN6swNXGrl3tHe4m8ajypMQRMlMG-wEzniAg\",\"t\":\"guild_create\",\"ts\":1795000600000}"
+  },
+  {
+   "name": "mallory lookalike guild",
+   "key_label": "mallory",
+   "did": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+   "core": {
+    "t": "guild_create",
+    "s": "agb.guild_create/1",
+    "from": "did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz",
+    "ts": 1795000660000,
+    "n": "000000000000500b",
+    "room": "core/social",
+    "b": {
+     "name": "f1iptide"
+    }
+   },
+   "canonical_core": "{\"b\":{\"name\":\"f1iptide\"},\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000500b\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"t\":\"guild_create\",\"ts\":1795000660000}",
+   "cid": "0x181d32b7810a43c50dd66601c885c4f80579daf20d566b84468627e977706316",
+   "sig": "qYSmyNPzBFJaZqVSRH5e2Nppa8uXENaRZdOctUxsNv2prqLQt6EjzNVDemT5TtfBRGBluXGSP8gavy5XT7-UDA",
+   "wire": "agb1 {\"b\":{\"name\":\"f1iptide\"},\"cid\":\"0x181d32b7810a43c50dd66601c885c4f80579daf20d566b84468627e977706316\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000500b\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"sig\":\"qYSmyNPzBFJaZqVSRH5e2Nppa8uXENaRZdOctUxsNv2prqLQt6EjzNVDemT5TtfBRGBluXGSP8gavy5XT7-UDA\",\"t\":\"guild_create\",\"ts\":1795000660000}"
+  },
+  {
+   "name": "alice invites bob",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "guild_invite",
+    "s": "agb.guild_invite/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000720000,
+    "n": "000000000000500c",
+    "room": "core/social",
+    "b": {
+     "guild": "guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17",
+     "to": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY"
+    }
+   },
+   "canonical_core": "{\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500c\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"t\":\"guild_invite\",\"ts\":1795000720000}",
+   "cid": "0x856678582ae21f5c961b34e22b6ff295ffd87407a9723c06b13b09139bab0bd1",
+   "sig": "KMWl7xPQYVfx9a4r4c7DzGfnIX__Un57OU_wOZXGmG2b27LGXPazLfEg4FIzSmHkhKzNgksDiBWDkTl03VChCg",
+   "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0x856678582ae21f5c961b34e22b6ff295ffd87407a9723c06b13b09139bab0bd1\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500c\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"sig\":\"KMWl7xPQYVfx9a4r4c7DzGfnIX__Un57OU_wOZXGmG2b27LGXPazLfEg4FIzSmHkhKzNgksDiBWDkTl03VChCg\",\"t\":\"guild_invite\",\"ts\":1795000720000}"
+  }
+ ],
+ "invalid": [
+  {
+   "name": "handle-non-ascii-cyrillic-a",
+   "line": "agb1 {\"b\":{\"name\":\"\\u0430lice\",\"op\":\"claim\"},\"cid\":\"0x4331cf4c100401c181053bd0e4242a16e968f48530f3cf0b2cd61799c2188fff\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000501d\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"-ChJSplxg3s6OjuJYgc49_Jl-gPmvTFBFiZtqDrszqH-RSc4UC07nKqjQ7u7K4L_nZsO7hjwOfAK3pARuC6TAw\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-uppercase",
+   "line": "agb1 {\"b\":{\"name\":\"Alice\",\"op\":\"claim\"},\"cid\":\"0xe45d1109fa9feab8d7ac4830e20e74f3be91906ac0b4aaf26f4069aa442cedc9\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000501e\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"MHOP_pVcIKU93sXF2_TU8sniCe46VbS8JnHpcTlgo2S7cH-qC6cGTWEo-7LzipSdOjWL4ZdgPSZt_cOs3GkDDg\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-too-short",
+   "line": "agb1 {\"b\":{\"name\":\"al\",\"op\":\"claim\"},\"cid\":\"0xbaaa24429eb2a1952ba6492483b3871f809ae33ab14bde8fc069bf7964b0a066\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000501f\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"6WtXgXt-GZkoIf8j_i35UkvaoZyRoKWnxRkfJa9PBBbmyd7b549Y6lNy-VE_CQJUrM03n66ZXClnqB-TMTTWAQ\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-too-long",
+   "line": "agb1 {\"b\":{\"name\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\",\"op\":\"claim\"},\"cid\":\"0x890856df828a2ebc4cf521f2c7f6163062d9ce2d40cd4868cb3e134bf44f3ca2\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005020\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"a_3skAC2l63g2e_hVRDJm7dMoFCknb1VNn5a4b0IEs7a0mQUCXQOLvOG9wKB0tbB1mWHUr4TbaN9VME9INPvDA\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-double-separator",
+   "line": "agb1 {\"b\":{\"name\":\"al__ice\",\"op\":\"claim\"},\"cid\":\"0xc2840ddb4e353c1ca8344d7ae8dbb3f8ebcccc247bf6bf3317d5d6505addfcc1\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005021\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"QCWnY7JNz5eAfJXjBaWXnbT76HnRUmNOoa0831jphSmVdpNoElvhWK47ZR6VBDsAED9SgJCluWa_AjOtwHcJCA\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-leading-digit",
+   "line": "agb1 {\"b\":{\"name\":\"0xalice\",\"op\":\"claim\"},\"cid\":\"0x4eb6ff10b1eb65ec1a44ab538803d5b7aa4378c301eb5010eb182c147d921666\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005022\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"sIVsvwaAtwyCgYg4-9r_gAve7m-Nt36avtLgzKIfFxGEjO0XoBVv_LEUdfro8IkYcLPMyFP_k-9AWYd78ev1DQ\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-trailing-separator",
+   "line": "agb1 {\"b\":{\"name\":\"alice-\",\"op\":\"claim\"},\"cid\":\"0xe349c9ae1d3b63dbe394531a39e835eddb5bfd099cd5edc0e50c939d7439f6fa\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005023\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"vlyi-6swj-UVnuA2Kp9XaC-XWkOSywuZdTpHrQ7nb3I9KRYTAeZLQwHD9hpxHXtJL67_Z55ZlWuxBxc4YqH2AQ\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "friend-request-self",
+   "line": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0xfd002a2833efda10209a141e7030c70ae1f57734fd0e831a38f66351b456d2b2\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005024\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"EpsamZ7u3TVq4p8ZMDM-E9u7bvbqYjkVXjLKbMq9YCWSRHDs89OpTnK-Of6O2TN9MXQ_2Jn5xhwRsDyPPFYSBw\",\"t\":\"friend_request\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "friend-accept-missing-ref",
+   "line": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0xe28dd1225aed2269a37cad12d36670ef9028729865e5a234af06e4c640686adb\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005025\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"sig\":\"g4x8nJYQJV4vmuHUzlLyZpcmcoW2eJQ0fH6bTl0XKXl2HUKSlLW7lk38LAzFRBWXIMIyBsgcEOSxsHIbayddBg\",\"t\":\"friend_accept\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "guild-join-missing-ref",
+   "line": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\"},\"cid\":\"0xb65907590b30b5921061e7e5a31a88f6e7cb968a5e8e6c2167e84398c3fed2b9\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005026\",\"room\":\"core/social\",\"s\":\"agb.guild_join/1\",\"sig\":\"muk3Zq2R45_xitGP_3jy0Aj9FCtBahrscekL4ZPex6PNbPXBB99cAA0bPn60bdq1vK4GwUO9dXrLLf08kFDrDg\",\"t\":\"guild_join\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "guild-bad-id",
+   "line": "agb1 {\"b\":{\"guild\":\"guild:abc\",\"to\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\"},\"cid\":\"0x031b96dd00ff4d9004981cf8eecab68c782316f45560a40b16b718dabf99fa6e\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005027\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"sig\":\"S9x8PcBCwd2lOXpiZSRw8VqFecqXDUheWU5rFMLKd4YHXKfVSGsps7AjNmhUkG1oXLTIEyhtwvKt-akpWJ_-AQ\",\"t\":\"guild_invite\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "guild-bad-role",
+   "line": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"role\":\"admin\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0x8a57955261b81ad3fab903a960d6cbfa0798aeb4797266f4868a4f19f4070f02\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005028\",\"room\":\"core/social\",\"s\":\"agb.guild_role/1\",\"sig\":\"b4w3-K-fL4h3P6kAIT1ZAaoauZkNfn1puQgEcmV4K4cedTfRdjwq0qNShjdLLrQivJXaRaBqhwrcwrRpFbD-AQ\",\"t\":\"guild_role\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "guild-tag-lowercase",
+   "line": "agb1 {\"b\":{\"name\":\"crew\",\"tag\":\"flip\"},\"cid\":\"0x4ba439ad89666717a7763311f345772843113c89e2010167cba8d743e1d92d4a\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005029\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"sig\":\"Jq63zrU_Sq_lczTNkumnzq-SYQpP2PTHsTXvIiG3b_6I9ID42a0B9MD_JDJHe3eviugRTQ2MjLf90W726G4EDg\",\"t\":\"guild_create\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "handle-tampered",
+   "line": "agb1 {\"b\":{\"name\":\"alicf\",\"op\":\"claim\"},\"cid\":\"0x488fbf30f994c803e80677ca1860c1b5af12550ec33b4a2fd3abff4e06eda3f4\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005001\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"gbhua5WtZKp7JvYbKkqFjbw1mIF-QAzQiydtHvzNUqibMXCPkma-jChyYURqBYbrlrGAr4Y8h3Ek9yjH8fHDDQ\",\"t\":\"handle\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "dm-not-in-v0",
+   "line": "agb1 {\"b\":{\"box\":\"AAAA\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0x128f311726e923ec2f4886c24cb52354992fea354bba45a3cb482779914e8fc8\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000502a\",\"room\":\"core/social\",\"s\":\"agb.dm/1\",\"sig\":\"jrhghMV8djS37D_ypOmBgvg4pfgeTA_kOC5f2cB5rVaYzQuZ2Kndb5MjB1v7_SC_7XYmYbdvINEYCr8aVFKRAg\",\"t\":\"dm\",\"ts\":1795000000000}"
+  }
+ ],
+ "skeletons": [
+  [
+   "alice",
+   "allce"
+  ],
+  [
+   "a1ice",
+   "allce"
+  ],
+  [
+   "al1ce",
+   "allce"
+  ],
+  [
+   "a-l-i-c-e",
+   "allce"
+  ],
+  [
+   "bob_the_builder",
+   "bobthebullder"
+  ],
+  [
+   "b0b_the_bui1der",
+   "bobthebullder"
+  ],
+  [
+   "modern",
+   "modem"
+  ],
+  [
+   "modem",
+   "modem"
+  ],
+  [
+   "vvave",
+   "wave"
+  ],
+  [
+   "wave",
+   "wave"
+  ],
+  [
+   "s4tosh1",
+   "satoshl"
+  ],
+  [
+   "satoshl",
+   "satoshl"
+  ]
+ ],
+ "reserved": [
+  [
+   "admin",
+   "reserved name"
+  ],
+  [
+   "adm1n",
+   "reserved name"
+  ],
+  [
+   "a-d-m-i-n",
+   "reserved name"
+  ],
+  [
+   "fl0p",
+   "reserved name"
+  ],
+  [
+   "technocore",
+   "reserved name"
+  ],
+  [
+   "moderator",
+   "reserved name"
+  ],
+  [
+   "mod3rat0r",
+   "reserved name"
+  ],
+  [
+   "god",
+   "reserved: sacred name"
+  ],
+  [
+   "g0d",
+   "reserved: sacred name"
+  ],
+  [
+   "gawd",
+   "reserved: sacred name"
+  ],
+  [
+   "jesus",
+   "reserved: sacred name"
+  ],
+  [
+   "j3sus",
+   "reserved: sacred name"
+  ],
+  [
+   "jesus777",
+   "reserved: sacred name"
+  ],
+  [
+   "realjesus",
+   "reserved: sacred name"
+  ],
+  [
+   "jesusofficial",
+   "reserved: sacred name"
+  ],
+  [
+   "the-lord",
+   "reserved: sacred name"
+  ],
+  [
+   "christ",
+   "reserved: sacred name"
+  ],
+  [
+   "chr1st",
+   "reserved: sacred name"
+  ],
+  [
+   "yahweh",
+   "reserved: sacred name"
+  ],
+  [
+   "jehovah",
+   "reserved: sacred name"
+  ],
+  [
+   "allah",
+   "reserved: sacred name"
+  ],
+  [
+   "a11ah",
+   "reserved: sacred name"
+  ],
+  [
+   "holyspirit",
+   "reserved: sacred name"
+  ],
+  [
+   "holy-spirit",
+   "reserved: sacred name"
+  ],
+  [
+   "messiah",
+   "reserved: sacred name"
+  ],
+  [
+   "m3ss1ah",
+   "reserved: sacred name"
+  ],
+  [
+   "lord",
+   "reserved: sacred name"
+  ],
+  [
+   "god_sucks",
+   "reserved: blasphemy"
+  ],
+  [
+   "godsucks",
+   "reserved: blasphemy"
+  ],
+  [
+   "g0d-sux",
+   "reserved: blasphemy"
+  ],
+  [
+   "jesus-is-fake",
+   "reserved: blasphemy"
+  ],
+  [
+   "fuckgod",
+   "reserved: blasphemy"
+  ],
+  [
+   "goddamn",
+   "reserved: blasphemy"
+  ],
+  [
+   "antichrist",
+   "reserved: blasphemy"
+  ],
+  [
+   "lordkiller",
+   "reserved: blasphemy"
+  ],
+  [
+   "bobshit",
+   "reserved: obscene"
+  ],
+  [
+   "coon",
+   "reserved: slur"
+  ],
+  [
+   "rapist",
+   "reserved: obscene"
+  ],
+  [
+   "melchizedek",
+   null
+  ],
+  [
+   "alice",
+   null
+  ],
+  [
+   "a1ice",
+   null
+  ],
+  [
+   "godfrey",
+   null
+  ],
+  [
+   "christina",
+   null
+  ],
+  [
+   "christian",
+   null
+  ],
+  [
+   "goodgame",
+   null
+  ],
+  [
+   "warlord",
+   null
+  ],
+  [
+   "lord_of_lag",
+   null
+  ],
+  [
+   "jesusislord",
+   null
+  ],
+  [
+   "therapist",
+   null
+  ],
+  [
+   "torpedo",
+   null
+  ],
+  [
+   "grape",
+   null
+  ],
+  [
+   "pomegranate",
+   null
+  ],
+  [
+   "nigeria",
+   null
+  ],
+  [
+   "classy",
+   null
+  ],
+  [
+   "assassin",
+   null
+  ],
+  [
+   "dickens",
+   null
+  ],
+  [
+   "cocktail",
+   null
+  ],
+  [
+   "raccoon",
+   null
+  ],
+  [
+   "hello",
+   null
+  ],
+  [
+   "modern",
+   null
+  ],
+  [
+   "imdworker",
+   null
+  ],
+  [
+   "bob_the_builder",
+   null
+  ]
+ ],
+ "guild_rep_cap": 0.4,
+ "guild_rep": [
+  [
+   [
+    10
+   ],
+   0.0
+  ],
+  [
+   [
+    10,
+    10
+   ],
+   0.0
+  ],
+  [
+   [
+    1,
+    1,
+    1
+   ],
+   3.0
+  ],
+  [
+   [
+    10,
+    1,
+    1
+   ],
+   3.333333333
+  ],
+  [
+   [
+    10,
+    10,
+    1
+   ],
+   5.0
+  ],
+  [
+   [
+    5,
+    4,
+    3,
+    2
+   ],
+   14.0
+  ],
+  [
+   [
+    3,
+    0,
+    0,
+    2,
+    2
+   ],
+   6.666666667
+  ],
+  [
+   [],
+   0.0
+  ]
+ ],
+ "scenario": {
+  "now_ms": 1795259200000,
+  "order": "list order is indexer order",
+  "steps": [
+   {
+    "name": "alice claims alice",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"name\":\"alice\",\"op\":\"claim\"},\"cid\":\"0x488fbf30f994c803e80677ca1860c1b5af12550ec33b4a2fd3abff4e06eda3f4\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005001\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"gbhua5WtZKp7JvYbKkqFjbw1mIF-QAzQiydtHvzNUqibMXCPkma-jChyYURqBYbrlrGAr4Y8h3Ek9yjH8fHDDQ\",\"t\":\"handle\",\"ts\":1795000000000}"
+   },
+   {
+    "name": "mallory lookalike a1ice",
+    "key_label": "mallory",
+    "wire": "agb1 {\"b\":{\"name\":\"a1ice\",\"op\":\"claim\"},\"cid\":\"0x6dbd48ee0c397d0769f7b973b05794aa5f5bf982533a10cd4bbad803fa4bc0d6\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005002\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"e9G1PsOUj7TiINSsHfyRtThX12dzOzstB6knUIF-qtpSWBWCNDtJpGemo-iI2qiElFUA9Hc4Q1rHX1UoNz4NBQ\",\"t\":\"handle\",\"ts\":1795000060000}"
+   },
+   {
+    "name": "mallory reserved admin",
+    "key_label": "mallory",
+    "wire": "agb1 {\"b\":{\"name\":\"adm1n\",\"op\":\"claim\"},\"cid\":\"0x8d9447297b32efbb0bac7aafe801bb0db82b662e5411169815e6f5cfc5ebbad8\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005003\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"2uFyTYsSp2QhM6AoPJO0zsRJg4auEhhIG-5iZUAz_O68hfwvw6EqMlKXf-xiIvJ1t5_kEARti4dikfAfMNdMAw\",\"t\":\"handle\",\"ts\":1795000120000}"
+   },
+   {
+    "name": "bob claims bob_the_builder",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"name\":\"bob_the_builder\",\"op\":\"claim\"},\"cid\":\"0x40dcf72ad50aaaae2699542c6d70607741e317b7b006f84bf9096d1503f506a1\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005004\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"SdlAPOgcq7Y32vJIDI2s4V0h1Q8lnzlHUnO6Ht3KYnvTpqXiwZyzDQjmUW4iCcZCR90rFy6ljGRcvS4Y7RB2AQ\",\"t\":\"handle\",\"ts\":1795000180000}"
+   },
+   {
+    "name": "alice requests bob",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"note\":\"worked together on PR 16\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005005\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"ECAzczBZi88eFttbc-ET8HHqNTJKg4JwEpHdsibOCbfBSgZX-HODFwVkeHzwJNrMEGFm4Ixm2djfAYSZm4GDAg\",\"t\":\"friend_request\",\"ts\":1795000240000}"
+   },
+   {
+    "name": "bob accepts alice",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0x1b15390127c00be73c94d5922353602275dea33a7e0026d159dcb02d87876bf0\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005006\",\"ref\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"sig\":\"qrEcqGLhi-UzZijGo3uuhRCCF_HU7t8_telwFJPRou1i-RXFnLiK9eibQbEzXfilu-99YJRU1Wz5gIIGA9JHAg\",\"t\":\"friend_accept\",\"ts\":1795000300000}"
+   },
+   {
+    "name": "carol requests alice",
+    "key_label": "carol",
+    "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0xb327452b1842203e7f78859830dc04b13cf4205f8eeb41dea2bf2462bddbf0b4\",\"from\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\",\"n\":\"0000000000005007\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"go3Lpy_zZ4UoCG93LYm3SvC0XNoC2jJYkdUC_3ixllfF8OV_0yd1DNrknVtfiWSe3-3jNAH3Pnb8AMQu-Vy5CQ\",\"t\":\"friend_request\",\"ts\":1795000360000}"
+   },
+   {
+    "name": "alice requests carol (crossed)",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"to\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\"},\"cid\":\"0x50447f679c5be6de3f281cdea53714c1d4cbb8f3504de36e6279c3b943c50b50\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005008\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"NppsbaAzQapGJXLpfA4_lUpsV-hY34PuY1qUrExGviQqjEusJr7rb8xvTcNxwVb3q0MMJeGfy5xVdvx4skGVCg\",\"t\":\"friend_request\",\"ts\":1795000420000}"
+   },
+   {
+    "name": "mallory forged accept",
+    "key_label": "mallory",
+    "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0x47cb95fa712d76efc3f913763577c8925af744dfc6ab10b9868144df3eabb58a\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005009\",\"ref\":\"0xa51b24d158c12d16c47f804744ad9aafd322854b037f512cb8454deee00bfec1\",\"room\":\"core/social\",\"s\":\"agb.friend_accept/1\",\"sig\":\"izRWRlQQSc7yoD8aeWgbtMOOyjwb7BtlGqRlWOqKiM3H_mK28apX4U3PtlZRUBCBiC8Yun-VGl8Tfuc2sWtpBA\",\"t\":\"friend_accept\",\"ts\":1795000480000}"
+   },
+   {
+    "name": "alice founds fliptide",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"about\":\"testnet work crew\",\"name\":\"fliptide\",\"tag\":\"FLIP\"},\"cid\":\"0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500a\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"sig\":\"R7Qs4nVIMnwN9nZIiCM7_C4sTUSh7acJSJnaOA2g_3bTWfunF0eN6swNXGrl3tHe4m8ajypMQRMlMG-wEzniAg\",\"t\":\"guild_create\",\"ts\":1795000600000}"
+   },
+   {
+    "name": "mallory lookalike guild",
+    "key_label": "mallory",
+    "wire": "agb1 {\"b\":{\"name\":\"f1iptide\"},\"cid\":\"0x181d32b7810a43c50dd66601c885c4f80579daf20d566b84468627e977706316\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000500b\",\"room\":\"core/social\",\"s\":\"agb.guild_create/1\",\"sig\":\"qYSmyNPzBFJaZqVSRH5e2Nppa8uXENaRZdOctUxsNv2prqLQt6EjzNVDemT5TtfBRGBluXGSP8gavy5XT7-UDA\",\"t\":\"guild_create\",\"ts\":1795000660000}"
+   },
+   {
+    "name": "alice invites bob",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0x856678582ae21f5c961b34e22b6ff295ffd87407a9723c06b13b09139bab0bd1\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500c\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"sig\":\"KMWl7xPQYVfx9a4r4c7DzGfnIX__Un57OU_wOZXGmG2b27LGXPazLfEg4FIzSmHkhKzNgksDiBWDkTl03VChCg\",\"t\":\"guild_invite\",\"ts\":1795000720000}"
+   },
+   {
+    "name": "bob joins",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\"},\"cid\":\"0xc7c2abfd52600d72d480d00e2be055e23baf45b25743e6112176a0fbc9ef7196\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"000000000000500d\",\"ref\":\"0x856678582ae21f5c961b34e22b6ff295ffd87407a9723c06b13b09139bab0bd1\",\"room\":\"core/social\",\"s\":\"agb.guild_join/1\",\"sig\":\"4uOPJQn_YQvuvG8GDHqhJcuJBq41am5Vf91zKb6XxlbeeJMg7qf8qa6J8IgU2aojW8rm9_Fk2dVkIh_i6eeIAg\",\"t\":\"guild_join\",\"ts\":1795000780000}"
+   },
+   {
+    "name": "carol joins uninvited",
+    "key_label": "carol",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\"},\"cid\":\"0x8686409ffddb2472944736fd9f12262ad04dad38a9a0c7800cfa195eb1e2972f\",\"from\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\",\"n\":\"000000000000500e\",\"ref\":\"0x856678582ae21f5c961b34e22b6ff295ffd87407a9723c06b13b09139bab0bd1\",\"room\":\"core/social\",\"s\":\"agb.guild_join/1\",\"sig\":\"ry37t2ci4hrfdBuuzf_UpI7yD9koHL89v_YBUDfwsm9c9H9KAQYiGp4-Cd6e8-1SzwRF1-kZIMsjDGJbnx1qBw\",\"t\":\"guild_join\",\"ts\":1795000840000}"
+   },
+   {
+    "name": "alice invites carol",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"to\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\"},\"cid\":\"0xc096b717018ebaf1da2d651ea3358dbc751f5014fed968e0acf9dd2e75e6ace8\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000500f\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"sig\":\"_TL2s3pkiWf-9GF5vJyJG023PAv-5tBiEqZrdZU6pqI2CbmpAHyRBV9s_cKlFvlDONJEgFtTM2GZxEcv9E-UAg\",\"t\":\"guild_invite\",\"ts\":1795000900000}"
+   },
+   {
+    "name": "carol joins",
+    "key_label": "carol",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\"},\"cid\":\"0x38159a8087cfbae700bbbc6b6bbed83def32827b1a2002d771a96d6f7cc5b11a\",\"from\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\",\"n\":\"0000000000005010\",\"ref\":\"0xc096b717018ebaf1da2d651ea3358dbc751f5014fed968e0acf9dd2e75e6ace8\",\"room\":\"core/social\",\"s\":\"agb.guild_join/1\",\"sig\":\"AD-bQR5sFFXD8pTmw3jcBomVzLE-QUtNEyuz161w8HtEDlbK3H6f5cupg4MZqxKqyMmV4rysyDojf2j0J3o-Ag\",\"t\":\"guild_join\",\"ts\":1795000960000}"
+   },
+   {
+    "name": "alice makes bob officer",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"role\":\"officer\",\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0xa11350203d5413d0b4c5e5cfe9f0e055704c1a560732d470c20fe224c4316960\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005011\",\"room\":\"core/social\",\"s\":\"agb.guild_role/1\",\"sig\":\"XO01joiTh88SqFkiy2DdpmP9hTYvcU6V0JOq8lfGGjnpDQ3-TTwPbmZUNwk3zV-8wu5-yHTeCP1qw0_pjeJtDg\",\"t\":\"guild_role\",\"ts\":1795001020000}"
+   },
+   {
+    "name": "bob invites dave",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"to\":\"did:key:z6MkrenmhecqzAnJ5W3dRZKZoSN67wJLBmGxfWQcWct8amET\"},\"cid\":\"0xb82d6deda0a9ef0fcbfa34076f8edfa20c24f46667273fbdf70ad8013896dbdd\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005012\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"sig\":\"SCFZYSUjOqMgY-th5uLn5KsItkbVxTOv7zk6GB_BWfYeb8VR97iIpyLDTR61sZQDkY4dAyODgPLfbTcsgIAJDw\",\"t\":\"guild_invite\",\"ts\":1795001080000}"
+   },
+   {
+    "name": "dave joins",
+    "key_label": "dave",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\"},\"cid\":\"0x27ec8f09410ad108a19351a13934618d41b897c7405d9fb5d46a17ae637c9ff0\",\"from\":\"did:key:z6MkrenmhecqzAnJ5W3dRZKZoSN67wJLBmGxfWQcWct8amET\",\"n\":\"0000000000005013\",\"ref\":\"0xb82d6deda0a9ef0fcbfa34076f8edfa20c24f46667273fbdf70ad8013896dbdd\",\"room\":\"core/social\",\"s\":\"agb.guild_join/1\",\"sig\":\"P1ZJK-Dkq5S8nv2N-0dIiosyIim34FaKWa9GRx8MpEfObVkosgpRK61x_Hy4BAdtd_49hRyEYltsmMo-8SotBA\",\"t\":\"guild_join\",\"ts\":1795001140000}"
+   },
+   {
+    "name": "carol (member) invites erin",
+    "key_label": "carol",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"to\":\"did:key:z6Mknyzoc4at42GEBBoqy8PgNqkKmQJvxjHYvtPfieFZ47fo\"},\"cid\":\"0x2b8ee50f367662a57a4b0366aed916064311c9631bbda946a045bfde2c02b446\",\"from\":\"did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n\",\"n\":\"0000000000005014\",\"room\":\"core/social\",\"s\":\"agb.guild_invite/1\",\"sig\":\"41duGq31irforx_h23zeqFPlY0r25npUfFFzlH9SWln6MMsexUDK-05dSX3nrzWBSU2kUlelmfsgIrD64-fFBQ\",\"t\":\"guild_invite\",\"ts\":1795001200000}"
+   },
+   {
+    "name": "bob asks for the guild",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"1000\"},\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"task\":\"Index 3 rooms, CSV out\"},\"cid\":\"0xf8439f74c2779e81ffb3e2175c50672524c8aed6ea952a2f67dc5a2e3fefa0a9\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005015\",\"room\":\"core/social\",\"s\":\"agb.ask/1\",\"sig\":\"l__C2SXEvAYdoEhsqTd4t8GD8VOuBVidk3f0S2diI3u4h6NDhq14Vpuf9WhizhMTEgx1X6XjkgJlZZHTS51QDw\",\"t\":\"ask\",\"ts\":1795001260000}"
+   },
+   {
+    "name": "mallory names the guild",
+    "key_label": "mallory",
+    "wire": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"1\"},\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"task\":\"Pay me first\"},\"cid\":\"0x297533c66d308a3b36f0da55b710fe4161e2893e8feccb1a060454eca34c23a2\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"0000000000005016\",\"room\":\"core/social\",\"s\":\"agb.ask/1\",\"sig\":\"Ro8uGo5n-kmLOe8gAdudERuzB6LYeNf0cv2rNr4Jslf_Iz9deSW1bARna41lM5QchmNLxpPAcoZLOSTjbH9mCA\",\"t\":\"ask\",\"ts\":1795001320000}"
+   },
+   {
+    "name": "bob unfriends alice",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\"},\"cid\":\"0xf1ea0f11971fcbbdbc0f9b60afde174e7fa335891de1aaceee4dcdd38e1b73bc\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"0000000000005017\",\"room\":\"core/social\",\"s\":\"agb.unfriend/1\",\"sig\":\"SOGCVA-Kz5HOnVT9_V3y_sz0b8jOs94X-z5t5XNw6g58bYIq_JuK9MI1M7nNr0jG799r4K462ABx7rumDVurAA\",\"t\":\"unfriend\",\"ts\":1795001380000}"
+   },
+   {
+    "name": "alice re-requests bob too soon",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"to\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\"},\"cid\":\"0xf080ff82f6a360357a2fd629c3127bd801560ad5fbc5eff10d1f3b27288e414e\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005018\",\"room\":\"core/social\",\"s\":\"agb.friend_request/1\",\"sig\":\"sL1FQtFyay0MBhoPvSuR5gYNJG81MNtO589Tm-AU6AKScCCqse-PmREirDw-amuzEoWf9dBaK5d4tvqCtsKyBQ\",\"t\":\"friend_request\",\"ts\":1795001440000}"
+   },
+   {
+    "name": "alice founder leaves with members",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\"},\"cid\":\"0x9e2b4ebceef09c1fe3eb94baef599a48ccbb1bacb903c5e16ca0cfc513ecd059\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000005019\",\"room\":\"core/social\",\"s\":\"agb.guild_leave/1\",\"sig\":\"cxjRXfeAa1oMMundXFXu_Jnz-eOMCZ95nBWsBaShEp2NhoT2ol1mA1_vKGBJQZgaG5npXY24V-CicFNDIxVHDg\",\"t\":\"guild_leave\",\"ts\":1795001500000}"
+   },
+   {
+    "name": "alice renames to alicia",
+    "key_label": "alice",
+    "wire": "agb1 {\"b\":{\"name\":\"alicia\",\"op\":\"claim\"},\"cid\":\"0x5c131677b8e1efd8740bf8b7954e06b494bef76d1736b89e5dd359632bab56b2\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"000000000000501a\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"pcae5rUyY3tYIXY2gyZYqYAkrAl7EomqpzcSQ7LA-bra-vtIL-iHjTG0MSk9Muz8VomH3sQ0hHuUC4aGxtqnCg\",\"t\":\"handle\",\"ts\":1795172800000}"
+   },
+   {
+    "name": "mallory snipes released alice",
+    "key_label": "mallory",
+    "wire": "agb1 {\"b\":{\"name\":\"alice\",\"op\":\"claim\"},\"cid\":\"0xea6a662a1266429655caa9838f3cf5e5adf4280a56230a8f488a02ce110165f6\",\"from\":\"did:key:z6Mkq19KbsszGYgUoiCr4RtQ7K1cGE9KHsGRmkWYCB3UGniz\",\"n\":\"000000000000501b\",\"room\":\"core/social\",\"s\":\"agb.handle/1\",\"sig\":\"nx8uQrthvMgXYDtGlAJxiBPYJsKqzO3WI1E7JreVd416w4P_ruFuX2UYfEskW4eftBey5ufVVU5BBvkDPy0FAg\",\"t\":\"handle\",\"ts\":1795172860000}"
+   },
+   {
+    "name": "bob removes dave",
+    "key_label": "bob",
+    "wire": "agb1 {\"b\":{\"guild\":\"guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17\",\"reason\":\"inactive\",\"to\":\"did:key:z6MkrenmhecqzAnJ5W3dRZKZoSN67wJLBmGxfWQcWct8amET\"},\"cid\":\"0x0c16e9123ea497ee3873fcdff7a68064086ae2ae151fe4aec8a339b0439e2f6b\",\"from\":\"did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY\",\"n\":\"000000000000501c\",\"room\":\"core/social\",\"s\":\"agb.guild_leave/1\",\"sig\":\"LtomnK7m6BogW4AOsD8Zsi2Fpb33B4dwzGQFQJAqsm9J5SsTixUdX9N7n0LOi_B3mU8IT7rysv13OH-D4GTSAw\",\"t\":\"guild_leave\",\"ts\":1795172920000}"
+   }
+  ],
+  "expected": {
+   "handles": {
+    "alicia": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "bob_the_builder": "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY"
+   },
+   "friends": [
+    [
+     "did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n",
+     "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o"
+    ]
+   ],
+   "pending": [],
+   "guild": {
+    "gid": "guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17",
+    "name": "fliptide",
+    "members": {
+     "did:key:z6Mknjz7Pz7yNw4t9TJ26hu1M6HxpZoxiiKz2TEGMkLguZ1n": "member",
+     "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o": "founder",
+     "did:key:z6MkrW1ZdVPzDo4Vu2uUCgpf7nBytpMh9BwVNuuLfeiXoHrY": "officer"
+    }
+   },
+   "party": {
+    "0xf8439f74c2779e81ffb3e2175c50672524c8aed6ea952a2f67dc5a2e3fefa0a9": "guild:0xb19474f2abdbdf0b45a575c405648916d9ad04200baf93fa5fe314c83beeab17",
+    "0x297533c66d308a3b36f0da55b710fe4161e2893e8feccb1a060454eca34c23a2": null
+   },
+   "ignored": {
+    "mallory lookalike a1ice": "lookalike of @alice",
+    "mallory reserved admin": "reserved name",
+    "mallory forged accept": "no matching pending request",
+    "mallory lookalike guild": "lookalike of guild @fliptide",
+    "carol joins uninvited": "no matching invite",
+    "carol (member) invites erin": "not allowed to invite",
+    "alice re-requests bob too soon": "rate limit: re-request cooldown",
+    "alice founder leaves with members": "founder must hand off (guild_role founder) before leaving",
+    "mallory snipes released alice": "held for previous holder"
+   }
+  }
+ }
+}
