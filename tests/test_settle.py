@@ -86,3 +86,17 @@ def test_cli_rep_settlements_flag(tmp_path, capsys):
         {"railRef": "tx-1", "payee": worker.did, "asset": "FLOP", "amt": str(F)}]}))
     cli.main(["rep", "--src", str(src), "--now", str(NOW), "--settlements", str(led), "--did", worker.did])
     assert json.loads(capsys.readouterr().out)["score"] > 0
+
+
+def test_malformed_receipt_fails_closed_without_raising():
+    a = SigningKey.generate()
+    amt = {"asset": "FLOP", "amt": "1"}
+    v = ledger(("tx-1", a.did, "FLOP", "1"), ("tx-2", a.did, "FLOP", "1"))
+    good = {"t": "receipt", "from": "did:key:zP", "b": {"outcome": "settled", "rail": "flop-htlc", "railRef": "tx-1", "payee": a.did, "amount": amt}}
+    msgs = [
+        good, dict(good),                                                   # rebroadcast collapses
+        {"t": "receipt", "b": {"outcome": "settled", "rail": "flop-htlc", "railRef": "tx-2", "payee": a.did, "amount": amt}},  # no from
+        {"t": "receipt", "from": "did:key:zP", "b": {"outcome": "settled", "rail": "flop-htlc", "railRef": "tx-3", "amount": amt}},  # no payee
+        {"t": "receipt", "from": "did:key:zP", "b": {"outcome": "settled", "rail": None, "railRef": "tx-1", "payee": a.did, "amount": amt}},
+    ]
+    assert settle.verified_settlements(msgs, v) == frozenset({("flop-htlc", "tx-1")})

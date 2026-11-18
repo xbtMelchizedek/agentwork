@@ -13,9 +13,10 @@ agrees:
 
 Rules (fail closed):
 - amounts are base-unit decimal strings, compared exactly; floats are rejected;
-- one settlement pays one receipt: if more than one signed `settled` receipt names the same
-  (rail, railRef), none of them is verified (a duplicate is either a mistake or an attempt
-  to count one payment twice);
+- one settlement pays one receipt: if two different `settled` receipts (payer, payee or
+  amount differ) name the same (rail, railRef), none of them is verified. Byte-identical
+  claims collapse to one, so a rebroadcast is harmless;
+- a receipt missing `from`, `payee` or `amount` makes its (rail, railRef) unverifiable;
 - `None` (unknown rail) is never treated as verified.
 
 PaperRail reads a local JSON ledger and never touches the network:
@@ -78,6 +79,14 @@ def _no_float(s: str):
     raise ValueError(f"floats are forbidden in a settlement ledger: {s}")
 
 
+def _claim(m: dict) -> tuple | None:
+    b = m["b"]
+    frm, payee, amount = m.get("from"), b.get("payee"), b.get("amount")
+    if not (isinstance(frm, str) and isinstance(payee, str) and isinstance(amount, dict)):
+        return None
+    return frm, payee, json.dumps(amount, sort_keys=True)
+
+
 def verified_settlements(msgs: Iterable[dict], verifier: SettlementVerifier) -> frozenset:
     """Set of (rail, railRef) whose single settled receipt the verifier confirms."""
     claims: dict[tuple, list[dict]] = {}
@@ -88,9 +97,11 @@ def verified_settlements(msgs: Iterable[dict], verifier: SettlementVerifier) -> 
         claims.setdefault((b.get("rail"), b.get("railRef")), []).append(m)
     out = set()
     for (rail, ref), ms in sorted(claims.items(), key=lambda kv: (str(kv[0][0]), str(kv[0][1]))):
-        payers_payees = {(m["from"], m["b"]["payee"], json.dumps(m["b"]["amount"], sort_keys=True)) for m in ms}
-        if len(payers_payees) != 1:
-            continue  # two different receipts claim one settlement
+        if not isinstance(rail, str) or not isinstance(ref, str):
+            continue
+        claimants = {_claim(m) for m in ms}
+        if None in claimants or len(claimants) != 1:
+            continue  # malformed, or two different receipts claim one settlement
         b = ms[0]["b"]
         if verifier.check(rail, ref, b["payee"], b["amount"]) is True:
             out.add((rail, ref))
