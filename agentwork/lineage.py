@@ -36,6 +36,89 @@ def merkle_root(cids: list[str]) -> str:
     return "0x" + layer[0].hex()
 
 
+
+def _parent(a: bytes, b: bytes) -> bytes:
+    return hashlib.sha256(b"\x01" + a + b).digest()
+
+
+def merkle_proof(cids: list[str], index: int) -> list[dict]:
+    """Inclusion proof for cids[index] under `merkle_root(cids)` (same odd-layer padding).
+
+    Each step is {"side": "L"|"R", "hash": "0x.."}: the sibling's side relative to the path.
+    """
+    if not 0 <= index < len(cids):
+        raise ValueError("index out of range")
+    layer = [bytes.fromhex(c[2:]) for c in cids]
+    i, proof = index, []
+    while len(layer) > 1:
+        if len(layer) % 2:
+            layer.append(layer[-1])
+        sib = i ^ 1
+        proof.append({"side": "L" if sib < i else "R", "hash": "0x" + layer[sib].hex()})
+        layer = [_parent(layer[j], layer[j + 1]) for j in range(0, len(layer), 2)]
+        i //= 2
+    return proof
+
+
+def verify_proof(leaf_cid: str, proof: list[dict], root: str) -> bool:
+    """True if `leaf_cid` with `proof` hashes to `root`. Malformed input is False, never an exception."""
+    try:
+        h = bytes.fromhex(leaf_cid[2:])
+        if not leaf_cid.startswith("0x") or len(h) != 32 or len(proof) > 64:
+            return False
+        for step in proof:
+            sib = bytes.fromhex(step["hash"][2:])
+            if not step["hash"].startswith("0x") or len(sib) != 32 or step["side"] not in ("L", "R"):
+                return False
+            h = _parent(sib, h) if step["side"] == "L" else _parent(h, sib)
+        return "0x" + h.hex() == root
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return False
+
+
+def export_checkpoint(lines: list[str], checkpoint: int, leaf: int | None = None) -> dict:
+    """Shareable bundle: the signed checkpoint line, its range, and (optionally) a proof for one entry.
+
+    The chain must verify first; the bundle is self-checking with `verify_export`.
+    """
+    rep = verify_chain(lines)
+    if not rep.ok:
+        raise ValueError("chain does not verify: " + "; ".join(rep.errors[:3]))
+    envs = [codec.decode(x) for x in lines]
+    if not 0 <= checkpoint < len(envs) or envs[checkpoint]["t"] != "lineage" or envs[checkpoint]["b"].get("kind") != "checkpoint":
+        raise ValueError(f"entry {checkpoint} is not a checkpoint")
+    b = envs[checkpoint]["b"]
+    lo, hi = b["from_seq"], b["to_seq"]
+    out = {"format": "agentwork.lineage-checkpoint/1", "lin": rep.lin, "checkpoint_line": lines[checkpoint],
+           "range": [lo, hi], "root": b["root"]}
+    if leaf is not None:
+        if not lo <= leaf <= hi:
+            raise ValueError(f"entry {leaf} is outside checkpoint range {lo}..{hi}")
+        out["leaf"] = {"seq": leaf, "line": lines[leaf],
+                       "proof": merkle_proof([e["cid"] for e in envs[lo:hi + 1]], leaf - lo)}
+    return out
+
+
+def verify_export(bundle: dict) -> bool:
+    """Check signatures on the checkpoint (and leaf) lines and the leaf's inclusion proof."""
+    try:
+        cp = codec.verify_line(bundle["checkpoint_line"])
+        if not cp.ok:
+            return False
+        env = codec.decode(bundle["checkpoint_line"])
+        if env["b"].get("kind") != "checkpoint" or env["b"].get("root") != bundle["root"]:
+            return False
+        if "leaf" not in bundle:
+            return True
+        lv = codec.verify_line(bundle["leaf"]["line"])
+        lenv = codec.decode(bundle["leaf"]["line"])
+        lin = env["b"].get("lin")
+        if not lv.ok or not (lenv.get("b", {}).get("lin") == lin or "lin:" + lenv["cid"] == lin):
+            return False  # leaf must belong to the same lineage (inception cid = lin)
+        return verify_proof(lenv["cid"], bundle["leaf"]["proof"], env["b"]["root"])
+    except (KeyError, TypeError, ValueError):
+        return False
+
 @dataclass
 class ChainReport:
     ok: bool
