@@ -97,6 +97,8 @@ class Rep:
     settled_value: dict = field(default_factory=dict)   # asset -> base-unit int (string on export)
     flags: int = 0
     paid_receipts: int = 0
+    ring_receipts: int = 0          # counted receipts (as payee) discounted for closing a trade ring
+    conflicted_receipts: int = 0    # counted receipts (as payee) with >=1 conflicted attester verdict
 
     def to_json(self) -> dict:
         return {
@@ -104,6 +106,8 @@ class Rep:
             "distinct_counterparties": self.counterparties,
             "settled_value": {a: str(v) for a, v in sorted(self.settled_value.items())},
             "reputable_flags": self.flags, "receipts_paid": self.paid_receipts,
+            "receipts_ring_discounted": self.ring_receipts,
+            "receipts_attester_conflicted": self.conflicted_receipts,
             "transferable": False,
         }
 
@@ -236,6 +240,7 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
     current = _receipt_tips(idx, now_ms)
     edges = _trade_edges(idx, current, p) if p.attester_conflict_window_ms is not None else {}
     out = []
+    conflicted: set[str] = set()
     for m in idx.values():
         if m["t"] != "receipt":
             continue
@@ -257,6 +262,7 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
                 continue
         good: dict[str, float] = {}
         bad: dict[str, float] = {}
+        hit = False
         for a in attests.get(m["cid"], ()):
             who = a["from"]
             if who in (payer, payee) or not attester_ok(who):
@@ -264,11 +270,14 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
             w = 1.0
             if edges and attester_conflicted(edges, who, m, p.attester_conflict_window_ms):
                 w = p.attester_conflict_weight
+                hit = True
             (good if a["b"]["verdict"] == "valid" else bad)[who] = w
         gw, bw = sum(good.values()), sum(bad.values())
         if gw <= 0 or bw >= gw:
             continue
         out.append(m)
+        if hit:
+            conflicted.add(m["cid"])
     out.sort(key=lambda r: (r["ts"], r["cid"]))
     ring: dict[str, float] = {}
     if p.ring_window_ms is not None and out:
@@ -277,11 +286,11 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
             if ring_length(directed, m, p.ring_window_ms, p.ring_min_len, p.ring_max_len,
                            p.ring_search_budget) is not None:
                 ring[m["cid"]] = p.ring_weight
-    return out, ring
+    return out, ring, conflicted
 
 
 def _score(qualified: tuple, now_ms: int, p: Params) -> dict[str, Rep]:
-    receipts, ring = qualified
+    receipts, ring, conflicted = qualified
     reps: dict[str, Rep] = {}
     contrib: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     pair_hist: dict[tuple, list[int]] = defaultdict(list)
@@ -297,6 +306,8 @@ def _score(qualified: tuple, now_ms: int, p: Params) -> dict[str, Rep]:
         contrib[payee][payer] += base
         rep = reps.setdefault(payee, Rep(payee))
         rep.receipts += 1
+        rep.ring_receipts += r["cid"] in ring
+        rep.conflicted_receipts += r["cid"] in conflicted
         rep.settled_value[asset] = rep.settled_value.get(asset, 0) + amt
         reps.setdefault(payer, Rep(payer)).paid_receipts += 1
     for did, by_cp in contrib.items():

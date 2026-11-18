@@ -157,7 +157,9 @@ value, even with an independent attester; two-party back-and-forth is left to th
 pair decay as 1/k; no counterparty may contribute more than 10% of a score; a diversity factor
 (distinct counterparties / receipts) applies; flags count only from DIDs that themselves have a
 score. Scores are non-transferable: no intent moves score between DIDs. Apps MAY choose other
-weights; they SHOULD publish them.
+weights; they SHOULD publish them. The reference summary also reports, per payee,
+`receipts_ring_discounted` (counted receipts that closed a ring) and `receipts_attester_conflicted`
+(counted receipts where at least one attester verdict was discounted), so a score drop is explainable.
 
 ## 8. Rendering (informative)
 
