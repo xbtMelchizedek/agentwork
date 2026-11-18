@@ -1,0 +1,75 @@
+{
+ "spec": "Technocore say-signed: sig over <room>|<nonce>|<text>; nonce is 1-19 digits",
+ "version": 1,
+ "keys": "PUBLIC test keys: seed = sha256('agentwork public test key: ' + label)",
+ "key_label": "alice",
+ "cases": [
+  {
+   "name": "case-1",
+   "nonce": "1794963040209364600",
+   "above_2_53": true,
+   "lossy_js": "1794963040209364500",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "room": "builders",
+   "text": "agb1 {\"b\":{\"text\":\"nonce precision case 1\"},\"cid\":\"0x2bcb9199412419c5e2760875b9134d6cbad46d7921186d9080108e1e5df31bc3\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"voZ3LnzRVM9l4yoWXP86Om1N8cxRvzAaVWeEk2UmpRmEvJM5CiLvQr93FogQpxXdzfGX6MKkMnjOI10fdboACg\",\"t\":\"note\",\"ts\":1795000000000}",
+   "signing_string": "builders|1794963040209364600|agb1 {\"b\":{\"text\":\"nonce precision case 1\"},\"cid\":\"0x2bcb9199412419c5e2760875b9134d6cbad46d7921186d9080108e1e5df31bc3\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"voZ3LnzRVM9l4yoWXP86Om1N8cxRvzAaVWeEk2UmpRmEvJM5CiLvQr93FogQpxXdzfGX6MKkMnjOI10fdboACg\",\"t\":\"note\",\"ts\":1795000000000}",
+   "sig": "XXjzBjIZRZ0Dbi4ZdUtWPwH9E06IRcHSO1jPXX8SZSFp7OgxD9cbFT0XPVH3c_btQABylm2Z-ZAJjSU8nJMEBg",
+   "raw_message": "{\"did\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"nonce\":1794963040209364600,\"room\":\"builders\",\"seq\":101,\"sig\":\"XXjzBjIZRZ0Dbi4ZdUtWPwH9E06IRcHSO1jPXX8SZSFp7OgxD9cbFT0XPVH3c_btQABylm2Z-ZAJjSU8nJMEBg\",\"text\":\"agb1 {\\\"b\\\":{\\\"text\\\":\\\"nonce precision case 1\\\"},\\\"cid\\\":\\\"0x2bcb9199412419c5e2760875b9134d6cbad46d7921186d9080108e1e5df31bc3\\\",\\\"from\\\":\\\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\\\",\\\"n\\\":\\\"0000000000000001\\\",\\\"room\\\":\\\"core/builders\\\",\\\"s\\\":\\\"agb.note/1\\\",\\\"sig\\\":\\\"voZ3LnzRVM9l4yoWXP86Om1N8cxRvzAaVWeEk2UmpRmEvJM5CiLvQr93FogQpxXdzfGX6MKkMnjOI10fdboACg\\\",\\\"t\\\":\\\"note\\\",\\\"ts\\\":1795000000000}\"}"
+  },
+  {
+   "name": "case-2",
+   "nonce": "1794963169135027100",
+   "above_2_53": true,
+   "lossy_js": "1794963169135027200",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "room": "builders",
+   "text": "agb1 {\"b\":{\"text\":\"nonce precision case 2\"},\"cid\":\"0x0428395a118df37a2e8283d9ca05240dc52470b10bde5ee7a500148ebc5bd212\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000002\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"Q25f1MYwUOkE98EBNbLmRrCoCBMaA9aI5eUJDneDzigQml46USUPlQX4e10sElagLPqM7hxYjeRwiSToTe5PBQ\",\"t\":\"note\",\"ts\":1795000000000}",
+   "signing_string": "builders|1794963169135027100|agb1 {\"b\":{\"text\":\"nonce precision case 2\"},\"cid\":\"0x0428395a118df37a2e8283d9ca05240dc52470b10bde5ee7a500148ebc5bd212\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000002\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"Q25f1MYwUOkE98EBNbLmRrCoCBMaA9aI5eUJDneDzigQml46USUPlQX4e10sElagLPqM7hxYjeRwiSToTe5PBQ\",\"t\":\"note\",\"ts\":1795000000000}",
+   "sig": "TOJFubhqG6z3mJryxCggnFFpiQY84B26t6JaGYt3usthXHAI_ktzGXHUKbuXzD7i_ISdiFL2K8JKTwzPY0ayBg",
+   "raw_message": "{\"did\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"nonce\":1794963169135027100,\"room\":\"builders\",\"seq\":102,\"sig\":\"TOJFubhqG6z3mJryxCggnFFpiQY84B26t6JaGYt3usthXHAI_ktzGXHUKbuXzD7i_ISdiFL2K8JKTwzPY0ayBg\",\"text\":\"agb1 {\\\"b\\\":{\\\"text\\\":\\\"nonce precision case 2\\\"},\\\"cid\\\":\\\"0x0428395a118df37a2e8283d9ca05240dc52470b10bde5ee7a500148ebc5bd212\\\",\\\"from\\\":\\\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\\\",\\\"n\\\":\\\"0000000000000002\\\",\\\"room\\\":\\\"core/builders\\\",\\\"s\\\":\\\"agb.note/1\\\",\\\"sig\\\":\\\"Q25f1MYwUOkE98EBNbLmRrCoCBMaA9aI5eUJDneDzigQml46USUPlQX4e10sElagLPqM7hxYjeRwiSToTe5PBQ\\\",\\\"t\\\":\\\"note\\\",\\\"ts\\\":1795000000000}\"}"
+  },
+  {
+   "name": "case-3",
+   "nonce": "9007199254740991",
+   "above_2_53": false,
+   "lossy_js": "9007199254740991",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "room": "builders",
+   "text": "agb1 {\"b\":{\"text\":\"nonce precision case 3\"},\"cid\":\"0xe26374522f925995d1b57a7a59aa59c4ae11a03da3bc59d8b3ad0e85a35cbcc5\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000003\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"4zx1FIWTLlK9DuP9qTpeWr0xLdHMzxwcFaFM8FS3slYg5MlXKHv2bBouR4nJlZSdFZptjId6Dwr0WTDesktOCA\",\"t\":\"note\",\"ts\":1795000000000}",
+   "signing_string": "builders|9007199254740991|agb1 {\"b\":{\"text\":\"nonce precision case 3\"},\"cid\":\"0xe26374522f925995d1b57a7a59aa59c4ae11a03da3bc59d8b3ad0e85a35cbcc5\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000003\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"4zx1FIWTLlK9DuP9qTpeWr0xLdHMzxwcFaFM8FS3slYg5MlXKHv2bBouR4nJlZSdFZptjId6Dwr0WTDesktOCA\",\"t\":\"note\",\"ts\":1795000000000}",
+   "sig": "gQcQf_JdPLT2OkRaDBU2itqZxEMC5YEpro_u7kbT6HEoxX6V10JAdKURDcxr7Q3d1xq6zkkDpyYVxpIZlmTdCA",
+   "raw_message": "{\"did\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"nonce\":9007199254740991,\"room\":\"builders\",\"seq\":103,\"sig\":\"gQcQf_JdPLT2OkRaDBU2itqZxEMC5YEpro_u7kbT6HEoxX6V10JAdKURDcxr7Q3d1xq6zkkDpyYVxpIZlmTdCA\",\"text\":\"agb1 {\\\"b\\\":{\\\"text\\\":\\\"nonce precision case 3\\\"},\\\"cid\\\":\\\"0xe26374522f925995d1b57a7a59aa59c4ae11a03da3bc59d8b3ad0e85a35cbcc5\\\",\\\"from\\\":\\\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\\\",\\\"n\\\":\\\"0000000000000003\\\",\\\"room\\\":\\\"core/builders\\\",\\\"s\\\":\\\"agb.note/1\\\",\\\"sig\\\":\\\"4zx1FIWTLlK9DuP9qTpeWr0xLdHMzxwcFaFM8FS3slYg5MlXKHv2bBouR4nJlZSdFZptjId6Dwr0WTDesktOCA\\\",\\\"t\\\":\\\"note\\\",\\\"ts\\\":1795000000000}\"}"
+  },
+  {
+   "name": "case-4",
+   "nonce": "9007199254740993",
+   "above_2_53": true,
+   "lossy_js": "9007199254740992",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "room": "builders",
+   "text": "agb1 {\"b\":{\"text\":\"nonce precision case 4\"},\"cid\":\"0xd31d2e389e79df3fca211431620a63bbef559dda14eeb03bf6220a8a42671dd7\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000004\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"TLTCVvCwREmiwo3lOyfr7-eUuuAs9O5jX26wG2qv0YYgRjrJOfocrdj_VbrU_kQ3wE_FNV9GKR6H3e7cAw2nBA\",\"t\":\"note\",\"ts\":1795000000000}",
+   "signing_string": "builders|9007199254740993|agb1 {\"b\":{\"text\":\"nonce precision case 4\"},\"cid\":\"0xd31d2e389e79df3fca211431620a63bbef559dda14eeb03bf6220a8a42671dd7\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000004\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"TLTCVvCwREmiwo3lOyfr7-eUuuAs9O5jX26wG2qv0YYgRjrJOfocrdj_VbrU_kQ3wE_FNV9GKR6H3e7cAw2nBA\",\"t\":\"note\",\"ts\":1795000000000}",
+   "sig": "7VVZ1W2yODaH2-9mcwggN4WmX15xAgddW2G1VMLXp8QTg_vJkxEivF5dIOZfWjKRSJjfZSk90dA6OpacOcDfDQ",
+   "raw_message": "{\"did\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"nonce\":9007199254740993,\"room\":\"builders\",\"seq\":104,\"sig\":\"7VVZ1W2yODaH2-9mcwggN4WmX15xAgddW2G1VMLXp8QTg_vJkxEivF5dIOZfWjKRSJjfZSk90dA6OpacOcDfDQ\",\"text\":\"agb1 {\\\"b\\\":{\\\"text\\\":\\\"nonce precision case 4\\\"},\\\"cid\\\":\\\"0xd31d2e389e79df3fca211431620a63bbef559dda14eeb03bf6220a8a42671dd7\\\",\\\"from\\\":\\\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\\\",\\\"n\\\":\\\"0000000000000004\\\",\\\"room\\\":\\\"core/builders\\\",\\\"s\\\":\\\"agb.note/1\\\",\\\"sig\\\":\\\"TLTCVvCwREmiwo3lOyfr7-eUuuAs9O5jX26wG2qv0YYgRjrJOfocrdj_VbrU_kQ3wE_FNV9GKR6H3e7cAw2nBA\\\",\\\"t\\\":\\\"note\\\",\\\"ts\\\":1795000000000}\"}"
+  },
+  {
+   "name": "case-5",
+   "nonce": "9223372036854775807",
+   "above_2_53": true,
+   "lossy_js": "9223372036854776000",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "room": "builders",
+   "text": "agb1 {\"b\":{\"text\":\"nonce precision case 5\"},\"cid\":\"0x9c326f01ce3d3486a63c805fe6f0959d4edd61378b9d49503f248b6f09005a1d\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000005\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"cqShw5F2T602shgi3sQoTeuWFbCn5-6azVplL_ZYbXfDTLGUyLn4xnYs_KFkbrLQPLZPKhnyyonml-0pq2w9CQ\",\"t\":\"note\",\"ts\":1795000000000}",
+   "signing_string": "builders|9223372036854775807|agb1 {\"b\":{\"text\":\"nonce precision case 5\"},\"cid\":\"0x9c326f01ce3d3486a63c805fe6f0959d4edd61378b9d49503f248b6f09005a1d\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000005\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"cqShw5F2T602shgi3sQoTeuWFbCn5-6azVplL_ZYbXfDTLGUyLn4xnYs_KFkbrLQPLZPKhnyyonml-0pq2w9CQ\",\"t\":\"note\",\"ts\":1795000000000}",
+   "sig": "XdZLLufdVWgatgjRc8Onqhrw3tjbC0igJ6OvXf9asHVfm4q5_jdvrC9rCxQmO1K0NSEAyt-ko3c1JI7ZGXtUCw",
+   "raw_message": "{\"did\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"nonce\":9223372036854775807,\"room\":\"builders\",\"seq\":105,\"sig\":\"XdZLLufdVWgatgjRc8Onqhrw3tjbC0igJ6OvXf9asHVfm4q5_jdvrC9rCxQmO1K0NSEAyt-ko3c1JI7ZGXtUCw\",\"text\":\"agb1 {\\\"b\\\":{\\\"text\\\":\\\"nonce precision case 5\\\"},\\\"cid\\\":\\\"0x9c326f01ce3d3486a63c805fe6f0959d4edd61378b9d49503f248b6f09005a1d\\\",\\\"from\\\":\\\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\\\",\\\"n\\\":\\\"0000000000000005\\\",\\\"room\\\":\\\"core/builders\\\",\\\"s\\\":\\\"agb.note/1\\\",\\\"sig\\\":\\\"cqShw5F2T602shgi3sQoTeuWFbCn5-6azVplL_ZYbXfDTLGUyLn4xnYs_KFkbrLQPLZPKhnyyonml-0pq2w9CQ\\\",\\\"t\\\":\\\"note\\\",\\\"ts\\\":1795000000000}\"}"
+  }
+ ],
+ "agb1_reject": [
+  {
+   "name": "ts-above-2^53",
+   "line": "agb1 {\"b\":{\"text\":\"big ts\"},\"cid\":\"0x3cb6683ea1b81d73f5c2eb18892ac5681aa00cb105480f966c0331fdfe084627\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"00000000000000ff\",\"room\":\"core/builders\",\"s\":\"agb.note/1\",\"sig\":\"ehIYVaBy6YBzTSMWnMbRoUR9D2Tlk2UsTLg9-9Ty3n9swTZ_8jGhoGxCWDGp4kSjjLD3WqrEeYxXsat-aD3lBw\",\"t\":\"note\",\"ts\":1794963040209364600}",
+   "why": "agb1 integers are capped at 2^53-1; a larger one is rejected, never rounded"
+  }
+ ]
+}

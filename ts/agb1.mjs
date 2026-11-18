@@ -255,3 +255,47 @@ export function guildReputation(scores, cap = 0.4) {
   }
   return 0;
 }
+
+// ── Technocore signed lane: nonce precision ──
+// The server verifies say-signed writes over `<room>|<nonce>|<text>`. Nonces run up to 19
+// digits, past 2^53, where a JS number can no longer hold every integer (above 2^60 doubles
+// step by 256). So a nonce must never pass through a JS number on the way to that string:
+// JSON.parse('{"nonce":1794963040209364600}').nonce prints as 1794963040209364500 and the
+// rebuilt string no longer matches what was signed. agb1 envelopes are not affected (their
+// `n` is a hex string, and their integers are capped at 2^53-1 and rejected above it).
+const TC_NONCE_RE = /^[0-9]{1,19}$/;
+const TC_ROOM_RE = /^[a-z0-9][a-z0-9_-]{0,47}$/;
+
+/** Exact signing string for a Technocore say-signed message. Nonce: digit string, BigInt or a safe integer. */
+export function tcSigningString(room, nonce, text) {
+  if (typeof room !== "string" || !TC_ROOM_RE.test(room)) throw new AgbError("bad Technocore room name");
+  let n;
+  if (typeof nonce === "string") n = nonce;
+  else if (typeof nonce === "bigint") n = nonce.toString();
+  else if (typeof nonce === "number" && Number.isSafeInteger(nonce)) n = String(nonce);
+  else throw new AgbError("nonce must be a digit string or BigInt (a JS number above 2^53 has lost digits)");
+  if (!TC_NONCE_RE.test(n)) throw new AgbError("nonce must be 1-19 digits");
+  if (typeof text !== "string") throw new AgbError("text must be a string");
+  return `${room}|${n}|${text}`;
+}
+
+/** JSON.parse, but integer literals outside the safe range come back as digit strings, unrounded. */
+export function parseJsonLossless(raw) {
+  if (typeof raw !== "string") throw new AgbError("raw JSON must be a string");
+  let out = "", i = 0;
+  while (i < raw.length) {
+    const c = raw[i];
+    if (c === '"') {
+      let j = i + 1;
+      while (j < raw.length && raw[j] !== '"') j += raw[j] === "\\" ? 2 : 1;
+      out += raw.slice(i, j + 1); i = j + 1;
+    } else if (c === "-" || (c >= "0" && c <= "9")) {
+      const m = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/.exec(raw.slice(i));
+      if (!m) throw new AgbError("bad JSON number");
+      const lit = m[0];
+      out += /^-?[0-9]+$/.test(lit) && !Number.isSafeInteger(Number(lit)) ? `"${lit}"` : lit;
+      i += lit.length;
+    } else { out += c; i++; }
+  }
+  try { return JSON.parse(out); } catch (e) { throw new AgbError("bad JSON"); }
+}

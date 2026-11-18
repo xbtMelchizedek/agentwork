@@ -1,7 +1,7 @@
 // node ts/test.mjs — checks the TS codec against vectors/agb1-v1.json (no deps).
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { canonical, computeCid, decode, encode, build, keyFromSeed, generateKey, AgbError, handleSkeleton, reservedReason, guildReputation } from "./agb1.mjs";
+import { canonical, computeCid, decode, encode, build, keyFromSeed, generateKey, AgbError, handleSkeleton, reservedReason, guildReputation, verifySig, tcSigningString, parseJsonLossless } from "./agb1.mjs";
 
 const V = JSON.parse(readFileSync(new URL("../vectors/agb1-v1.json", import.meta.url)));
 let pass = 0, failN = 0;
@@ -50,5 +50,30 @@ for (const v of S.invalid) { let threw = false; try { decode(v.line); } catch (e
 for (const [n, sk] of S.skeletons) ok(handleSkeleton(n) === sk, `skeleton ${n}`);
 for (const [n, r] of S.reserved) ok(reservedReason(n) === r, `reserved ${n}: ${reservedReason(n)} != ${r}`);
 for (const [sc, want] of S.guild_rep) ok(Math.abs(guildReputation(sc, S.guild_rep_cap) - want) < 1e-6, `guild rep ${JSON.stringify(sc)}`);
+// Technocore signed-lane nonces above 2^53 (vectors/nonce-precision-v1.json)
+const NP = JSON.parse(readFileSync(new URL("../vectors/nonce-precision-v1.json", import.meta.url)));
+for (const c of NP.cases) {
+  const key = keyFromSeed(seed(NP.key_label));
+  ok(key.did === c.did, `nonce ${c.name}: did`);
+  ok(key.sign(c.signing_string) === c.sig, `nonce ${c.name}: deterministic sig`);
+  const m = parseJsonLossless(c.raw_message);
+  ok(String(m.nonce) === c.nonce, `nonce ${c.name}: lossless parse keeps every digit`);
+  ok(m.text === c.text && m.sig === c.sig && m.room === c.room, `nonce ${c.name}: other fields intact`);
+  ok(tcSigningString(m.room, m.nonce, m.text) === c.signing_string, `nonce ${c.name}: signing string rebuilt exactly`);
+  ok(verifySig(m.did, m.sig, tcSigningString(m.room, m.nonce, m.text)), `nonce ${c.name}: verifies`);
+  ok(tcSigningString(c.room, BigInt(c.nonce), c.text) === c.signing_string, `nonce ${c.name}: BigInt nonce`);
+  const lossy = JSON.parse(c.raw_message).nonce;
+  ok(String(lossy) === c.lossy_js, `nonce ${c.name}: plain JSON.parse gives ${c.lossy_js}`);
+  if (c.above_2_53) {
+    ok(String(lossy) !== c.nonce, `nonce ${c.name}: plain JSON.parse loses digits`);
+    ok(!verifySig(c.did, c.sig, `${c.room}|${lossy}|${c.text}`), `nonce ${c.name}: lossy rebuild must not verify`);
+    let threw = false; try { tcSigningString(c.room, lossy, c.text); } catch (e) { threw = e instanceof AgbError; }
+    ok(threw, `nonce ${c.name}: tcSigningString refuses an unsafe number`);
+  } else {
+    ok(tcSigningString(c.room, lossy, c.text) === c.signing_string, `nonce ${c.name}: safe number accepted`);
+  }
+}
+for (const v of NP.agb1_reject) { let threw = false; try { decode(v.line); } catch (e) { threw = e instanceof AgbError; } ok(threw, `nonce ${v.name}: must be rejected`); }
+for (const bad of ["", "12a", "12345678901234567890", "-1"]) { let threw = false; try { tcSigningString("builders", bad, "x"); } catch (e) { threw = e instanceof AgbError; } ok(threw, `tcSigningString rejects nonce ${JSON.stringify(bad)}`); }
 console.log(`ts vectors: ${pass} passed, ${failN} failed`);
 process.exit(failN ? 1 : 0);

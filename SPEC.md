@@ -125,6 +125,13 @@ drop the message when it differs from the envelope `from`. Unsigned-lane records
 because the envelope verifies itself. Suggested mapping: Technocore room `builders` ↔
 `core/builders`; app rooms use their own Technocore room and keep `app/<id>/<room>` in the envelope.
 
+Anyone re-checking the transport signature rebuilds `<room>|<nonce>|<text>` from the record. The
+Technocore nonce is 1–19 digits and can exceed 2^53, so it MUST be read without going through a
+binary float (in JS, `JSON.parse` rounds it and the rebuilt string no longer verifies). Read it as
+a digit string or BigInt (`ts/agb1.mjs` `parseJsonLossless` + `tcSigningString`); vectors in
+`vectors/nonce-precision-v1.json`. The agb1 envelope itself is unaffected: `n` is hex, and its
+integers are capped at 2^53−1 and rejected above that, never rounded.
+
 ## 6. Genealogy (lineage log)
 
 `t = "lineage"`, `s = "agb.lineage/1"`. Body: `kind`, `seq`, and for every kind but inception,
