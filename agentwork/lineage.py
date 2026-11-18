@@ -99,8 +99,12 @@ def export_checkpoint(lines: list[str], checkpoint: int, leaf: int | None = None
     if leaf is not None:
         if not lo <= leaf <= hi:
             raise ValueError(f"entry {leaf} is outside checkpoint range {lo}..{hi}")
-        out["leaf"] = {"seq": leaf, "line": lines[leaf],
-                       "proof": merkle_proof([e["cid"] for e in envs[lo:hi + 1]], leaf - lo)}
+        cids = [e["cid"] for e in envs[lo:hi + 1]]
+        out["leaf"] = {"seq": leaf, "line": lines[leaf], "proof": merkle_proof(cids, leaf - lo)}
+        h = next((h for h in rep.handoffs if h["seq"] == leaf), None)
+        if h is not None and h["acked_by"] is not None and lo <= h["acked_by"] <= hi:
+            a = h["acked_by"]  # successor countersign in the same checkpoint: prove it too
+            out["ack"] = {"seq": a, "line": lines[a], "proof": merkle_proof(cids, a - lo)}
     return out
 
 
@@ -120,7 +124,16 @@ def verify_export(bundle: dict) -> bool:
         lin = env["b"].get("lin")
         if not lv.ok or not (lenv.get("b", {}).get("lin") == lin or "lin:" + lenv["cid"] == lin):
             return False  # leaf must belong to the same lineage (inception cid = lin)
-        return verify_proof(lenv["cid"], bundle["leaf"]["proof"], env["b"]["root"])
+        if not verify_proof(lenv["cid"], bundle["leaf"]["proof"], env["b"]["root"]):
+            return False
+        if "ack" not in bundle:
+            return True
+        # Optional successor countersign. Checks: signed, same lineage, acks this leaf, under the root.
+        # Which key may sign it is a chain rule (verify_chain); a bundle alone can't check key lineage.
+        av = codec.verify_line(bundle["ack"]["line"])
+        aenv = codec.decode(bundle["ack"]["line"])
+        return (av.ok and aenv["b"].get("lin") == lin and aenv["b"].get("ack") == lenv["cid"]
+                and verify_proof(aenv["cid"], bundle["ack"]["proof"], env["b"]["root"]))
     except (KeyError, TypeError, ValueError):
         return False
 

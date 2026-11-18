@@ -115,3 +115,25 @@ def test_render_shows_ack(tmp_path, keys):
     assert f"countersigns handoff `{hcid[:18]}" in render.sentence(acked, "UTC")
     handoff = json.loads(log.lines()[-2][5:])
     assert "countersigns" not in render.sentence(handoff, "UTC")
+
+
+def test_export_carries_ack_proof(tmp_path, keys):
+    import copy
+    log = base(tmp_path, keys)
+    log.append(keys["a"], "entry", what="note", ref="m2 online", ack=True, ts=T + 3)
+    log.append(keys["a"], "checkpoint", ts=T + 4)
+    lines = log.lines()
+    b = lineage.export_checkpoint(lines, 4, leaf=2)          # leaf 2 = handoff, acked by 3
+    assert b["ack"]["seq"] == 3 and lineage.verify_export(b)
+    assert "ack" not in lineage.export_checkpoint(lines, 4, leaf=1)
+    t = copy.deepcopy(b); t["ack"]["line"] = lines[1]       # not an ack of this handoff
+    assert not lineage.verify_export(t)
+    t = copy.deepcopy(b); t["ack"]["proof"] = b["leaf"]["proof"]
+    assert not lineage.verify_export(t)
+
+
+def test_export_unacked_handoff_has_no_ack(tmp_path, keys):
+    log = base(tmp_path, keys)
+    log.append(keys["a"], "checkpoint", ts=T + 3)            # checkpoint ends the ack window
+    b = lineage.export_checkpoint(log.lines(), 3, leaf=2)
+    assert "ack" not in b and lineage.verify_export(b)
