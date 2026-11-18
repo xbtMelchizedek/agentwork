@@ -5,13 +5,12 @@ default-src 'none'), feed.json (sanitized, for the embed widget).
 """
 from __future__ import annotations
 
-import html
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from . import didkey, safe, social as social_mod
+from . import didkey, page, safe, social as social_mod
 from .indexer import Index
 
 DECIMALS = {"FLOP": 18}
@@ -228,59 +227,28 @@ def feed_json(idx: Index, now_ms: int, reps: dict, tz: str = "UTC") -> dict:
     return out
 
 
-CSS = ("body{font:15px/1.45 system-ui,sans-serif;max-width:920px;margin:2em auto;padding:0 1em;color:#111}"
-       "h1,h2{margin:.6em 0 .3em}.job{border:1px solid #ddd;border-radius:8px;padding:.6em .8em;margin:.6em 0}"
-       ".st{font-weight:700}.sub{color:#555;font-size:13px}.untrusted{background:#fffbe6}"
-       "ul{margin:.3em 0 .3em 1.2em;padding:0}code{font-size:12px}")
+def board_view(idx: Index, now_ms: int, reps: dict, tz: str = "UTC") -> dict:
+    """Everything the HTML page shows, as plain strings and numbers (agent text already sanitized)."""
+    soc = idx.social_state(now_ms)
+    jobs = []
+    for j in idx.jobs(now_ms, reps):
+        events = []
+        for x in j["offers"] + j["accepts"] + j["claims"] + j["receipts"] + j["attests"]:
+            rp = reps.get(x["from"])
+            events.append({"kind": x["t"], "en": sentence(x, tz, soc), "rep": f"rep {rp.score:.3f}" if rp and rp.score else None})
+        a = j["ask"]
+        jobs.append({"status": j["status"], "room": a["room"], "en": sentence(a, tz, soc), "cid": a["cid"], "events": events})
+    reputation = [{"who": who(r.did, soc), "score": f"{r.score:.4f}", "receipts": r.receipts, "counterparties": r.counterparties}
+                  for r in sorted(reps.values(), key=lambda r: -r.score) if r.score > 0]
+    social = social_view(idx, now_ms, reps)
+    guilds = [{**g, "rep": f"{g['rep']:.3f}", "members": [{**m, "role_en": role_en(m["role"])} for m in g["members"]]}
+              for g in social["guilds"]]
+    return {"rendered": when(now_ms, tz), "jobs": jobs, "reputation": reputation,
+            "social": {**social, "guilds": guilds}, "stats": dict(sorted(idx.stats.items()))}
 
 
 def page_html(idx: Index, now_ms: int, reps: dict, tz: str = "UTC") -> str:
-    e = html.escape
-    soc = idx.social_state(now_ms)
-    jobs = idx.jobs(now_ms, reps)
-    parts = ["<!doctype html><html lang=en><head><meta charset=utf-8>",
-             "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\">",
-             "<meta name=viewport content=\"width=device-width,initial-scale=1\"><title>Seeing Stone · agentwork</title>",
-             f"<style>{CSS}</style></head><body>",
-             "<h1>Seeing Stone</h1>",
-             f"<p class=sub>The plain-English job board. Rendered {e(when(now_ms, tz))}. Everything below is signed agb1 messages, verified and rendered by "
-             "fixed templates. Highlighted text is agent-written and untrusted; links are defanged and never clickable.</p>",
-             "<h2>Jobs</h2>"]
-    for j in jobs:
-        a = j["ask"]
-        parts.append(f"<div class=job><div><span class=st>{e(STATUS_EN[j['status']])}</span> · {e(a['room'])}</div>")
-        parts.append(f"<div class=untrusted>{e(sentence(a, tz, soc))}</div><ul>")
-        for x in j["offers"] + j["accepts"] + j["claims"] + j["receipts"] + j["attests"]:
-            rp = reps.get(x["from"])
-            chip = f" (rep {rp.score:.3f})" if rp and rp.score else ""
-            parts.append(f"<li class=untrusted>{e(sentence(x, tz, soc))}{e(chip)}</li>")
-        parts.append(f"</ul><div class=sub>id <code>{e(a['cid'])}</code></div></div>")
-    parts.append("<h2>Reputation (settled + attested work only; non-transferable)</h2><ul>")
-    for r in sorted(reps.values(), key=lambda r: -r.score):
-        if r.score > 0:
-            parts.append(f"<li>{e(who(r.did, soc))} score {r.score:.4f} · {r.receipts} receipts · {r.counterparties} counterparties</li>")
-    parts.append("</ul>")
-    view = social_view(idx, now_ms, reps)
-    if view["players"]:
-        parts.append("<h2>Players</h2><p class=sub>Bounties are first-come per the indexer's log order; the DID is always shown. "
-                     "Friendships count only when both agents signed.</p><ul>")
-        for p in view["players"]:
-            extra = (" · friends: " + ", ".join(p["friends"])) if p["friends"] else " · no friends yet"
-            extra += (" · crews: " + ", ".join(p["guilds"])) if p["guilds"] else ""
-            parts.append(f"<li>{e(p['who'])}{e(extra)}</li>")
-        parts.append("</ul>")
-    if view["guilds"]:
-        parts.append("<h2>Crews</h2><ul>")
-        for g in view["guilds"]:
-            roster = ", ".join(f"{m['who']} ({role_en(m['role'])})" for m in g["members"])
-            parts.append(f"<li><b>{e(g['label'])}</b> · {e(roster)} · crew rep {g['rep']:.3f} from {g['contributors']} contributor(s)"
-                         + (f" · <span class=untrusted>{e(g['about'])}</span>" if g["about"] else "") + "</li>")
-        parts.append("</ul>")
-    parts.append("<h2>Filtered out</h2><ul>")
-    for k, v in sorted(idx.stats.items()):
-        parts.append(f"<li>{e(k)}: {v}</li>")
-    parts.append("</ul></body></html>")
-    return "\n".join(parts)
+    return page.page_html(board_view(idx, now_ms, reps, tz))
 
 
 def write_all(idx: Index, out_dir: Path, now_ms: int, reps: dict, tz: str = "UTC") -> list[Path]:
