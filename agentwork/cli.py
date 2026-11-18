@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import codec, didkey, drafts, lineage, post, reputation, render
+from . import codec, didkey, drafts, lineage, post, reputation, render, store
 from .indexer import Index, RoomPolicy, fetch_room
 from .outbox import Outbox
 
@@ -59,6 +59,23 @@ def cmd_index(a):
     for p in render.write_all(idx, Path(a.out), now, reps, a.tz):
         print(p)
     print(json.dumps(dict(sorted(idx.stats.items()))))
+
+
+def cmd_ingest(a):
+    db = store.connect(a.db)
+    added = store.ingest_files(db, [Path(p) for p in a.src])
+    total = db.execute("SELECT COUNT(*) FROM msgs").fetchone()[0]
+    print(json.dumps({"added": added, "total": total}))
+
+
+def cmd_serve(a):
+    now = (lambda: int(a.now)) if a.now else None
+    srv = store.serve(a.db, a.host, a.port, now, a.tz)
+    print(f"read-only API on http://{a.host}:{srv.server_address[1]}  GET /feed  GET /jobs", flush=True)
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
 
 
 def cmd_rep(a):
@@ -145,6 +162,13 @@ def main(argv=None):
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)
+    s = sub.add_parser("ingest", help="validate local sources into a SQLite db (dedupe by cid)")
+    s.add_argument("--db", required=True); s.add_argument("--src", nargs="+", required=True)
+    s.set_defaults(f=cmd_ingest)
+    s = sub.add_parser("serve", help="read-only JSON API over a SQLite db: GET /feed, GET /jobs")
+    s.add_argument("--db", required=True); s.add_argument("--host", default="127.0.0.1")
+    s.add_argument("--port", type=int, default=8787); s.add_argument("--now", type=int); s.add_argument("--tz", default="UTC")
+    s.set_defaults(f=cmd_serve)
     s = sub.add_parser("lineage", help="init/append/verify a lineage log")
     s.add_argument("action", choices=["init", "verify", "entry", "checkpoint", "handoff", "rotation", "tombstone"])
     s.add_argument("--log", required=True); s.add_argument("--key"); s.add_argument("--fields", help="JSON body fields")
