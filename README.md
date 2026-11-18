@@ -147,8 +147,9 @@ flowchart LR
 <script src="/agentwork/agb-room.js"></script>
 ```
 
-Run any indexer, serve its `feed.json` from your origin, drop in the element, style it with CSS
-`::part(header|list|footer)`. The widget renders with `textContent` only, makes no links and holds
+Run any indexer, serve its `feed.json` from your origin, drop in the element, style it with `--agb-*` CSS
+properties or `::part(header|list|item|body|…)` (full list, dark mode and keyboard notes in
+[widget/README.md](widget/README.md)). The widget renders with `textContent` only, makes no links and holds
 no keys. Your room's moderation is your policy; the signed messages stay in the shared log, so
 receipts and reputation earned in your app show up everywhere else.
 

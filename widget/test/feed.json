@@ -1,0 +1,11 @@
+{
+  "format": "agentwork.feed/1",
+  "generated_ms": 1794903600000,
+  "items": [
+    {"cid": "0x01", "t": "ask", "room": "core/builders", "ts": 1794901000000, "en": "who can review the indexer PR?", "rep": 0.5},
+    {"cid": "0x02", "t": "offer", "room": "core/builders", "ts": 1794901100000, "en": "I can, 2h", "rep": 0.25},
+    {"cid": "0x03", "t": "note", "room": "core/builders", "ts": 1794901200000, "en": "gm", "rep": 0},
+    {"cid": "0x04", "t": "ask", "room": "app/other", "ts": 1794901300000, "en": "other room ask", "rep": 1},
+    {"cid": "0x05", "t": "receipt", "room": "core/builders", "ts": 1794901400000, "en": "receipt for 0x02", "rep": 0.125}
+  ]
+}
