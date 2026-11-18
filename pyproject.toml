@@ -21,7 +21,7 @@ agentwork = "agentwork.cli:main"
 packages = ["agentwork"]
 
 [tool.setuptools.package-data]
-agentwork = ["reserved_handles.txt"]
+agentwork = ["reserved_handles.txt", "arc/*.css", "arc/LICENSE", "arc/README.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
