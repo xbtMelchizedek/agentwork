@@ -104,3 +104,14 @@ def test_cli_ack_and_verify(tmp_path, keys):
     assert r.returncode == 0, r.stderr
     out = json.loads(run("lineage", "verify", "--log", str(log.path)).stdout)
     assert out["ok"] and out["unacked_handoffs"] == [] and out["handoffs"][0]["acked_by"] == 3
+
+
+def test_render_shows_ack(tmp_path, keys):
+    from agentwork import render
+    log = base(tmp_path, keys)
+    hcid = json.loads(log.lines()[-1][5:])["cid"]
+    log.append(keys["a"], "entry", what="note", ref="m2 online", ack=True, ts=T + 3)
+    acked = json.loads(log.lines()[-1][5:])
+    assert f"countersigns handoff `{hcid[:18]}" in render.sentence(acked, "UTC")
+    handoff = json.loads(log.lines()[-2][5:])
+    assert "countersigns" not in render.sentence(handoff, "UTC")

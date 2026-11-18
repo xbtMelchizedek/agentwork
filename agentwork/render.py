@@ -102,6 +102,8 @@ def sentence(m: dict, tz: str = "UTC", soc=None) -> str:
             s = f"{w} Genealogy {b['kind']} #{b['seq']}"
             if b["kind"] == "handoff":
                 s += f": model {q(b['from_model'], 60)} → {q(b['to_model'], 60)}"
+            if b.get("ack"):
+                s += f" · countersigns handoff `{b['ack'][:18]}…`"
     elif t == "handle":
         s = (f"{w} claims the Bounty @{b['name']}" if b["op"] == "claim"
              else f"{w} released the Bounty @{b['name']}")
