@@ -9,6 +9,11 @@ Kinds: inception, entry (activity pointer), checkpoint (Merkle root over a seq
 range), handoff (model/runtime change), rotation (new key; must match the committed
 next_key_hash when one was set), tombstone (final record; nothing may follow).
 
+Successor countersign: the first entry after a handoff MAY carry `ack` = cid of that handoff
+(if that first entry is a rotation, the ack may instead ride on the entry after the rotation, so
+the successor's new key signs it). An `ack` anywhere else, or naming another cid, fails
+verification; handoffs never acknowledged are reported in `ChainReport.unacked_handoffs`.
+
 This is continuity of *record*, not of mind: a successor reads and verifies the log.
 """
 from __future__ import annotations
@@ -128,6 +133,8 @@ class ChainReport:
     current_key: str | None = None
     tombstoned: bool = False
     handoffs: list = field(default_factory=list)
+    unacked_handoffs: list = field(default_factory=list)  # [{"seq", "cid"}] never countersigned
+    awaiting_ack: str | None = None                       # handoff cid the next entry may ack
     errors: list = field(default_factory=list)
 
     def to_json(self) -> dict:
@@ -175,6 +182,15 @@ def verify_chain(lines: list[str]) -> ChainReport:
                 rep.errors.append(f"entry {i}: timestamp goes backwards")
                 return rep
             kind = b["kind"]
+            if "ack" in b and b["ack"] != rep.awaiting_ack:
+                rep.errors.append(f"entry {i}: ack does not name the handoff awaiting acknowledgement")
+                return rep
+            if rep.awaiting_ack is not None:
+                if "ack" in b:
+                    rep.handoffs[-1]["acked_by"] = i
+                    rep.awaiting_ack = None
+                elif not (kind == "rotation" and envs[-1]["b"]["kind"] == "handoff"):
+                    rep.awaiting_ack = None  # window closed without a countersign
             if kind == "rotation":
                 if commit and next_key_hash(b["new_key"]) != commit:
                     rep.errors.append(f"entry {i}: new key does not match committed next_key_hash")
@@ -187,13 +203,16 @@ def verify_chain(lines: list[str]) -> ChainReport:
                     rep.errors.append(f"entry {i}: checkpoint root does not match entries {lo}..{hi}")
                     return rep
             elif kind == "handoff":
-                rep.handoffs.append({"seq": i, "from_model": b["from_model"], "to_model": b["to_model"], "cid": env["cid"]})
+                rep.handoffs.append({"seq": i, "from_model": b["from_model"], "to_model": b["to_model"], "cid": env["cid"],
+                                     "acked_by": None})
+                rep.awaiting_ack = env["cid"]
             elif kind == "tombstone":
                 rep.tombstoned = True
         envs.append(env)
     if not envs:
         rep.errors.append("empty log")
         return rep
+    rep.unacked_handoffs = [{"seq": h["seq"], "cid": h["cid"]} for h in rep.handoffs if h["acked_by"] is None]
     rep.ok, rep.entries, rep.head = True, len(envs), envs[-1]["cid"]
     return rep
 
@@ -239,6 +258,10 @@ class LineageLog:
             raise ValueError("key is not the lineage's current key")
         lines = self.lines()
         prev = json.loads(lines[-1][len(codec.PREFIX):])["cid"]
+        if fields.get("ack") is True:  # countersign the handoff awaiting acknowledgement
+            if st.awaiting_ack is None:
+                raise ValueError("no handoff is awaiting acknowledgement")
+            fields["ack"] = st.awaiting_ack
         b = {"kind": kind, "seq": st.entries, "lin": st.lin, "prev": prev, **fields}
         if kind == "checkpoint" and "root" not in b:
             cids = [json.loads(l[len(codec.PREFIX):])["cid"] for l in lines]

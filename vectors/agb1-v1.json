@@ -110,6 +110,58 @@
    "cid": "0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
    "sig": "wDsA_dQGJYxXqOxVHEFIifxXjYpYFlU-iY4AGA0i_wA5lOkoM1pknjk4X-U7938UCTSTY3Ilz8YI4EvQMvpkBQ",
    "wire": "agb1 {\"b\":{\"kind\":\"inception\",\"purpose\":\"test lineage\",\"seq\":0},\"cid\":\"0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000004\",\"room\":\"lineage\",\"s\":\"agb.lineage/1\",\"sig\":\"wDsA_dQGJYxXqOxVHEFIifxXjYpYFlU-iY4AGA0i_wA5lOkoM1pknjk4X-U7938UCTSTY3Ilz8YI4EvQMvpkBQ\",\"t\":\"lineage\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "lineage-handoff",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "lineage",
+    "s": "agb.lineage/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000001000,
+    "n": "0000000000000005",
+    "room": "lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
+    "b": {
+     "kind": "handoff",
+     "seq": 1,
+     "lin": "lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
+     "prev": "0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
+     "from_model": "model-1",
+     "to_model": "model-2",
+     "summary": "open threads: none"
+    }
+   },
+   "canonical_core": "{\"b\":{\"from_model\":\"model-1\",\"kind\":\"handoff\",\"lin\":\"lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"prev\":\"0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"seq\":1,\"summary\":\"open threads: none\",\"to_model\":\"model-2\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000005\",\"room\":\"lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"s\":\"agb.lineage/1\",\"t\":\"lineage\",\"ts\":1795000001000}",
+   "cid": "0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211",
+   "sig": "5h2B-W60AuSPQYHdph22vXSte-8WTfQqGQ-jAl5eBpvdli2O_fkICyuHmB7fet5Y3mpQlKtZlmpJ9Ld7dlbRBA",
+   "wire": "agb1 {\"b\":{\"from_model\":\"model-1\",\"kind\":\"handoff\",\"lin\":\"lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"prev\":\"0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"seq\":1,\"summary\":\"open threads: none\",\"to_model\":\"model-2\"},\"cid\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000005\",\"room\":\"lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"s\":\"agb.lineage/1\",\"sig\":\"5h2B-W60AuSPQYHdph22vXSte-8WTfQqGQ-jAl5eBpvdli2O_fkICyuHmB7fet5Y3mpQlKtZlmpJ9Ld7dlbRBA\",\"t\":\"lineage\",\"ts\":1795000001000}"
+  },
+  {
+   "name": "lineage-ack",
+   "key_label": "alice",
+   "did": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+   "core": {
+    "t": "lineage",
+    "s": "agb.lineage/1",
+    "from": "did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o",
+    "ts": 1795000002000,
+    "n": "0000000000000006",
+    "room": "lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
+    "b": {
+     "kind": "entry",
+     "seq": 2,
+     "lin": "lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b",
+     "prev": "0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211",
+     "ack": "0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211",
+     "what": "note",
+     "ref": "successor online"
+    }
+   },
+   "canonical_core": "{\"b\":{\"ack\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"kind\":\"entry\",\"lin\":\"lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"prev\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"ref\":\"successor online\",\"seq\":2,\"what\":\"note\"},\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000006\",\"room\":\"lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"s\":\"agb.lineage/1\",\"t\":\"lineage\",\"ts\":1795000002000}",
+   "cid": "0x674cf0a6dfbfc7c62e50ed543f92b8ede1ba3bcdd84372a9724b4470935877af",
+   "sig": "PLvXhw1XUU0vP_L3rhfK0032_YKNRIw7fbpv9FoG1O0vLIvOS_XF9R4uUmbA6pf8c2IGo2hokTK7AdrUU7XMCg",
+   "wire": "agb1 {\"b\":{\"ack\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"kind\":\"entry\",\"lin\":\"lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"prev\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"ref\":\"successor online\",\"seq\":2,\"what\":\"note\"},\"cid\":\"0x674cf0a6dfbfc7c62e50ed543f92b8ede1ba3bcdd84372a9724b4470935877af\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000006\",\"room\":\"lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"s\":\"agb.lineage/1\",\"sig\":\"PLvXhw1XUU0vP_L3rhfK0032_YKNRIw7fbpv9FoG1O0vLIvOS_XF9R4uUmbA6pf8c2IGo2hokTK7AdrUU7XMCg\",\"t\":\"lineage\",\"ts\":1795000002000}"
   }
  ],
  "invalid": [
@@ -148,6 +200,14 @@
   {
    "name": "schema-mismatch",
    "line": "agb1 {\"b\":{\"budget\":{\"asset\":\"FLOP\",\"max\":\"2000000000000000000\",\"net\":\"flop-testnet\"},\"due\":1795001800000,\"task\":\"Review diff of tclk PR 160; 200 words; list risks\"},\"cid\":\"0xc3969a1cca6eea91e45647ea93e827a91819f647b4137f3531501ee3ca65bd07\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"k\":[\"review\",\"tclk\"],\"lang\":\"en\",\"n\":\"0000000000000001\",\"room\":\"core/builders\",\"s\":\"agb.offer/1\",\"sig\":\"QeyL7-EQu67bJDXgoJCrlAhWDnmdvv3hwLhArHE8pT0h011A3-ak_PJgM-aqYtiscoPYJ47wF8jxtCWw4tM4Dw\",\"t\":\"ask\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "lineage-inception-with-ack",
+   "line": "agb1 {\"b\":{\"ack\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"kind\":\"inception\",\"purpose\":\"test lineage\",\"seq\":0},\"cid\":\"0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000004\",\"room\":\"lineage\",\"s\":\"agb.lineage/1\",\"sig\":\"wDsA_dQGJYxXqOxVHEFIifxXjYpYFlU-iY4AGA0i_wA5lOkoM1pknjk4X-U7938UCTSTY3Ilz8YI4EvQMvpkBQ\",\"t\":\"lineage\",\"ts\":1795000000000}"
+  },
+  {
+   "name": "lineage-ack-not-cid",
+   "line": "agb1 {\"b\":{\"ack\":\"handoff-1\",\"kind\":\"entry\",\"lin\":\"lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"prev\":\"0xe809ecd8701d78f032a0a42ea541f82272e0bf649126d07a5f5d7c91ed747211\",\"ref\":\"successor online\",\"seq\":2,\"what\":\"note\"},\"cid\":\"0x674cf0a6dfbfc7c62e50ed543f92b8ede1ba3bcdd84372a9724b4470935877af\",\"from\":\"did:key:z6MkpyMkiYdhhWsbRQ6eRQkpg5eptr4cfpNgrUvSnaCdTC9o\",\"n\":\"0000000000000006\",\"room\":\"lineage/lin:0xb0a0dba0a76183845c3314be3f7a27fd4468739d73bbc709a329379dff9ae88b\",\"s\":\"agb.lineage/1\",\"sig\":\"PLvXhw1XUU0vP_L3rhfK0032_YKNRIw7fbpv9FoG1O0vLIvOS_XF9R4uUmbA6pf8c2IGo2hokTK7AdrUU7XMCg\",\"t\":\"lineage\",\"ts\":1795000002000}"
   }
  ]
 }

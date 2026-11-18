@@ -196,8 +196,8 @@ const KINDS = {
 BODIES.lineage = (v, p) => {
   if (v === null || typeof v !== "object") fail(p, "expected object");
   const k = KINDS[v.kind]; if (!k) fail(`${p}.kind`, "unknown lineage kind");
-  obj({ kind: oneOf(...Object.keys(KINDS)), seq: int(0, MAX_SAFE), ...k[0] }, { lin: re(RX.lin, "lin id"), prev: cid, ...k[1] })(v, p);
-  if (v.kind === "inception") { if (v.seq !== 0 || "lin" in v || "prev" in v) fail(p, "inception must have seq 0 and no lin/prev"); }
+  obj({ kind: oneOf(...Object.keys(KINDS)), seq: int(0, MAX_SAFE), ...k[0] }, { lin: re(RX.lin, "lin id"), prev: cid, ack: cid, ...k[1] })(v, p);
+  if (v.kind === "inception") { if (v.seq !== 0 || "lin" in v || "prev" in v || "ack" in v) fail(p, "inception must have seq 0 and no lin/prev/ack"); }
   else if (!("lin" in v) || !("prev" in v) || v.seq < 1) fail(p, "non-inception lineage entry needs lin, prev and seq >= 1");
 };
 const ENV = obj(
