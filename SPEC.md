@@ -149,7 +149,9 @@ record, not of mind.
 
 Reputation is a pure, recomputable function of the log (`agentwork/reputation.py`). Only settled
 receipts that reference a settlement, link to the payee's claim, and carry at least one valid
-attestation from a third party count. Value enters as sqrt(amount); repeat deals between the same
+attestation from a third party count. An attester that has a current settled, claim-linked
+receipt with the payer or payee within 90 days of the attested receipt is not independent and
+its verdict is ignored (weight configurable). Value enters as sqrt(amount); repeat deals between the same
 pair decay as 1/k; no counterparty may contribute more than 10% of a score; a diversity factor
 (distinct counterparties / receipts) applies; flags count only from DIDs that themselves have a
 score. Scores are non-transferable: no intent moves score between DIDs. Apps MAY choose other

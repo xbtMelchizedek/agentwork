@@ -31,6 +31,16 @@ attestation majority drops a receipt the same way. Both the original and the cor
 stay in the log, so the history shows what was claimed and what replaced it. A payer can
 only ever move one counterparty's share, which `cap_frac` already bounds.
 
+Conflicted attesters: an attester who has a *trade edge* with the payer or the payee within
+`attester_conflict_window_ms` of the receipt (before or after) is not independent of that
+deal, so its attestation (valid or invalid) counts with weight `attester_conflict_weight`
+(default 0.0: ignored) instead of 1.0. A trade edge is a current (chain-tip) `settled`
+receipt between two distinct DIDs, other than the receipt being attested; when
+`require_claim_link` is on, it must also reference the payee's own `claim`, so a payer
+cannot unilaterally "conflict" an honest attester by posting a receipt naming it. Edges do
+not need attestations themselves (no circularity). This breaks in-ring attester loops
+(A pays B, C attests; C trades with B). Set the window to None to disable.
+
 Everything is recomputable by anyone from the same log; parameters are explicit.
 """
 from __future__ import annotations
@@ -58,6 +68,8 @@ class Params:
     verified_settlements: frozenset | None = None  # set of (rail, railRef) seen on-rail
     flag_step: float = 0.10
     flag_max: float = 0.50
+    attester_conflict_window_ms: int | None = 90 * DAY_MS  # None disables the conflict check
+    attester_conflict_weight: float = 0.0       # weight of a conflicted attester's verdict
 
 
 @dataclass
@@ -121,12 +133,37 @@ def _receipt_tips(idx: dict[str, dict], now_ms: int) -> dict[tuple, dict]:
 receipt_tips = _receipt_tips  # public: the indexer uses the same chain rule for job status
 
 
+def _trade_edges(idx: dict[str, dict], current: dict[tuple, dict], p: Params) -> dict[str, list[tuple]]:
+    """DID -> [(other DID, ts, receipt cid)] for every current settled receipt (both directions)."""
+    edges: dict[str, list[tuple]] = defaultdict(list)
+    for r in current.values():
+        b = r["b"]
+        payer, payee = r["from"], b["payee"]
+        if b["outcome"] != "settled" or payer == payee:
+            continue
+        if p.require_claim_link:
+            claim = idx.get(r.get("ref"))
+            if not claim or claim["t"] != "claim" or claim["from"] != payee:
+                continue
+        edges[payer].append((payee, r["ts"], r["cid"]))
+        edges[payee].append((payer, r["ts"], r["cid"]))
+    return edges
+
+
+def attester_conflicted(edges: dict[str, list[tuple]], attester: str, receipt: dict, window_ms: int) -> bool:
+    """True if `attester` traded with the receipt's payer or payee within `window_ms` of it."""
+    parties = {receipt["from"], receipt["b"]["payee"]}
+    return any(other in parties and cid != receipt["cid"] and abs(ts - receipt["ts"]) <= window_ms
+               for other, ts, cid in edges.get(attester, ()))
+
+
 def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_ok) -> list[dict]:
     attests: dict[str, list[dict]] = defaultdict(list)
     for m in idx.values():
         if m["t"] == "attest":
             attests[m["ref"]].append(m)
     current = _receipt_tips(idx, now_ms)
+    edges = _trade_edges(idx, current, p) if p.attester_conflict_window_ms is not None else {}
     out = []
     for m in idx.values():
         if m["t"] != "receipt":
@@ -147,13 +184,18 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
             claim = idx.get(m["ref"])
             if not claim or claim["t"] != "claim" or claim["from"] != payee:
                 continue
-        good, bad = set(), set()
+        good: dict[str, float] = {}
+        bad: dict[str, float] = {}
         for a in attests.get(m["cid"], ()):
             who = a["from"]
             if who in (payer, payee) or not attester_ok(who):
                 continue
-            (good if a["b"]["verdict"] == "valid" else bad).add(who)
-        if not good or len(bad) >= len(good):
+            w = 1.0
+            if edges and attester_conflicted(edges, who, m, p.attester_conflict_window_ms):
+                w = p.attester_conflict_weight
+            (good if a["b"]["verdict"] == "valid" else bad)[who] = w
+        gw, bw = sum(good.values()), sum(bad.values())
+        if gw <= 0 or bw >= gw:
             continue
         out.append(m)
     return sorted(out, key=lambda r: (r["ts"], r["cid"]))
