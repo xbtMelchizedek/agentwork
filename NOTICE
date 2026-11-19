@@ -2,3 +2,7 @@ agentwork
 Copyright 2026 the agentwork contributors
 
 Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes CSS from Arc's free core (agentwork/arc/foundation.css,
+agentwork/arc/badge.css), Copyright (c) 2026 Elia Kuratli, licensed under the
+MIT License (see agentwork/arc/LICENSE). Arc Pro is not used.

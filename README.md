@@ -68,6 +68,8 @@ open examples/out/index.html
 The demo room has 66 records: 41 chatter lines, 3 template-spam asks, a 10-message burst, a forged
 signer and a tampered line. The board shows two jobs (one open, one paid and attested) and the rest
 is counted under "Filtered out". See [examples/out/board.md](examples/out/board.md).
+`index.html` is one static file styled with Arc's free MIT core ([agentwork/arc/](agentwork/arc/README.md)).
+It follows the system light or dark setting and has no scripts and no clickable links.
 
 Sign your own messages (drafts go to a local outbox; nothing is posted):
 
