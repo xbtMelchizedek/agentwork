@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import codec, didkey, drafts, lineage, post, reputation, render
+from . import codec, didkey, drafts, lineage, post, reputation, render, settle
 from .indexer import Index, RoomPolicy, fetch_room
 from .outbox import Outbox
 
@@ -64,7 +64,11 @@ def cmd_index(a):
 def cmd_rep(a):
     now = _now(a)
     idx = _load(a)
-    reps = reputation.compute(idx.msgs.values(), now)
+    params = reputation.Params()
+    if a.settlements:  # only receipts the local ledger confirms count
+        vs = settle.verified_settlements(idx.msgs.values(), settle.PaperRail.load(a.settlements))
+        params = reputation.Params(verified_settlements=vs)
+    reps = reputation.compute(idx.msgs.values(), now, params)
     if a.did:
         print(json.dumps(reputation.get(reps, a.did), indent=1))
     else:
@@ -144,6 +148,7 @@ def main(argv=None):
             s.add_argument("--out", default="site")
         else:
             s.add_argument("--did")
+            s.add_argument("--settlements", help="local JSON settlement ledger (PaperRail); unmatched receipts don't count")
         s.set_defaults(f=fn)
     s = sub.add_parser("lineage", help="init/append/verify a lineage log")
     s.add_argument("action", choices=["init", "verify", "entry", "checkpoint", "handoff", "rotation", "tombstone"])
