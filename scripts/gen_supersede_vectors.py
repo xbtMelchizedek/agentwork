@@ -34,7 +34,8 @@ class Seq:
         return f"{self.i:016x}"
 
 
-def scenario(name, note, steps, eval_dt=100):
+def scenario(name, note, steps, eval_dt=100, arrival=None):
+    """`arrival` reorders/duplicates wire lines to model delivery; results must not depend on it."""
     s = Seq()
     m = []
     ask = codec.build(payer, "ask", R, {"task": "t", "budget": {"asset": "FLOP", "max": str(F)}}, ts=TS, n=s.n())
@@ -54,6 +55,8 @@ def scenario(name, note, steps, eval_dt=100):
             m.append(codec.build(checker, "attest", R, {"verdict": "valid", "method": "rerun"},
                                  ref=rc["cid"], ts=rc["ts"] + 1, n=s.n()))
     now = TS + eval_dt
+    if arrival:
+        m = arrival(m)
     idx = Index()
     for e in m:
         idx.add_line(codec.encode(e))
@@ -78,6 +81,17 @@ SCENARIOS = [
              [("settled", None, True, 0), ("refunded", 0, False, 1000)]),
     scenario("restore-needs-fresh-attest", "re-settle without its own attest is current but does not count",
              [("settled", None, True, 0), ("disputed", 0, False, 5), ("settled", 1, False, 10)]),
+    # Edge cases suggested on Technocore /r/builders #41409: duplicates, out-of-order delivery, ambiguity.
+    scenario("duplicate-delivery", "every line delivered twice: dedup by cid, same result as settled-then-refunded",
+             [("settled", None, True, 0), ("refunded", 0, False, 5)], arrival=lambda m: m + m),
+    scenario("out-of-order-delivery", "dispute-then-settle lines arrive newest first: order is by (ts, cid), not arrival",
+             [("settled", None, True, 0), ("disputed", 0, False, 5), ("settled", 1, True, 10)], arrival=lambda m: m[::-1]),
+    scenario("backdated-correction", "refund names the settled receipt but is dated before it: ignored",
+             [("settled", None, True, 0), ("refunded", 0, False, -5)]),
+    scenario("settle-after-dispute-must-link", "settled after a dispute that names the original, not the dispute: stale, stays disputed",
+             [("settled", None, True, 0), ("disputed", 0, False, 5), ("settled", 0, True, 10)]),
+    scenario("fork-earliest-wins", "two corrections name the same tip: the earlier (ts, cid) continues the chain, the other is ignored",
+             [("settled", None, True, 0), ("disputed", 0, False, 5), ("refunded", 0, False, 6), ("settled", 1, True, 10)]),
 ]
 
 
