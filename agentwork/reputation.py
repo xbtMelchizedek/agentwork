@@ -31,6 +31,27 @@ attestation majority drops a receipt the same way. Both the original and the cor
 stay in the log, so the history shows what was claimed and what replaced it. A payer can
 only ever move one counterparty's share, which `cap_frac` already bounds.
 
+Conflicted attesters: an attester who has a *trade edge* with the payer or the payee within
+`attester_conflict_window_ms` of the receipt (before or after) is not independent of that
+deal, so its attestation (valid or invalid) counts with weight `attester_conflict_weight`
+(default 0.0: ignored) instead of 1.0. A trade edge is a current (chain-tip) `settled`
+receipt between two distinct DIDs, other than the receipt being attested; when
+`require_claim_link` is on, it must also reference the payee's own `claim`, so a payer
+cannot unilaterally "conflict" an honest attester by posting a receipt naming it. Edges do
+not need attestations themselves (no circularity). This breaks in-ring attester loops
+(A pays B, C attests; C trades with B). Set the window to None to disable.
+
+Trade rings: a counted receipt P->Q whose payee can reach the payer back along directed
+trade edges (Q->...->P, each edge within `ring_window_ms` of the receipt) closes a cycle of
+length L (number of DIDs). If `ring_min_len <= L <= ring_max_len` its base is multiplied by
+`ring_weight` (default 0.25), even when the attester is independent. The defaults (3..6)
+leave two-party back-and-forth to pair decay and the counterparty cap. Only the shortest
+qualifying cycle matters (DFS over simple paths in sorted order, at most
+`ring_search_budget` expansions per receipt; deterministic). Edges are the same
+claim-linked trade edges as above, so nobody can put an honest receipt into a ring
+without the other workers' own claims; the weight is partial so a real small economy is
+dented, not erased. Set `ring_window_ms` to None to disable.
+
 Everything is recomputable by anyone from the same log; parameters are explicit.
 """
 from __future__ import annotations
@@ -58,6 +79,13 @@ class Params:
     verified_settlements: frozenset | None = None  # set of (rail, railRef) seen on-rail
     flag_step: float = 0.10
     flag_max: float = 0.50
+    attester_conflict_window_ms: int | None = 90 * DAY_MS  # None disables the conflict check
+    attester_conflict_weight: float = 0.0       # weight of a conflicted attester's verdict
+    ring_window_ms: int | None = 90 * DAY_MS    # None disables trade-ring detection
+    ring_min_len: int = 3                       # cycles shorter than this are left to pair decay/cap
+    ring_max_len: int = 6                       # longest cycle (in DIDs) searched for
+    ring_weight: float = 0.25                   # base multiplier for a receipt that closes a ring
+    ring_search_budget: int = 20_000            # max edge expansions per receipt (bounds dense graphs)
 
 
 @dataclass
@@ -69,6 +97,8 @@ class Rep:
     settled_value: dict = field(default_factory=dict)   # asset -> base-unit int (string on export)
     flags: int = 0
     paid_receipts: int = 0
+    ring_receipts: int = 0          # counted receipts (as payee) discounted for closing a trade ring
+    conflicted_receipts: int = 0    # counted receipts (as payee) with >=1 conflicted attester verdict
 
     def to_json(self) -> dict:
         return {
@@ -76,6 +106,8 @@ class Rep:
             "distinct_counterparties": self.counterparties,
             "settled_value": {a: str(v) for a, v in sorted(self.settled_value.items())},
             "reputable_flags": self.flags, "receipts_paid": self.paid_receipts,
+            "receipts_ring_discounted": self.ring_receipts,
+            "receipts_attester_conflicted": self.conflicted_receipts,
             "transferable": False,
         }
 
@@ -121,13 +153,94 @@ def _receipt_tips(idx: dict[str, dict], now_ms: int) -> dict[tuple, dict]:
 receipt_tips = _receipt_tips  # public: the indexer uses the same chain rule for job status
 
 
+def _trade_edges(idx: dict[str, dict], current: dict[tuple, dict], p: Params) -> dict[str, list[tuple]]:
+    """DID -> [(other DID, ts, receipt cid)] for every current settled receipt (both directions)."""
+    edges: dict[str, list[tuple]] = defaultdict(list)
+    for r in current.values():
+        b = r["b"]
+        payer, payee = r["from"], b["payee"]
+        if b["outcome"] != "settled" or payer == payee:
+            continue
+        if p.require_claim_link:
+            claim = idx.get(r.get("ref"))
+            if not claim or claim["t"] != "claim" or claim["from"] != payee:
+                continue
+        edges[payer].append((payee, r["ts"], r["cid"]))
+        edges[payee].append((payer, r["ts"], r["cid"]))
+    return edges
+
+
+def attester_conflicted(edges: dict[str, list[tuple]], attester: str, receipt: dict, window_ms: int) -> bool:
+    """True if `attester` traded with the receipt's payer or payee within `window_ms` of it."""
+    parties = {receipt["from"], receipt["b"]["payee"]}
+    return any(other in parties and cid != receipt["cid"] and abs(ts - receipt["ts"]) <= window_ms
+               for other, ts, cid in edges.get(attester, ()))
+
+
+def _directed_edges(idx: dict[str, dict], current: dict[tuple, dict], p: Params) -> dict[str, list[tuple]]:
+    """payer DID -> [(payee DID, ts, receipt cid)] for every trade edge (see _trade_edges)."""
+    out: dict[str, list[tuple]] = defaultdict(list)
+    for did, lst in _trade_edges(idx, current, p).items():
+        for other, ts, cid in lst:
+            r = idx[cid]
+            if r["from"] == did and r["b"]["payee"] == other:
+                out[did].append((other, ts, cid))
+    return out
+
+
+def ring_length(out_edges: dict[str, list[tuple]], receipt: dict, window_ms: int,
+                min_len: int = 3, max_len: int = 6, budget: int = 20_000) -> int | None:
+    """Shortest cycle length L (in DIDs, min_len <= L <= max_len) closed by `receipt`, else None.
+
+    The receipt is payer P -> payee Q; a cycle exists if Q reaches P along a *simple* path of
+    directed trade edges (payer -> payee), each within `window_ms` of the receipt and not the
+    receipt itself. A path with k edges closes a cycle of k + 1 DIDs. Depth-first over simple
+    paths in sorted order, at most `budget` edge expansions (deterministic; a dense graph that
+    exhausts the budget returns the best cycle found so far, possibly None).
+    """
+    payer, payee, rts, rcid = receipt["from"], receipt["b"]["payee"], receipt["ts"], receipt["cid"]
+    if max_len < 2 or payer == payee:
+        return None
+    adj: dict[str, list[str]] = {}
+
+    def succ(node: str) -> list[str]:
+        if node not in adj:
+            adj[node] = sorted({o for o, ts, cid in out_edges.get(node, ())
+                                if cid != rcid and abs(ts - rts) <= window_ms})
+        return adj[node]
+
+    best = None
+    left = budget
+    stack = [(payee, iter(succ(payee)))]
+    on_path = {payee}
+    while stack and left > 0:
+        node, it = stack[-1]
+        nxt = next(it, None)
+        if nxt is None:
+            stack.pop(); on_path.discard(node)
+            continue
+        left -= 1
+        length = len(stack) + 1                     # DIDs in the cycle if nxt == payer
+        if nxt == payer:
+            if length >= min_len and (best is None or length < best):
+                best = length
+            continue                                # never walk through P
+        limit = max_len if best is None else best - 1
+        if nxt in on_path or length + 1 > limit:
+            continue                                # extending to nxt and back to P needs length + 1
+        stack.append((nxt, iter(succ(nxt)))); on_path.add(nxt)
+    return best
+
+
 def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_ok) -> list[dict]:
     attests: dict[str, list[dict]] = defaultdict(list)
     for m in idx.values():
         if m["t"] == "attest":
             attests[m["ref"]].append(m)
     current = _receipt_tips(idx, now_ms)
+    edges = _trade_edges(idx, current, p) if p.attester_conflict_window_ms is not None else {}
     out = []
+    conflicted: set[str] = set()
     for m in idx.values():
         if m["t"] != "receipt":
             continue
@@ -147,19 +260,37 @@ def _qualifying_receipts(idx: dict[str, dict], now_ms: int, p: Params, attester_
             claim = idx.get(m["ref"])
             if not claim or claim["t"] != "claim" or claim["from"] != payee:
                 continue
-        good, bad = set(), set()
+        good: dict[str, float] = {}
+        bad: dict[str, float] = {}
+        hit = False
         for a in attests.get(m["cid"], ()):
             who = a["from"]
             if who in (payer, payee) or not attester_ok(who):
                 continue
-            (good if a["b"]["verdict"] == "valid" else bad).add(who)
-        if not good or len(bad) >= len(good):
+            w = 1.0
+            if edges and attester_conflicted(edges, who, m, p.attester_conflict_window_ms):
+                w = p.attester_conflict_weight
+                hit = True
+            (good if a["b"]["verdict"] == "valid" else bad)[who] = w
+        gw, bw = sum(good.values()), sum(bad.values())
+        if gw <= 0 or bw >= gw:
             continue
         out.append(m)
-    return sorted(out, key=lambda r: (r["ts"], r["cid"]))
+        if hit:
+            conflicted.add(m["cid"])
+    out.sort(key=lambda r: (r["ts"], r["cid"]))
+    ring: dict[str, float] = {}
+    if p.ring_window_ms is not None and out:
+        directed = _directed_edges(idx, current, p)
+        for m in out:
+            if ring_length(directed, m, p.ring_window_ms, p.ring_min_len, p.ring_max_len,
+                           p.ring_search_budget) is not None:
+                ring[m["cid"]] = p.ring_weight
+    return out, ring, conflicted
 
 
-def _score(receipts: list[dict], now_ms: int, p: Params) -> dict[str, Rep]:
+def _score(qualified: tuple, now_ms: int, p: Params) -> dict[str, Rep]:
+    receipts, ring, conflicted = qualified
     reps: dict[str, Rep] = {}
     contrib: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     pair_hist: dict[tuple, list[int]] = defaultdict(list)
@@ -171,10 +302,12 @@ def _score(receipts: list[dict], now_ms: int, p: Params) -> dict[str, Rep]:
         pair_hist[(payer, payee)] = hist + [r["ts"]]
         units = amt / (10 ** p.decimals[asset])
         age = max(0, now_ms - r["ts"])
-        base = math.sqrt(units) * (1.0 / k) * (0.5 ** (age / p.half_life_ms))
+        base = math.sqrt(units) * (1.0 / k) * (0.5 ** (age / p.half_life_ms)) * ring.get(r["cid"], 1.0)
         contrib[payee][payer] += base
         rep = reps.setdefault(payee, Rep(payee))
         rep.receipts += 1
+        rep.ring_receipts += r["cid"] in ring
+        rep.conflicted_receipts += r["cid"] in conflicted
         rep.settled_value[asset] = rep.settled_value.get(asset, 0) + amt
         reps.setdefault(payer, Rep(payer)).paid_receipts += 1
     for did, by_cp in contrib.items():
