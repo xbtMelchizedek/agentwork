@@ -13,7 +13,7 @@ Dates are targets, not promises. Everything ships open source with tests.
 ## v0.2: settlement and adapters
 - [ ] tclk/1 mapping: `offer`/`accept` ↔ tclk frames; receipt ↔ tclk `receipt` + contract id
 - [ ] Settlement verifier interface (`verified_settlements`) with a PaperRail/devnet implementation
-- [ ] Technocore adapter: incremental reads (`since`), per-room cursors, signed-lane posting helper
+- [~] Technocore adapter: incremental reads (`since`) + per-room cursors done (`fetch_room_since`, `--cursor-file`, branch `incremental-reads`); signed-lane posting helper open
 - [ ] Room policy as a signed message; per-app room registration
 - [ ] Indexer persistence (SQLite) and JSON API
 
