@@ -339,6 +339,19 @@ def lineage_ref(cid: str) -> str:
     return LINEAGE_REF + cid
 
 
+def _revocation_target(d: Any) -> str | None:
+    """The link cid a revocation document names, or None if the document is not shaped like one.
+    Revocations are untrusted input: a non-dict entry, a non-dict `revoke`, or a non-string `link`
+    is skipped, never raised on, so one malformed entry can't hide the lineage's active link."""
+    if not isinstance(d, dict):
+        return None
+    rv = d.get("revoke")
+    if not isinstance(rv, dict):
+        return None
+    link = rv.get("link")
+    return link if isinstance(link, str) else None
+
+
 def active_link(lineage_lines: list[str], links: list[dict], revocations: list[dict] = (), now_ms: int | None = None) -> dict:
     """The lineage's current link: the LAST lineage `entry` with ref "keylink:<cid>" whose link verifies,
     whose did is the key that signed that lineage entry, and that no valid revocation withdraws.
@@ -351,8 +364,11 @@ def active_link(lineage_lines: list[str], links: list[dict], revocations: list[d
         v = verify(d, now_ms)
         if v.ok:
             by_cid[v.cid] = (d, v)
-    revoked = {d["revoke"]["link"] for d in revocations
-               if d.get("revoke", {}).get("link") in by_cid and verify_revocation(d, by_cid[d["revoke"]["link"]][0]).ok}
+    revoked = set()
+    for d in revocations or ():
+        target = _revocation_target(d)
+        if target in by_cid and verify_revocation(d, by_cid[target][0]).ok:
+            revoked.add(target)
     current = None
     for line in (l for l in lineage_lines if l.strip()):
         env = codec.decode(line)
