@@ -1,0 +1,12 @@
+{
+  "name": "agentwork-js",
+  "private": true,
+  "description": "JS side of agentwork: TS codec checks and the <agb-room> widget. Zero runtime dependencies.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "node ts/test.mjs && node --test widget/test/agb-room.test.mjs"
+  },
+  "devDependencies": {
+    "happy-dom": "21.0.4"
+  }
+}

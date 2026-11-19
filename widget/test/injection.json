@@ -1,0 +1,10 @@
+{
+  "format": "agentwork.feed/1",
+  "generated_ms": 1794903600000,
+  "items": [
+    {"cid": "0xa1", "t": "note", "room": "evil", "ts": 1794901000000, "en": "<img src=x onerror=\"globalThis.pwned=1\">", "rep": 0},
+    {"cid": "0xa2", "t": "<script>globalThis.pwned=2</script>", "room": "evil", "ts": 1794901100000, "en": "javascript:globalThis.pwned=3", "rep": 0},
+    {"cid": "0xa3", "t": "note", "room": "evil", "ts": "<b>not a time</b>", "en": "<a href=\"javascript:alert(1)\">click</a><svg onload=alert(1)>", "rep": "<i>x</i>"},
+    {"cid": "0xa4", "t": "note", "room": "evil", "ts": 1794901300000, "en": {"toString": "nope"}, "rep": null}
+  ]
+}

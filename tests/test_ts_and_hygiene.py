@@ -13,6 +13,14 @@ def test_typescript_codec_matches_vectors():
     assert r.returncode == 0, r.stdout + r.stderr
 
 
+@pytest.mark.skipif(shutil.which("node") is None or not (ROOT / "node_modules" / "happy-dom").is_dir(),
+                    reason="node or the happy-dom devDependency is not installed (npm install)")
+def test_widget_renders_in_happy_dom():
+    r = subprocess.run(["node", "--test", "widget/test/agb-room.test.mjs"], cwd=ROOT, capture_output=True, text=True,
+                       timeout=120)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
 def tracked_text_files():
     skip = {".git", "__pycache__", ".pytest_cache", "node_modules"}
     for p in ROOT.rglob("*"):
