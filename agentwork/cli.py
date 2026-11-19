@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import codec, didkey, drafts, lineage, post, reputation, render
+from . import codec, didkey, drafts, erc8004, lineage, post, reputation, render
 from .indexer import Index, RoomPolicy, fetch_room
 from .outbox import Outbox
 
@@ -64,6 +64,11 @@ def cmd_index(a):
 def cmd_rep(a):
     now = _now(a)
     idx = _load(a)
+    if getattr(a, "format", "agb1") == "erc8004":
+        if not a.did:
+            sys.exit("--format erc8004 needs --did")
+        print(json.dumps(erc8004.export(idx.msgs.values(), a.did, now), indent=1))
+        return
     reps = reputation.compute(idx.msgs.values(), now)
     if a.did:
         print(json.dumps(reputation.get(reps, a.did), indent=1))
@@ -144,6 +149,8 @@ def main(argv=None):
             s.add_argument("--out", default="site")
         else:
             s.add_argument("--did")
+            s.add_argument("--format", choices=["agb1", "erc8004"], default="agb1",
+                           help="erc8004: ERC-8004 feedback-file JSON with the evidence cids (a file, never on-chain)")
         s.set_defaults(f=fn)
     s = sub.add_parser("lineage", help="init/append/verify a lineage log")
     s.add_argument("action", choices=["init", "verify", "entry", "checkpoint", "handoff", "rotation", "tombstone"])
