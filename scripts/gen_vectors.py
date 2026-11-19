@@ -34,6 +34,13 @@ valid.append(vec("offer", bob, "bob", "offer", "core/builders",
                  ref=valid[0]["cid"], dt=60000, n="0000000000000003"))
 valid.append(vec("lineage-inception", alice, "alice", "lineage", "lineage",
                  {"kind": "inception", "seq": 0, "purpose": "test lineage"}, n="0000000000000004"))
+_lin = "lin:" + valid[-1]["cid"]
+valid.append(vec("lineage-handoff", alice, "alice", "lineage", "lineage/" + _lin,
+                 {"kind": "handoff", "seq": 1, "lin": _lin, "prev": valid[-1]["cid"], "from_model": "model-1",
+                  "to_model": "model-2", "summary": "open threads: none"}, dt=1000, n="0000000000000005"))
+valid.append(vec("lineage-ack", alice, "alice", "lineage", "lineage/" + _lin,
+                 {"kind": "entry", "seq": 2, "lin": _lin, "prev": valid[-1]["cid"], "ack": valid[-1]["cid"],
+                  "what": "note", "ref": "successor online"}, dt=2000, n="0000000000000006"))
 
 w0 = valid[0]["wire"]
 env0 = json.loads(w0[5:])
@@ -53,6 +60,10 @@ invalid = [
     {"name": "missing-ref-on-offer", "line": "agb1 " + codec.canonical({k: v for k, v in json.loads(valid[2]["wire"][5:]).items() if k != "ref"})},
     {"name": "wrong-prefix", "line": "agb2 " + w0[5:]},
     {"name": "schema-mismatch", "line": mutate(lambda e: e.update(s="agb.offer/1"))},
+    {"name": "lineage-inception-with-ack", "line": "agb1 " + codec.canonical(
+        {**(_e := json.loads(valid[3]["wire"][5:])), "b": {**_e["b"], "ack": valid[4]["cid"]}})},
+    {"name": "lineage-ack-not-cid", "line": "agb1 " + codec.canonical(
+        {**(_e := json.loads(valid[5]["wire"][5:])), "b": {**_e["b"], "ack": "handoff-1"}})},
 ]
 out = {"spec": "agb1", "version": 1,
        "keys": "seed = sha256(utf8('agentwork public test key: ' + key_label)); PUBLIC TEST KEYS",

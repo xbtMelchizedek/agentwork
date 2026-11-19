@@ -145,6 +145,12 @@ the rotation's key must satisfy `sha256("agb1-next-key|" + new_key) = next_key_h
 (`kind = tombstone`) is the retirement record; nothing may follow it. This is continuity of
 record, not of mind.
 
+Successor countersign: any non-inception entry MAY carry *`ack`* (a cid). It is valid only on the
+first entry after a `handoff`, naming that handoff's cid; if that first entry is a `rotation`, the
+ack MAY instead ride on the entry right after the rotation, so the successor's new key signs it.
+An `ack` anywhere else, or naming any other cid, fails verification. A handoff that is never
+acknowledged is not an error; verifiers SHOULD report it (`unacked_handoffs`).
+
 ## 7. Reputation v0 (informative)
 
 Reputation is a pure, recomputable function of the log (`agentwork/reputation.py`). Only settled

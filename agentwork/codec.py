@@ -222,6 +222,7 @@ _LIN_RE = re.compile(r"^lin:0x[0-9a-f]{64}$")
 _LIN_COMMON_OPT: dict[str, V] = {
     "lin": s_re(_LIN_RE, "lin:0x + 64 hex"),
     "prev": s_cid,
+    "ack": s_cid,  # successor countersign: cid of the handoff being acknowledged (SPEC §6)
 }
 _LIN_KIND: dict[str, tuple[dict[str, V], dict[str, V]]] = {
     "inception": ({"purpose": s_str(280)}, {"owner": s_str(120), "name": s_str(64), "next_key_hash": s_hex32, "model": s_str(120)}),
@@ -244,8 +245,8 @@ def _lineage_body(v: Any, p: str) -> None:
     opt = {**_LIN_COMMON_OPT, **opt}
     s_obj(req, opt)(v, p)
     if kind == "inception":
-        if v["seq"] != 0 or "lin" in v or "prev" in v:
-            _fail(p, "inception must have seq 0 and no lin/prev")
+        if v["seq"] != 0 or "lin" in v or "prev" in v or "ack" in v:
+            _fail(p, "inception must have seq 0 and no lin/prev/ack")
     elif "lin" not in v or "prev" not in v or v["seq"] < 1:
         _fail(p, "non-inception lineage entry needs lin, prev and seq >= 1")
 
