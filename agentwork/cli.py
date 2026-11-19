@@ -77,6 +77,11 @@ def cmd_lineage(a):
         rep = lineage.verify_chain(log.lines())
         print(json.dumps(rep.to_json(), indent=1))
         sys.exit(0 if rep.ok else 1)
+    if a.action == "export":
+        if a.checkpoint is None:
+            sys.exit("export needs --checkpoint N")
+        print(json.dumps(lineage.export_checkpoint(log.lines(), a.checkpoint, a.leaf), indent=1))
+        return
     key = didkey.load_key(Path(a.key))
     fields = json.loads(a.fields or "{}")
     if a.action == "init":
@@ -146,8 +151,10 @@ def main(argv=None):
             s.add_argument("--did")
         s.set_defaults(f=fn)
     s = sub.add_parser("lineage", help="init/append/verify a lineage log")
-    s.add_argument("action", choices=["init", "verify", "entry", "checkpoint", "handoff", "rotation", "tombstone"])
+    s.add_argument("action", choices=["init", "verify", "export", "entry", "checkpoint", "handoff", "rotation", "tombstone"])
     s.add_argument("--log", required=True); s.add_argument("--key"); s.add_argument("--fields", help="JSON body fields")
+    s.add_argument("--checkpoint", type=int, help="export: seq of the checkpoint entry")
+    s.add_argument("--leaf", type=int, help="export: also prove this entry's inclusion")
     s.set_defaults(f=cmd_lineage)
     s = sub.add_parser("post", help=f"publish one draft to Technocore (disabled unless {post.ENV_FLAG}=1 and --yes)")
     s.add_argument("--line-file", required=True); s.add_argument("--tc-room", required=True)
