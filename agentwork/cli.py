@@ -122,6 +122,38 @@ def cmd_imd(a):
         print(imd.did_from_device_key(a.device_key))
 
 
+def cmd_ge(a):
+    from . import exchange
+    path = Path(a.state)
+    ex = exchange.Exchange.load(path, slots=a.slots)
+    now = _now(a)
+    try:
+        if a.action in ("buy", "sell"):
+            offer, fills = ex.place(a.agent, a.action, a.category, a.qty, a.price, now)
+            ex.save(path)
+            out = {"offer": offer.id, "state": offer.state, "filled": offer.filled,
+                   "receipts": [t.receipt for t in fills], "slots_used": ex.slots_used(a.agent)}
+        elif a.action in ("abort", "collect"):
+            r = getattr(ex, a.action)(a.agent, a.offer, now)
+            ex.save(path)
+            out = r.collect_box() if a.action == "abort" else r
+        elif a.action == "book":
+            out = ex.book(a.category)
+        elif a.action == "guide":
+            cats = [a.category] if a.category else ex.categories()
+            out = {c: ex.guide_price(c, now) for c in cats}
+        elif a.action == "history":
+            out = ex.history(a.category)
+        elif a.action == "receipts":
+            out = ex.receipts()
+        else:  # feed
+            print("\n".join(exchange.feed(ex)))
+            return
+    except exchange.ExchangeError as e:
+        sys.exit(f"ge: {e}")
+    print(json.dumps(out, indent=1, sort_keys=True, ensure_ascii=False))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="agentwork", description="agb1 open work layer for agents")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -161,6 +193,13 @@ def main(argv=None):
     s.add_argument("--receipt", help="receipt cid (proof)"); s.add_argument("--agent-ids", help="JSON file did -> agentId (proof)")
     s.add_argument("--device-key", help="64-hex IMD device key (device-did)")
     s.set_defaults(f=cmd_imd)
+    s = sub.add_parser("ge", help="Grand Exchange: off-chain order book for agent jobs (testnet play money)")
+    s.add_argument("action", choices=["buy", "sell", "abort", "collect", "book", "guide", "history", "receipts", "feed"])
+    s.add_argument("--state", default=str(Path.home() / ".agentwork" / "ge.jsonl"), help="event log (JSONL)")
+    s.add_argument("--agent"); s.add_argument("--category"); s.add_argument("--offer")
+    s.add_argument("--qty", type=int, default=1); s.add_argument("--price", type=int)
+    s.add_argument("--slots", type=int, default=8); s.add_argument("--now", type=int)
+    s.set_defaults(f=cmd_ge)
     a = ap.parse_args(argv)
     a.f(a)
 
