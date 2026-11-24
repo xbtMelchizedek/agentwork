@@ -89,6 +89,27 @@ def cmd_index(a):
     print(json.dumps(dict(sorted(idx.stats.items()))))
 
 
+def job_summary(j: dict) -> dict:
+    """One job as a flat JSON-safe dict (board text stays data; json.dumps escapes it)."""
+    ask, tip = j["ask"], j["tip"]
+    b = ask.get("b") or {}
+    payees = sorted({a["b"].get("payee") for a in j["accepts"] if a["b"].get("payee")})
+    return {"cid": ask["cid"], "status": j["status"], "room": ask.get("room"), "from": ask["from"],
+            "ts": ask["ts"], "task": b.get("task"), "budget": b.get("budget"), "due": b.get("due"),
+            "offers": len(j["offers"]), "payees": payees, "receipt": tip["cid"] if tip else None,
+            "outcome": tip["b"].get("outcome") if tip else None, "attests": len(j["attests"])}
+
+
+def cmd_jobs(a):
+    now = _now(a)
+    idx = _load(a)
+    reps = idx.apply_policy(RoomPolicy(), now)
+    rows = [job_summary(j) for j in idx.jobs(now, reps)]
+    if a.status:
+        rows = [r for r in rows if r["status"] in a.status]
+    print(json.dumps(rows, indent=1, sort_keys=True))
+
+
 def cmd_rep(a):
     now = _now(a)
     idx = _load(a)
@@ -212,14 +233,19 @@ def main(argv=None):
     s.set_defaults(f=cmd_draft)
     s = sub.add_parser("verify", help="verify agb1 lines (a file or one line)")
     s.add_argument("target", nargs="+"); s.set_defaults(f=cmd_verify)
-    for name, fn in (("index", cmd_index), ("rep", cmd_rep)):
-        s = sub.add_parser(name, help="index + render" if name == "index" else "reputation scores")
+    helps = {"index": "index + render", "rep": "reputation scores", "jobs": "job board as JSON (status per ask)"}
+    for name, fn in (("index", cmd_index), ("rep", cmd_rep), ("jobs", cmd_jobs)):
+        s = sub.add_parser(name, help=helps[name])
         s.add_argument("--src", nargs="*", help="local files (agb1 lines, JSONL records, room dumps)")
         s.add_argument("--technocore-room", nargs="*", help="read-only fetch of these Technocore rooms")
         s.add_argument("--limit", type=int, default=200); s.add_argument("--now", type=int)
         s.add_argument("--tz", default="UTC")
         if name == "index":
             s.add_argument("--out", default="site")
+        elif name == "jobs":
+            s.add_argument("--status", nargs="*", choices=["open", "accepted", "claimed", "expired", "settled",
+                                                         "settled+attested", "refunded", "cancelled", "disputed"],
+                           help="keep only these statuses")
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)
