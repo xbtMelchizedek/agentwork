@@ -107,6 +107,10 @@ def cmd_jobs(a):
     rows = [job_summary(j) for j in idx.jobs(now, reps)]
     if a.status:
         rows = [r for r in rows if r["status"] in a.status]
+    if a.did:
+        if not a.did.startswith("did:"):
+            raise CliError(f"--did must be a DID (did:key:...), got {a.did[:40]!r}")
+        rows = [r for r in rows if r["from"] == a.did or a.did in r["payees"]]
     print(json.dumps(rows, indent=1, sort_keys=True))
 
 
@@ -246,6 +250,7 @@ def main(argv=None):
             s.add_argument("--status", nargs="*", choices=["open", "accepted", "claimed", "expired", "settled",
                                                          "settled+attested", "refunded", "cancelled", "disputed"],
                            help="keep only these statuses")
+            s.add_argument("--did", help="keep only jobs this DID posted or was accepted as payee on")
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)

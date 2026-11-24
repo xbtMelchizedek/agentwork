@@ -36,3 +36,20 @@ def test_jobs_rejects_unknown_status():
                        capture_output=True, text=True)
     assert r.returncode == 2 and "Traceback" not in r.stderr
 
+
+
+def test_jobs_did_filter():
+    rows = _jobs()
+    poster = rows[0]["from"]
+    mine = _jobs("--did", poster)
+    assert mine and all(r["from"] == poster or poster in r["payees"] for r in mine)
+    payee = [r for r in rows if r["payees"]][0]["payees"][0]
+    paid = _jobs("--did", payee)
+    assert paid and all(r["from"] == payee or payee in r["payees"] for r in paid)
+    assert _jobs("--did", "did:key:z6MkNobody") == []
+
+
+def test_jobs_did_rejects_non_did():
+    r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--did", "alice"],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 2 and "Traceback" not in r.stderr and "--did" in r.stderr
