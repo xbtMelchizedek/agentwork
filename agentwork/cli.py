@@ -12,6 +12,31 @@ from .indexer import Index, RoomPolicy, fetch_room
 from .outbox import Outbox
 
 
+class CliError(Exception):
+    """Bad user input: main() prints one line to stderr and exits 2 instead of a traceback."""
+
+
+def _json_obj(text: str | None, flag: str) -> dict:
+    try:
+        v = json.loads(text if text is not None else "{}")
+    except json.JSONDecodeError as e:
+        raise CliError(f"{flag} is not valid JSON ({e.msg} at char {e.pos})") from None
+    if not isinstance(v, dict):
+        raise CliError(f"{flag} must be a JSON object, got {type(v).__name__}")
+    return v
+
+
+def _key(path: str | None, cmd: str) -> didkey.SigningKey:
+    if not path:
+        raise CliError(f"{cmd} needs --key (a seed file from `agentwork keygen`)")
+    try:
+        return didkey.load_key(Path(path))
+    except FileNotFoundError:
+        raise CliError(f"key file not found: {path}") from None
+    except ValueError as e:
+        raise CliError(f"bad key file {path}: {e}") from None
+
+
 def _now(a) -> int:
     return int(a.now) if getattr(a, "now", None) else int(time.time() * 1000)
 
@@ -23,9 +48,12 @@ def cmd_keygen(a):
 
 
 def cmd_draft(a):
-    key = didkey.load_key(Path(a.key))
-    args = json.loads(a.args)
-    env = drafts.make(f"post_{a.intent}", key, args)
+    key = _key(a.key, "draft")
+    args = _json_obj(a.args, "--args")
+    try:
+        env = drafts.make(f"post_{a.intent}", key, args)
+    except codec.AgbError as e:
+        raise CliError(str(e)) from None
     p = Outbox(Path(a.outbox)).put(env)
     print(json.dumps({"cid": env["cid"], "outbox_file": str(p), "posted": False}))
 
@@ -77,12 +105,19 @@ def cmd_lineage(a):
         rep = lineage.verify_chain(log.lines())
         print(json.dumps(rep.to_json(), indent=1))
         sys.exit(0 if rep.ok else 1)
-    key = didkey.load_key(Path(a.key))
-    fields = json.loads(a.fields or "{}")
-    if a.action == "init":
-        env = log.incept(key, **fields)
-    else:
-        env = log.append(key, a.action, **fields)
+    key = _key(a.key, f"lineage {a.action}")
+    fields = _json_obj(a.fields, "--fields")
+    if a.action == "init" and "purpose" not in fields:
+        raise CliError('lineage init needs --fields with "purpose", e.g. {"purpose":"…"}')
+    try:
+        if a.action == "init":
+            env = log.incept(key, **fields)
+        else:
+            env = log.append(key, a.action, **fields)
+    except ValueError as e:
+        raise CliError(f"{a.action}: {e}") from None
+    except TypeError as e:  # unknown field name for incept
+        raise CliError(f"{a.action}: bad --fields: {e}") from None
     print(env["cid"])
 
 
@@ -104,6 +139,17 @@ def cmd_mcp(a):
 
 def cmd_imd(a):
     from . import imd
+    if a.action == "proof" and not a.receipt:
+        raise CliError("imd proof needs --receipt <cid>")
+    if a.action == "device-did" and not a.device_key:
+        raise CliError("imd device-did needs --device-key <64 hex>")
+    try:
+        _imd(a, imd)
+    except imd.ImdError as e:
+        raise CliError(f"{a.action}: {e}") from None
+
+
+def _imd(a, imd):
     if a.action == "observe":
         recs = imd.load_observed(a.src)
         text = imd.observed_md(recs, a.tz)
@@ -201,7 +247,11 @@ def main(argv=None):
     s.add_argument("--slots", type=int, default=8); s.add_argument("--now", type=int)
     s.set_defaults(f=cmd_ge)
     a = ap.parse_args(argv)
-    a.f(a)
+    try:
+        a.f(a)
+    except CliError as e:
+        print(f"agentwork {a.cmd}: {e}", file=sys.stderr)
+        sys.exit(2)
 
 
 if __name__ == "__main__":
