@@ -127,3 +127,17 @@ def test_jobs_room_rejects_blank():
     r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--room", " / "],
                        cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 2 and "Traceback" not in r.stderr and "--room" in r.stderr
+
+
+def test_jobs_asset_filter():
+    rows = _jobs()
+    flop = [r for r in rows if (r.get("budget") or {}).get("asset") == "FLOP"]
+    assert flop and _jobs("--asset", "FLOP") == flop
+    assert _jobs("--asset", " flop ") == flop
+    assert _jobs("--asset", "USDC") == []
+
+
+def test_jobs_asset_rejects_blank():
+    r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--asset", "  "],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 2 and "Traceback" not in r.stderr and "--asset" in r.stderr
