@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -111,7 +112,32 @@ def cmd_jobs(a):
         if not a.did.startswith("did:"):
             raise CliError(f"--did must be a DID (did:key:...), got {a.did[:40]!r}")
         rows = [r for r in rows if r["from"] == a.did or a.did in r["payees"]]
+    if a.md:
+        print(jobs_markdown(rows))
+        return
     print(json.dumps(rows, indent=1, sort_keys=True))
+
+
+def _md_cell(v, n: int = 80) -> str:
+    """Board text is data: flatten whitespace, escape pipes/backticks/brackets, cap length."""
+    t = " ".join(str("" if v is None else v).split())
+    t = t[:n] + ("..." if len(t) > n else "")
+    return re.sub(r"([|\\\`\[\]<>])", r"\\\1", t)
+
+
+def _budget(b) -> str:
+    if isinstance(b, dict):
+        return " ".join(str(b[k]) for k in ("max", "asset") if b.get(k) is not None) or ""
+    return "" if b is None else str(b)
+
+
+def jobs_markdown(rows: list) -> str:
+    """Job board as a markdown table (newest first); short cids and DIDs, task text escaped."""
+    head = "| status | task | budget | due | offers | from | cid |\n|---|---|---|---|---|---|---|"
+    body = [f"| {_md_cell(r['status'])} | {_md_cell(r['task'])} | {_md_cell(_budget(r['budget']), 24)} | {_md_cell(r['due'], 24)} "
+            f"| {r['offers']} | {_md_cell(r['from'][-8:])} | {_md_cell(str(r['cid'])[:12])} |"
+            for r in sorted(rows, key=lambda r: -(r['ts'] or 0))]
+    return "\n".join([head, *body]) if body else "_no jobs match_"
 
 
 def cmd_rep(a):
@@ -251,6 +277,7 @@ def main(argv=None):
                                                          "settled+attested", "refunded", "cancelled", "disputed"],
                            help="keep only these statuses")
             s.add_argument("--did", help="keep only jobs this DID posted or was accepted as payee on")
+            s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)

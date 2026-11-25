@@ -53,3 +53,21 @@ def test_jobs_did_rejects_non_did():
     r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--did", "alice"],
                        cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 2 and "Traceback" not in r.stderr and "--did" in r.stderr
+
+
+def test_jobs_md_table_escapes_board_text():
+    r = subprocess.run([sys.executable, '-m', 'agentwork', 'jobs', '--src', 'examples/demo_room.json',
+                        '--now', str(T + 3_600_000), '--md'], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    lines = r.stdout.strip().splitlines()
+    assert lines[0].startswith('| status | task |') and len(lines) == 2 + len(_jobs())
+
+
+def test_md_cell_neutralises_markup():
+    from agentwork.cli import _md_cell, jobs_markdown
+    bt, bs = chr(96), chr(92)
+    got = _md_cell('a|b [x](y) <s> ' + bt + 'c\nz')
+    assert got == 'a' + bs + '|b ' + bs + '[x' + bs + '](y) ' + bs + '<s' + bs + '> ' + bs + bt + 'c z'
+    assert _md_cell('x' * 100, 10) == 'x' * 10 + '...'
+    assert jobs_markdown([]) == '_no jobs match_'
+
