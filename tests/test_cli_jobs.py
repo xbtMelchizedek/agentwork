@@ -96,3 +96,19 @@ def test_jobs_task_rejects_blank():
                        cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 2 and "Traceback" not in r.stderr and "--task" in r.stderr
 
+
+
+def test_jobs_newest_keeps_newest_after_filters():
+    rows = _jobs()
+    newest = max(rows, key=lambda r: r["ts"])
+    one = _jobs("--newest", "1")
+    assert [r["cid"] for r in one] == [newest["cid"]]
+    assert len(_jobs("--newest", "50")) == len(rows)
+    assert _jobs("--status", "open", "--newest", "1", "--count") == {"total": 1, "by_status": {"open": 1}}
+
+
+def test_jobs_newest_rejects_non_positive():
+    for bad in ("0", "-3", "x"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--newest", bad],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--newest" in r.stderr

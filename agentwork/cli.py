@@ -117,6 +117,10 @@ def cmd_jobs(a):
         if not needle:
             raise CliError("--task needs non-blank text")
         rows = [r for r in rows if needle in " ".join(str(r["task"] or "").split()).casefold()]
+    if a.newest is not None:
+        if a.newest < 1:
+            raise CliError(f"--newest must be a positive integer, got {a.newest}")
+        rows = sorted(rows, key=lambda r: -(r["ts"] or 0))[:a.newest]
     if a.count:
         by = {}
         for r in rows:
@@ -289,9 +293,10 @@ def main(argv=None):
                            help="keep only these statuses")
             s.add_argument("--did", help="keep only jobs this DID posted or was accepted as payee on")
             s.add_argument("--task", help="keep only jobs whose task text contains this (case-insensitive, plain text, not a regex)")
+            s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",
-                           help='print only {"total", "by_status"} counts (after --status/--did/--task filters)')
+                           help='print only {"total", "by_status"} counts (after --status/--did/--task/--newest filters)')
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)
