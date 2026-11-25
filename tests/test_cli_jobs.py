@@ -193,3 +193,18 @@ def test_jobs_max_budget_rejects_bad():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--max-budget", bad],
                            cwd=ROOT, capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--max-budget" in r.stderr
+
+
+def test_jobs_since_filter():
+    rows = _jobs()
+    ts = sorted(r["ts"] for r in rows)
+    assert _jobs("--since", "0") == rows
+    assert _jobs("--since", str(ts[-1])) == [r for r in rows if r["ts"] >= ts[-1]]
+    assert _jobs("--since", str(ts[-1] + 1)) == []
+
+
+def test_jobs_since_rejects_bad():
+    for bad in ("-1", "x", "1.5"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--since", bad],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--since" in r.stderr

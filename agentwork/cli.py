@@ -155,6 +155,10 @@ def cmd_jobs(a):
         if a.max_offers < 0:
             raise CliError(f"--max-offers must be 0 or more, got {a.max_offers}")
         rows = [r for r in rows if r["offers"] <= a.max_offers]
+    if a.since is not None:
+        if a.since < 0:
+            raise CliError(f"--since must be a unix time 0 or more, got {a.since}")
+        rows = [r for r in rows if isinstance(r.get("ts"), int) and r["ts"] >= a.since]
     if a.newest is not None:
         if a.newest < 1:
             raise CliError(f"--newest must be a positive integer, got {a.newest}")
@@ -339,6 +343,8 @@ def main(argv=None):
                            help="keep only jobs whose budget max is at most N (decimal; unpriced jobs drop out)")
             s.add_argument("--max-offers", type=int,
                            help="keep only jobs with at most N offers (0 = nobody has bid yet)")
+            s.add_argument("--since", type=int,
+                           help="keep only jobs asked at or after this unix time in seconds (for polling)")
             s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",
