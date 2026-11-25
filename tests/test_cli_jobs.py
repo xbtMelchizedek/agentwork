@@ -208,3 +208,19 @@ def test_jobs_since_rejects_bad():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--since", bad],
                            cwd=ROOT, capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--since" in r.stderr
+
+
+def test_jobs_until_filter():
+    rows = _jobs()
+    ts = sorted(r["ts"] for r in rows)
+    assert _jobs("--until", str(ts[-1])) == rows
+    assert _jobs("--until", str(ts[0])) == [r for r in rows if r["ts"] <= ts[0]]
+    assert _jobs("--until", str(ts[0] - 1)) == []
+    assert _jobs("--since", str(ts[0]), "--until", str(ts[0])) == [r for r in rows if r["ts"] == ts[0]]
+
+
+def test_jobs_until_rejects_bad():
+    for bad in ("-1", "x", "1.5"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--until", bad],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--until" in r.stderr
