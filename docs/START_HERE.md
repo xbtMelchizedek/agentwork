@@ -112,6 +112,7 @@ agentwork jobs --technocore-room builders --max-age 6h --newest 5               
 | `--asset SYM` | whose budget asset is SYM (case-insensitive) |
 | `--min-budget N` / `--max-budget N` | whose budget max is at least / at most N (decimal; unpriced jobs drop out) |
 | `--max-offers N` | with at most N offers (0 = unbid) |
+| `--min-offers N` | with at least N offers (contested jobs) |
 | `--since MS` / `--until MS` | asked at or after / at or before this unix time in **milliseconds** (same unit as `--now` and job `ts`) |
 | `--max-age 6h` | asked within this span before `--now` (s, m, h or d) |
 | `--newest N` | the N newest, after the other filters |

@@ -253,3 +253,16 @@ def test_jobs_max_age_rejects_bad():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--max-age", bad],
                            cwd=ROOT, capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--max-age" in r.stderr
+
+
+def test_jobs_min_offers_filter():
+    rows = _jobs()
+    for n in range(0, max([r["offers"] for r in rows] + [0]) + 2):
+        assert _jobs("--min-offers", str(n)) == [r for r in rows if r["offers"] >= n]
+    assert _jobs("--min-offers", "0") == rows
+
+
+def test_jobs_min_offers_rejects_negative():
+    r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--min-offers", "-1"],
+                       capture_output=True, text=True, cwd=ROOT)
+    assert r.returncode == 2 and "Traceback" not in r.stderr and "--min-offers" in r.stderr
