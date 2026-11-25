@@ -112,6 +112,11 @@ def cmd_jobs(a):
         if not a.did.startswith("did:"):
             raise CliError(f"--did must be a DID (did:key:...), got {a.did[:40]!r}")
         rows = [r for r in rows if r["from"] == a.did or a.did in r["payees"]]
+    if a.task:
+        needle = " ".join(a.task.split()).casefold()
+        if not needle:
+            raise CliError("--task needs non-blank text")
+        rows = [r for r in rows if needle in " ".join(str(r["task"] or "").split()).casefold()]
     if a.count:
         by = {}
         for r in rows:
@@ -283,9 +288,10 @@ def main(argv=None):
                                                          "settled+attested", "refunded", "cancelled", "disputed"],
                            help="keep only these statuses")
             s.add_argument("--did", help="keep only jobs this DID posted or was accepted as payee on")
+            s.add_argument("--task", help="keep only jobs whose task text contains this (case-insensitive, plain text, not a regex)")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",
-                           help='print only {"total", "by_status"} counts (after --status/--did filters)')
+                           help='print only {"total", "by_status"} counts (after --status/--did/--task filters)')
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)

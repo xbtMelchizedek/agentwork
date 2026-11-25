@@ -80,3 +80,19 @@ def test_jobs_count_summary():
 
 def test_jobs_count_respects_filters():
     assert _jobs("--status", "open", "--count") == {"total": 1, "by_status": {"open": 1}}
+
+
+def test_jobs_task_filter_is_plain_case_insensitive_text():
+    rows = _jobs()
+    word = next(w for r in rows for w in str(r["task"] or "").split() if len(w) > 3)
+    hit = _jobs("--task", word.upper())
+    assert hit and all(word.casefold() in str(r["task"]).casefold() for r in hit)
+    assert _jobs("--task", ".*") == []
+    assert _jobs("--task", word, "--count")["total"] == len(hit)
+
+
+def test_jobs_task_rejects_blank():
+    r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--task", "  "],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 2 and "Traceback" not in r.stderr and "--task" in r.stderr
+
