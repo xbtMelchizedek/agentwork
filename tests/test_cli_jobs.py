@@ -235,3 +235,21 @@ def test_every_jobs_filter_is_documented_in_start_here():
     doc = (ROOT / "docs" / "START_HERE.md").read_text()
     missing = sorted(f for f in flags if "`" + f not in doc)
     assert flags and not missing, missing
+
+
+def test_jobs_max_age_is_relative_to_now_in_ms():
+    rows = _jobs()
+    newest = max(r["ts"] for r in rows)
+    oldest = min(r["ts"] for r in rows)
+    # ts and --now are milliseconds
+    assert _jobs("--now", str(newest), "--max-age", "1s") == [r for r in rows if r["ts"] >= newest - 1000]
+    span_s = (newest - oldest) // 1000 + 1
+    assert _jobs("--now", str(newest), "--max-age", f"{span_s}s") == rows
+    assert _jobs("--now", str(newest + 86_400_000 * 3), "--max-age", "2d") == []
+
+
+def test_jobs_max_age_rejects_bad():
+    for bad in ("0h", "6", "h", "-1d", "1.5h", "6w"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--max-age", bad],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--max-age" in r.stderr
