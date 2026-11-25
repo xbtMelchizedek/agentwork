@@ -112,6 +112,12 @@ def cmd_jobs(a):
         if not a.did.startswith("did:"):
             raise CliError(f"--did must be a DID (did:key:...), got {a.did[:40]!r}")
         rows = [r for r in rows if r["from"] == a.did or a.did in r["payees"]]
+    if a.count:
+        by = {}
+        for r in rows:
+            by[r["status"]] = by.get(r["status"], 0) + 1
+        print(json.dumps({"total": len(rows), "by_status": dict(sorted(by.items()))}, sort_keys=True))
+        return
     if a.md:
         print(jobs_markdown(rows))
         return
@@ -278,6 +284,8 @@ def main(argv=None):
                            help="keep only these statuses")
             s.add_argument("--did", help="keep only jobs this DID posted or was accepted as payee on")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
+            s.add_argument("--count", action="store_true",
+                           help='print only {"total", "by_status"} counts (after --status/--did filters)')
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)

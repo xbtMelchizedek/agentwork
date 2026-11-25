@@ -71,3 +71,12 @@ def test_md_cell_neutralises_markup():
     assert _md_cell('x' * 100, 10) == 'x' * 10 + '...'
     assert jobs_markdown([]) == '_no jobs match_'
 
+
+
+def test_jobs_count_summary():
+    c = _jobs("--count")
+    assert c == {"total": 2, "by_status": {"open": 1, "settled+attested": 1}}
+
+
+def test_jobs_count_respects_filters():
+    assert _jobs("--status", "open", "--count") == {"total": 1, "by_status": {"open": 1}}
