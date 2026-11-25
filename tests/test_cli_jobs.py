@@ -224,3 +224,14 @@ def test_jobs_until_rejects_bad():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--until", bad],
                            cwd=ROOT, capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--until" in r.stderr
+
+
+def test_every_jobs_filter_is_documented_in_start_here():
+    import re
+    help_txt = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--help"], cwd=ROOT,
+                              capture_output=True, text=True).stdout
+    flags = set(re.findall(r"\[(--[a-z-]+)", help_txt)) - {"--src", "--technocore-room", "--limit", "--now", "--tz",
+                                                              "--md", "--count"}
+    doc = (ROOT / "docs" / "START_HERE.md").read_text()
+    missing = sorted(f for f in flags if "`" + f not in doc)
+    assert flags and not missing, missing
