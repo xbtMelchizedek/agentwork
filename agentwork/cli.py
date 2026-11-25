@@ -117,6 +117,11 @@ def cmd_jobs(a):
         if not needle:
             raise CliError("--task needs non-blank text")
         rows = [r for r in rows if needle in " ".join(str(r["task"] or "").split()).casefold()]
+    if a.room is not None:
+        room = a.room.strip().strip("/")
+        if not room:
+            raise CliError("--room needs a room name, e.g. core/builders")
+        rows = [r for r in rows if str(r.get("room") or "").strip("/") == room]
     if a.newest is not None:
         if a.newest < 1:
             raise CliError(f"--newest must be a positive integer, got {a.newest}")
@@ -293,6 +298,7 @@ def main(argv=None):
                            help="keep only these statuses")
             s.add_argument("--did", help="keep only jobs this DID posted or was accepted as payee on")
             s.add_argument("--task", help="keep only jobs whose task text contains this (case-insensitive, plain text, not a regex)")
+            s.add_argument("--room", help="keep only jobs asked in this room (exact name, e.g. core/builders)")
             s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",

@@ -112,3 +112,18 @@ def test_jobs_newest_rejects_non_positive():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--newest", bad],
                            cwd=ROOT, capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--newest" in r.stderr
+
+
+def test_jobs_room_filter_is_exact():
+    rows = _jobs()
+    room = rows[0]["room"]
+    assert len(_jobs("--room", room)) == len([r for r in rows if r["room"] == room])
+    assert len(_jobs("--room", "/" + room + "/")) == len(_jobs("--room", room))
+    assert _jobs("--room", room.split("/")[0]) == []
+    assert _jobs("--room", "no/such-room") == []
+
+
+def test_jobs_room_rejects_blank():
+    r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--room", " / "],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 2 and "Traceback" not in r.stderr and "--room" in r.stderr
