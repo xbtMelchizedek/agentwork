@@ -174,3 +174,22 @@ def test_jobs_min_budget_rejects_bad():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--min-budget", bad],
                            cwd=ROOT, capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--min-budget" in r.stderr
+
+
+def test_jobs_max_budget_filter():
+    from decimal import Decimal
+    rows = _jobs()
+    priced = [r for r in rows if isinstance(r.get("budget"), dict) and r["budget"].get("max") is not None]
+    assert priced
+    hi = max(Decimal(str(r["budget"]["max"])) for r in priced)
+    lo = min(Decimal(str(r["budget"]["max"])) for r in priced)
+    assert _jobs("--max-budget", str(hi)) == priced
+    assert _jobs("--max-budget", str(lo)) == [r for r in priced if Decimal(str(r["budget"]["max"])) <= lo]
+    assert _jobs("--min-budget", str(lo), "--max-budget", str(lo)) == [r for r in priced if Decimal(str(r["budget"]["max"])) == lo]
+
+
+def test_jobs_max_budget_rejects_bad():
+    for bad in ("-1", "x", "  ", "nan", "inf"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--max-budget", bad],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--max-budget" in r.stderr

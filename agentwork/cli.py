@@ -129,22 +129,28 @@ def cmd_jobs(a):
             raise CliError("--asset needs an asset symbol, e.g. FLOP")
         rows = [r for r in rows if isinstance(r.get("budget"), dict)
                 and str(r["budget"].get("asset") or "").strip().casefold() == asset]
-    if a.min_budget is not None:
+    def _budget_bound(raw, flag):
         try:
-            floor = Decimal(a.min_budget.strip())
+            v = Decimal(raw.strip())
         except (InvalidOperation, AttributeError):
-            floor = None
-        if floor is None or not floor.is_finite() or floor < 0:
-            raise CliError(f"--min-budget must be a number 0 or more, got {str(a.min_budget)[:40]!r}")
+            v = None
+        if v is None or not v.is_finite() or v < 0:
+            raise CliError(f"{flag} must be a number 0 or more, got {str(raw)[:40]!r}")
+        return v
 
-        def _max(r):
-            b = r.get("budget")
-            try:
-                v = Decimal(str(b.get("max")).strip()) if isinstance(b, dict) and b.get("max") is not None else None
-            except InvalidOperation:
-                return None
-            return v if v is not None and v.is_finite() else None
+    def _max(r):
+        b = r.get("budget")
+        try:
+            v = Decimal(str(b.get("max")).strip()) if isinstance(b, dict) and b.get("max") is not None else None
+        except InvalidOperation:
+            return None
+        return v if v is not None and v.is_finite() else None
+    if a.min_budget is not None:
+        floor = _budget_bound(a.min_budget, "--min-budget")
         rows = [r for r in rows if (_max(r) is not None and _max(r) >= floor)]
+    if a.max_budget is not None:
+        ceil = _budget_bound(a.max_budget, "--max-budget")
+        rows = [r for r in rows if (_max(r) is not None and _max(r) <= ceil)]
     if a.max_offers is not None:
         if a.max_offers < 0:
             raise CliError(f"--max-offers must be 0 or more, got {a.max_offers}")
@@ -329,6 +335,8 @@ def main(argv=None):
             s.add_argument("--asset", help="keep only jobs whose budget asset is this (case-insensitive, e.g. FLOP)")
             s.add_argument("--min-budget",
                            help="keep only jobs whose budget max is at least N (decimal; unpriced jobs drop out)")
+            s.add_argument("--max-budget",
+                           help="keep only jobs whose budget max is at most N (decimal; unpriced jobs drop out)")
             s.add_argument("--max-offers", type=int,
                            help="keep only jobs with at most N offers (0 = nobody has bid yet)")
             s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
