@@ -128,6 +128,10 @@ def cmd_jobs(a):
             raise CliError("--asset needs an asset symbol, e.g. FLOP")
         rows = [r for r in rows if isinstance(r.get("budget"), dict)
                 and str(r["budget"].get("asset") or "").strip().casefold() == asset]
+    if a.max_offers is not None:
+        if a.max_offers < 0:
+            raise CliError(f"--max-offers must be 0 or more, got {a.max_offers}")
+        rows = [r for r in rows if r["offers"] <= a.max_offers]
     if a.newest is not None:
         if a.newest < 1:
             raise CliError(f"--newest must be a positive integer, got {a.newest}")
@@ -306,6 +310,8 @@ def main(argv=None):
             s.add_argument("--task", help="keep only jobs whose task text contains this (case-insensitive, plain text, not a regex)")
             s.add_argument("--room", help="keep only jobs asked in this room (exact name, e.g. core/builders)")
             s.add_argument("--asset", help="keep only jobs whose budget asset is this (case-insensitive, e.g. FLOP)")
+            s.add_argument("--max-offers", type=int,
+                           help="keep only jobs with at most N offers (0 = nobody has bid yet)")
             s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",

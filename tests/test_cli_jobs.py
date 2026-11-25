@@ -141,3 +141,18 @@ def test_jobs_asset_rejects_blank():
     r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--asset", "  "],
                        cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 2 and "Traceback" not in r.stderr and "--asset" in r.stderr
+
+
+def test_jobs_max_offers_filter():
+    rows = _jobs()
+    for n in (0, 1, 2):
+        assert _jobs("--max-offers", str(n)) == [r for r in rows if r["offers"] <= n]
+    top = max(r["offers"] for r in rows)
+    assert len(_jobs("--max-offers", str(top))) == len(rows)
+
+
+def test_jobs_max_offers_rejects_negative():
+    for bad in ("-1", "x"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--max-offers", bad],
+                           cwd=ROOT, capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--max-offers" in r.stderr
