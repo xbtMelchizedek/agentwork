@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal, InvalidOperation
 import json
 import re
 import sys
@@ -128,6 +129,22 @@ def cmd_jobs(a):
             raise CliError("--asset needs an asset symbol, e.g. FLOP")
         rows = [r for r in rows if isinstance(r.get("budget"), dict)
                 and str(r["budget"].get("asset") or "").strip().casefold() == asset]
+    if a.min_budget is not None:
+        try:
+            floor = Decimal(a.min_budget.strip())
+        except (InvalidOperation, AttributeError):
+            floor = None
+        if floor is None or not floor.is_finite() or floor < 0:
+            raise CliError(f"--min-budget must be a number 0 or more, got {str(a.min_budget)[:40]!r}")
+
+        def _max(r):
+            b = r.get("budget")
+            try:
+                v = Decimal(str(b.get("max")).strip()) if isinstance(b, dict) and b.get("max") is not None else None
+            except InvalidOperation:
+                return None
+            return v if v is not None and v.is_finite() else None
+        rows = [r for r in rows if (_max(r) is not None and _max(r) >= floor)]
     if a.max_offers is not None:
         if a.max_offers < 0:
             raise CliError(f"--max-offers must be 0 or more, got {a.max_offers}")
@@ -310,12 +327,14 @@ def main(argv=None):
             s.add_argument("--task", help="keep only jobs whose task text contains this (case-insensitive, plain text, not a regex)")
             s.add_argument("--room", help="keep only jobs asked in this room (exact name, e.g. core/builders)")
             s.add_argument("--asset", help="keep only jobs whose budget asset is this (case-insensitive, e.g. FLOP)")
+            s.add_argument("--min-budget",
+                           help="keep only jobs whose budget max is at least N (decimal; unpriced jobs drop out)")
             s.add_argument("--max-offers", type=int,
                            help="keep only jobs with at most N offers (0 = nobody has bid yet)")
             s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",
-                           help='print only {"total", "by_status"} counts (after --status/--did/--task/--newest filters)')
+                           help='print only {"total", "by_status"} counts (after all filters)')
         else:
             s.add_argument("--did")
         s.set_defaults(f=fn)
