@@ -122,7 +122,7 @@ class LineageLog:
         self.path = Path(path)
 
     def lines(self) -> list[str]:
-        return self.path.read_text().splitlines() if self.path.exists() else []
+        return self.path.read_text(encoding="utf-8").splitlines() if self.path.exists() else []
 
     def state(self) -> ChainReport:
         rep = verify_chain(self.lines())

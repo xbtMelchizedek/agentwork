@@ -232,7 +232,7 @@ class Exchange:
     def load(cls, path: Path, **kw) -> "Exchange":
         if not path.exists():
             return cls(**kw)
-        events = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+        events = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
         return cls.replay(events, **kw)
 
     def save(self, path: Path) -> None:

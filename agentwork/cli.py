@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 from decimal import Decimal, InvalidOperation
 import json
 import re
@@ -52,6 +53,15 @@ def _check_tz(tz: str | None) -> None:
         raise CliError(f"--tz: unknown IANA time zone {tz!r} (e.g. UTC, America/New_York)") from None
 
 
+@contextlib.contextmanager
+def _utf8(flag: str, path) -> None:
+    """Turn a UnicodeDecodeError while reading `path` into one CliError line instead of a traceback."""
+    try:
+        yield
+    except UnicodeDecodeError:
+        raise CliError(f"{flag}: not valid UTF-8: {path}") from None
+
+
 def _now(a) -> int:
     return int(a.now) if getattr(a, "now", None) else int(time.time() * 1000)
 
@@ -91,7 +101,8 @@ def cmd_verify(a):
     for t in a.target:
         src = Path(t)
         try:
-            lines += src.read_text().splitlines() if src.exists() else [t]
+            with _utf8("file", t):
+                lines += src.read_text(encoding="utf-8").splitlines() if src.exists() else [t]
         except OSError as e:  # directory or unreadable target file
             raise CliError(f"{e.strerror}: {t}") from None
     bad = 0
@@ -275,7 +286,8 @@ def cmd_lineage(a):
     if a.action == "verify" and not log.path.exists():  # init creates the log; verify needs one
         raise CliError(f"--log: No such file or directory: {a.log}")
     try:
-        lines = log.lines()  # read once up front so a directory --log fails before anything is written
+        with _utf8("--log", a.log):
+            lines = log.lines()  # read once up front so a directory --log fails before anything is written
     except OSError as e:  # directory or unreadable --log
         raise CliError(f"--log: {e.strerror}: {a.log}") from None
     if a.action == "verify":
@@ -300,7 +312,8 @@ def cmd_lineage(a):
 
 def cmd_post(a):
     try:
-        line = Path(a.line_file).read_text().strip()
+        with _utf8("--line-file", a.line_file):
+            line = Path(a.line_file).read_text(encoding="utf-8").strip()
     except OSError as e:  # missing, directory or unreadable --line-file
         raise CliError(f"--line-file: {e.strerror}: {a.line_file}") from None
     key = _key(a.key, "post")
@@ -352,10 +365,8 @@ def _imd(a, imd):
 
 def _agent_ids(path: str) -> dict:
     """--agent-ids file: a JSON object mapping did:key -> agentId (decimal string)."""
-    try:
+    with _utf8("--agent-ids", path):
         text = Path(path).read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        raise CliError(f"--agent-ids is not UTF-8 text: {path}") from None
     ids = _json_obj(text, "--agent-ids")
     for did, aid in ids.items():
         if not isinstance(aid, str):
@@ -367,7 +378,8 @@ def cmd_ge(a):
     from . import exchange
     path = Path(a.state)
     try:
-        ex = exchange.Exchange.load(path, slots=a.slots)  # a missing --state is a fresh book
+        with _utf8("--state", a.state):
+            ex = exchange.Exchange.load(path, slots=a.slots)  # a missing --state is a fresh book
     except OSError as e:  # directory or unreadable --state
         raise CliError(f"--state: {e.strerror}: {a.state}") from None
     now = _now(a)

@@ -55,7 +55,7 @@ CASES = [
     (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{empty}"], "--agent-ids is not valid JSON"),
     (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{listjson}"], "--agent-ids must be a JSON object, got list"),
     (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{intids}"], "--agent-ids values must be agentId strings, got int"),
-    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{binary}"], "--agent-ids is not UTF-8 text"),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{binary}"], "agentwork imd: --agent-ids: not valid UTF-8: "),
     (["imd", "observe", "--src", "{badjson}"], "badjson.json: not valid JSON (Expecting"),
     (["imd", "observe", "--src", "{binary}"], "binary.json: not UTF-8 text"),
     (["imd", "observe", "--src", "{job}"], "job_result.json: not valid JSON"),
@@ -171,3 +171,26 @@ def test_draft_into_new_outbox_still_works(env, capsys):
               "--args", '{"room":"r","task":"t","budget_asset":"FLOP","budget_max":"1"}'])
     out = json.loads(capsys.readouterr().out)
     assert out["posted"] is False and Path(out["outbox_file"]).is_file()
+
+
+UTF8_CASES = [
+    (["verify", "{binary}"], "agentwork verify: file: not valid UTF-8: "),
+    (["post", "--line-file", "{binary}", "--tc-room", "r", "--key", "{key}"], "agentwork post: --line-file: not valid UTF-8: "),
+    (["ge", "book", "--state", "{binary}"], "agentwork ge: --state: not valid UTF-8: "),
+    (["ge", "sell", "--state", "{binary}", "--agent", "a", "--category", "c", "--price", "1"], "agentwork ge: --state: not valid UTF-8: "),
+    (["lineage", "verify", "--log", "{binary}"], "agentwork lineage: --log: not valid UTF-8: "),
+    (["lineage", "init", "--log", "{binary}", "--key", "{key}", "--fields", '{{"purpose":"x"}}'], "agentwork lineage: --log: not valid UTF-8: "),
+]
+
+
+@pytest.mark.parametrize("argv,want", UTF8_CASES, ids=[" ".join(c[0][:2]) + f" #{i}" for i, c in enumerate(UTF8_CASES)])
+def test_non_utf8_input_is_one_line_and_writes_nothing(env, capsys, argv, want):
+    import os
+    from pathlib import Path
+    before = {n: (Path(env["dir"]) / n).read_bytes() for n in sorted(os.listdir(env["dir"]))}
+    with pytest.raises(SystemExit) as ex:
+        cli.main([x.format(**env) for x in argv])
+    err = capsys.readouterr().err
+    assert ex.value.code == 2 and "Traceback" not in err
+    assert err.strip().splitlines() == [want + env["binary"]]
+    assert {n: (Path(env["dir"]) / n).read_bytes() for n in sorted(os.listdir(env["dir"]))} == before
