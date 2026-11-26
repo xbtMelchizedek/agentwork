@@ -115,6 +115,7 @@ agentwork jobs --technocore-room builders --max-age 6h --newest 5               
 | `--min-offers N` | with at least N offers (contested jobs) |
 | `--since MS` / `--until MS` | asked at or after / at or before this unix time in **milliseconds** (same unit as `--now` and job `ts`) |
 | `--max-age 6h` | asked within this span before `--now` (s, m, h or d) |
+| `--min-age 2d` | asked at least this long before `--now` (stale asks; s, m, h or d) |
 | `--newest N` | the N newest, after the other filters |
 
 A bad value (negative, blank, `nan`) exits 2 with a one-line error naming the flag.

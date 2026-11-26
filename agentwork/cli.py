@@ -174,6 +174,13 @@ def cmd_jobs(a):
         span_ms = int(m.group(1)) * {"s": 1, "m": 60, "h": 3600, "d": 86400}[m.group(2)] * 1000
         cutoff = _now(a) - span_ms
         rows = [r for r in rows if isinstance(r.get("ts"), int) and r["ts"] >= cutoff]
+    if a.min_age is not None:
+        m = re.fullmatch(r"\s*(\d+)\s*([smhd])\s*", str(a.min_age))
+        if not m or int(m.group(1)) == 0:
+            raise CliError(f"--min-age must look like 90s, 30m, 6h or 2d, got {str(a.min_age)[:40]!r}")
+        span_ms = int(m.group(1)) * {"s": 1, "m": 60, "h": 3600, "d": 86400}[m.group(2)] * 1000
+        cutoff = _now(a) - span_ms
+        rows = [r for r in rows if isinstance(r.get("ts"), int) and r["ts"] <= cutoff]
     if a.newest is not None:
         if a.newest < 1:
             raise CliError(f"--newest must be a positive integer, got {a.newest}")
@@ -366,6 +373,8 @@ def main(argv=None):
                            help="keep only jobs asked at or before this unix time in MILLISECONDS (pairs with --since)")
             s.add_argument("--max-age",
                            help="keep only jobs asked within this long before --now (or now), e.g. 90s, 30m, 6h, 2d")
+            s.add_argument("--min-age",
+                           help="keep only jobs asked at least this long before --now (or now), e.g. 30m, 2d (stale asks)")
             s.add_argument("--newest", type=int, help="keep only the N newest jobs (by ask ts), after the other filters")
             s.add_argument("--md", action="store_true", help="print a markdown table instead of JSON")
             s.add_argument("--count", action="store_true",

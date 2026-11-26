@@ -266,3 +266,20 @@ def test_jobs_min_offers_rejects_negative():
     r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--min-offers", "-1"],
                        capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 2 and "Traceback" not in r.stderr and "--min-offers" in r.stderr
+
+
+def test_jobs_min_age_keeps_stale_asks():
+    rows = _jobs()
+    newest = max(r["ts"] for r in rows)
+    assert _jobs("--now", str(newest), "--min-age", "1s") == [r for r in rows if r["ts"] <= newest - 1000]
+    assert _jobs("--now", str(newest + 86_400_000 * 3), "--min-age", "2d") == rows
+    young = _jobs("--now", str(newest), "--max-age", "1s")
+    old = _jobs("--now", str(newest), "--min-age", "1s")
+    assert {r["cid"] for r in young} | {r["cid"] for r in old} == {r["cid"] for r in rows}
+
+
+def test_jobs_min_age_rejects_bad():
+    for bad in ("0h", "6", "h", "-1d", "1.5h", "6w"):
+        r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--min-age", bad],
+                           capture_output=True, text=True)
+        assert r.returncode == 2 and "Traceback" not in r.stderr and "--min-age" in r.stderr
