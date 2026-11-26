@@ -44,6 +44,12 @@ CASES = [
     (["keygen", "--out", "{key}"], "refusing to overwrite existing key file"),
     (["keygen", "--out", "{dir}"], "--out is a directory"),
     (["keygen", "--out", "{bad}/sub/k.seed"], "cannot write key file"),
+    (["index", "--src", "{missing}", "--json"], "--src: No such file or directory: "),
+    (["index", "--src", "{dir}", "--json"], "--src: Is a directory: "),
+    (["jobs", "--src", "{missing}"], "--src: No such file or directory: "),
+    (["jobs", "--src", "{dir}"], "--src: Is a directory: "),
+    (["rep", "--src", "{missing}"], "--src: No such file or directory: "),
+    (["rep", "--src", "{key}", "{dir}"], "--src: Is a directory: "),
 ]
 
 

@@ -84,7 +84,10 @@ def cmd_verify(a):
 def _load(a) -> Index:
     idx = Index()
     for p in a.src or []:
-        idx.add_file(Path(p))
+        try:
+            idx.add_file(Path(p))
+        except OSError as e:  # missing, directory or unreadable --src
+            raise CliError(f"--src: {e.strerror}: {p}") from None
     for room in a.technocore_room or []:
         idx.add_dump(fetch_room(room, a.limit))
     return idx
