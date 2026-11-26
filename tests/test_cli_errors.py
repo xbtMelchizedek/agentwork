@@ -14,7 +14,9 @@ def env(tmp_path):
     bad = tmp_path / "bad.seed"
     bad.write_bytes(b"short")
     log = tmp_path / "l.jsonl"
-    return {"key": str(kf), "bad": str(bad), "missing": str(tmp_path / "nope.seed"), "log": str(log),
+    line = tmp_path / "line.txt"
+    line.write_text("agb1 not-a-real-line\n")
+    return {"line": str(line), "key": str(kf), "bad": str(bad), "missing": str(tmp_path / "nope.seed"), "log": str(log),
             "outbox": str(tmp_path / "outbox"), "dir": str(tmp_path)}
 
 
@@ -50,6 +52,12 @@ CASES = [
     (["jobs", "--src", "{dir}"], "--src: Is a directory: "),
     (["rep", "--src", "{missing}"], "--src: No such file or directory: "),
     (["rep", "--src", "{key}", "{dir}"], "--src: Is a directory: "),
+    (["verify", "{dir}"], "verify: Is a directory: "),
+    (["post", "--line-file", "{missing}", "--tc-room", "r", "--key", "{key}"], "--line-file: No such file or directory: "),
+    (["post", "--line-file", "{dir}", "--tc-room", "r", "--key", "{key}"], "--line-file: Is a directory: "),
+    (["post", "--line-file", "{line}", "--tc-room", "r", "--key", "{missing}"], "key file not found"),
+    (["post", "--line-file", "{line}", "--tc-room", "r", "--key", "{bad}"], "bad key file"),
+    (["post", "--line-file", "{line}", "--tc-room", "r", "--key", "{dir}"], "cannot read key file"),
 ]
 
 

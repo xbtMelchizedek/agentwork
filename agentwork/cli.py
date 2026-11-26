@@ -35,6 +35,8 @@ def _key(path: str | None, cmd: str) -> didkey.SigningKey:
         return didkey.load_key(Path(path))
     except FileNotFoundError:
         raise CliError(f"key file not found: {path}") from None
+    except OSError as e:  # directory or unreadable --key
+        raise CliError(f"cannot read key file {path}: {e.strerror}") from None
     except ValueError as e:
         raise CliError(f"bad key file {path}: {e}") from None
 
@@ -72,7 +74,10 @@ def cmd_verify(a):
     lines = []
     for t in a.target:
         src = Path(t)
-        lines += src.read_text().splitlines() if src.exists() else [t]
+        try:
+            lines += src.read_text().splitlines() if src.exists() else [t]
+        except OSError as e:  # directory or unreadable target file
+            raise CliError(f"{e.strerror}: {t}") from None
     bad = 0
     for line in (l for l in lines if l.strip()):
         v = codec.verify_line(line)
@@ -272,8 +277,11 @@ def cmd_lineage(a):
 
 
 def cmd_post(a):
-    line = Path(a.line_file).read_text().strip()
-    key = didkey.load_key(Path(a.key))
+    try:
+        line = Path(a.line_file).read_text().strip()
+    except OSError as e:  # missing, directory or unreadable --line-file
+        raise CliError(f"--line-file: {e.strerror}: {a.line_file}") from None
+    key = _key(a.key, "post")
     try:
         status = post.post(line, a.tc_room, key, confirm=a.yes)
     except post.PostingDisabled as e:
