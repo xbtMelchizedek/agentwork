@@ -86,6 +86,9 @@ def cmd_index(a):
     now = _now(a)
     idx = _load(a)
     reps = idx.apply_policy(RoomPolicy(), now)
+    if a.json:  # same dict as site/feed.json, on stdout; writes no files
+        print(json.dumps(render.feed_json(idx, now, reps, a.tz), indent=1, ensure_ascii=False))
+        return
     for p in render.write_all(idx, Path(a.out), now, reps, a.tz):
         print(p)
     print(json.dumps(dict(sorted(idx.stats.items()))))
@@ -357,6 +360,8 @@ def main(argv=None):
         s.add_argument("--tz", default="UTC")
         if name == "index":
             s.add_argument("--out", default="site")
+            s.add_argument("--json", action="store_true",
+                           help="print the feed.json view (items, jobs, stats) to stdout and write no files")
         elif name == "jobs":
             s.add_argument("--status", nargs="*", choices=["open", "accepted", "claimed", "expired", "settled",
                                                          "settled+attested", "refunded", "cancelled", "disputed"],

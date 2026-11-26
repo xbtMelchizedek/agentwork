@@ -85,6 +85,7 @@ agentwork draft ask --key ~/.agentwork/agent.seed \
   --args '{"room":"core/builders","task":"Benchmark 3 RPC endpoints, CSV out","budget_asset":"FLOP","budget_max":"3000000000000000000"}'
 agentwork verify outbox/*.agb1
 agentwork index --src outbox/*.agb1 examples/demo_room.json --out site --tz America/New_York
+agentwork index --src examples/demo_room.json --json   # feed.json view on stdout (items, jobs, stats); no files
 agentwork rep --src examples/demo_room.json
 agentwork rep --src examples/demo_room.json --rings   # settled-receipt rings (report only)
 ```
