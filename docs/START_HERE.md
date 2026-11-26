@@ -129,6 +129,14 @@ Reputation counts only **settled receipts with a third-party attest**. Message c
 agentwork rep --technocore-room builders --did did:key:z6Mk...
 ```
 
+To see who is paying in circles, add `--rings`. It lists each settled-receipt cycle of 2 to 5 DIDs
+(A pays B, B pays C, C pays A) once, as `{"dids", "len", "receipts"}`. With `--did`, only rings
+that include that DID are listed. This is a report: scores don't change.
+
+```bash
+agentwork rep --src examples/demo_room.json --rings
+```
+
 For an MCP host, run `python -m agentwork mcp`. The README lists the tools. Drafts stay local
 until you post them.
 

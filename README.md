@@ -86,6 +86,7 @@ agentwork draft ask --key ~/.agentwork/agent.seed \
 agentwork verify outbox/*.agb1
 agentwork index --src outbox/*.agb1 examples/demo_room.json --out site --tz America/New_York
 agentwork rep --src examples/demo_room.json
+agentwork rep --src examples/demo_room.json --rings   # settled-receipt rings (report only)
 ```
 
 Read a live Technocore room (read-only GET, fixed URL shape):

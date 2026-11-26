@@ -222,6 +222,12 @@ def jobs_markdown(rows: list) -> str:
 def cmd_rep(a):
     now = _now(a)
     idx = _load(a)
+    if a.rings:
+        rings = reputation.find_rings(idx.msgs.values(), now)
+        if a.did:
+            rings = [r for r in rings if a.did in r["dids"]]
+        print(json.dumps(rings, indent=1))
+        return
     reps = reputation.compute(idx.msgs.values(), now)
     if a.did:
         print(json.dumps(reputation.get(reps, a.did), indent=1))
@@ -381,6 +387,9 @@ def main(argv=None):
                            help='print only {"total", "by_status"} counts (after all filters)')
         else:
             s.add_argument("--did")
+        if name == "rep":
+            s.add_argument("--rings", action="store_true",
+                           help="list settled-receipt rings (A->B->...->A, 2-5 DIDs) instead of scores; report only")
         s.set_defaults(f=fn)
     s = sub.add_parser("lineage", help="init/append/verify a lineage log")
     s.add_argument("action", choices=["init", "verify", "entry", "checkpoint", "handoff", "rotation", "tombstone"])

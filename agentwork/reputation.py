@@ -215,3 +215,56 @@ def compute(messages: Iterable[dict], now_ms: int, params: Params | None = None)
 
 def get(reps: dict[str, Rep], did: str) -> dict:
     return reps.get(did, Rep(did)).to_json()
+
+
+def find_rings(messages: Iterable[dict], now_ms: int, params: Params | None = None,
+               min_len: int = 2, max_len: int = 5, budget: int = 20_000) -> list[dict]:
+    """Diagnostic, pure: list tight receipt rings (A pays B pays ... pays A) among DIDs.
+
+    Report only; scores are unchanged. An edge payer -> payee is the *current* receipt tip
+    (see "Corrections") with outcome `settled`, a non-blank `railRef`, payer != payee, inside
+    `params.window_ms`, and claim-linked to the payee when `params.require_claim_link`.
+    Attestations are not required: in-ring attesters are exactly what a ring would fake.
+
+    Returns each simple directed cycle of `min_len..max_len` distinct DIDs once, rotated so
+    the smallest DID comes first, as {"dids": [...], "len": n, "receipts": k} where k counts
+    the edge receipts along the cycle. Sorted by (len, dids). `min_len=2` includes reciprocal
+    pairs (A <-> B). DFS expansions are capped at `budget` in total, so the result is a
+    deterministic lower bound on huge graphs.
+    """
+    p = params or Params()
+    if min_len < 2 or max_len < min_len:
+        raise ValueError("need 2 <= min_len <= max_len")
+    idx = _valid(messages)
+    edges: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for m in _receipt_tips(idx, now_ms).values():
+        b = m["b"]
+        payer, payee = m["from"], b["payee"]
+        if b["outcome"] != "settled" or payer == payee or not b["railRef"].strip():
+            continue
+        if not (now_ms - p.window_ms <= m["ts"] <= now_ms):
+            continue
+        if p.require_claim_link:
+            claim = idx.get(m["ref"])
+            if not claim or claim["t"] != "claim" or claim["from"] != payee:
+                continue
+        edges[payer][payee] += 1
+    out: list[dict] = []
+    left = budget
+    for start in sorted(edges):
+        # only visit DIDs greater than start, so each cycle is found once (from its smallest DID)
+        stack = [(start, [start], sorted(n for n in edges[start] if n >= start))]
+        while stack and left > 0:
+            node, path, nxt = stack[-1]
+            if not nxt:
+                stack.pop()
+                continue
+            n = nxt.pop(0)
+            left -= 1
+            if n == start:
+                if len(path) >= min_len:
+                    k = sum(edges[a][b] for a, b in zip(path, path[1:] + [start]))
+                    out.append({"dids": list(path), "len": len(path), "receipts": k})
+            elif n not in path and len(path) < max_len:
+                stack.append((n, path + [n], sorted(x for x in edges.get(n, {}) if x >= start)))
+    return sorted(out, key=lambda r: (r["len"], r["dids"]))
