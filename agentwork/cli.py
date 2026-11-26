@@ -294,6 +294,8 @@ def cmd_imd(a):
         _imd(a, imd)
     except imd.ImdError as e:
         raise CliError(f"{a.action}: {e}") from None
+    except OSError as e:  # missing/unreadable --src or --agent-ids, unwritable --out
+        raise CliError(f"{a.action}: {e.strerror}: {e.filename}") from None
 
 
 def _imd(a, imd):
