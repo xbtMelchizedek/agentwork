@@ -40,6 +40,8 @@ CASES = [
     (["draft", "ask", "--key", "{key}", "--outbox", "{outbox}", "--args", "[1]"], "must be a JSON object"),
     (["draft", "ask", "--key", "{key}", "--outbox", "{outbox}", "--args", "{{}}"], "missing argument: room"),
     (["draft", "ask", "--key", "{missing}", "--outbox", "{outbox}", "--args", "{{}}"], "key file not found"),
+    (["draft", "ask", "--key", "{key}", "--outbox", "{line}", "--args", '{{"room":"r","task":"t","budget_asset":"FLOP","budget_max":"1"}}'], "--outbox is a file, want a directory: "),
+    (["draft", "ask", "--key", "{key}", "--outbox", "{line}/sub", "--args", '{{"room":"r","task":"t","budget_asset":"FLOP","budget_max":"1"}}'], "draft: --outbox: Not a directory: "),
     (["imd", "device-did"], "needs --device-key"),
     (["imd", "device-did", "--device-key", "zz"], "device-did: device key must be"),
     (["imd", "proof"], "needs --receipt"),
@@ -150,3 +152,22 @@ def test_directory_state_or_log_writes_nothing(env, capsys):
 def test_missing_ge_state_is_still_a_fresh_book(env, capsys):
     cli.main(["ge", "book", "--state", env["dir"] + "/new/ge.jsonl"])
     assert capsys.readouterr().out.strip()
+
+
+def test_file_outbox_writes_nothing(env, capsys):
+    from pathlib import Path
+    before = Path(env["line"]).read_bytes()
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["draft", "ask", "--key", env["key"], "--outbox", env["line"],
+                  "--args", '{"room":"r","task":"t","budget_asset":"FLOP","budget_max":"1"}'])
+    assert ex.value.code == 2 and "Traceback" not in capsys.readouterr().err
+    assert Path(env["line"]).read_bytes() == before
+
+
+def test_draft_into_new_outbox_still_works(env, capsys):
+    import json
+    from pathlib import Path
+    cli.main(["draft", "ask", "--key", env["key"], "--outbox", env["outbox"],
+              "--args", '{"room":"r","task":"t","budget_asset":"FLOP","budget_max":"1"}'])
+    out = json.loads(capsys.readouterr().out)
+    assert out["posted"] is False and Path(out["outbox_file"]).is_file()

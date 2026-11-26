@@ -77,7 +77,12 @@ def cmd_draft(a):
         env = drafts.make(f"post_{a.intent}", key, args)
     except codec.AgbError as e:
         raise CliError(str(e)) from None
-    p = Outbox(Path(a.outbox)).put(env)
+    if Path(a.outbox).exists() and not Path(a.outbox).is_dir():
+        raise CliError(f"--outbox is a file, want a directory: {a.outbox}")
+    try:
+        p = Outbox(Path(a.outbox)).put(env)
+    except OSError as e:  # unwritable --outbox, or a file in its parent path
+        raise CliError(f"--outbox: {e.strerror}: {a.outbox}") from None
     print(json.dumps({"cid": env["cid"], "outbox_file": str(p), "posted": False}))
 
 
