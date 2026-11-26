@@ -15,7 +15,7 @@ def env(tmp_path):
     bad.write_bytes(b"short")
     log = tmp_path / "l.jsonl"
     return {"key": str(kf), "bad": str(bad), "missing": str(tmp_path / "nope.seed"), "log": str(log),
-            "outbox": str(tmp_path / "outbox")}
+            "outbox": str(tmp_path / "outbox"), "dir": str(tmp_path)}
 
 
 CASES = [
@@ -36,6 +36,9 @@ CASES = [
     (["imd", "device-did", "--device-key", "zz"], "device-did: device key must be"),
     (["imd", "proof"], "needs --receipt"),
     (["imd", "proof", "--receipt", "bafyx"], "proof: receipt not found"),
+    (["keygen", "--out", "{key}"], "refusing to overwrite existing key file"),
+    (["keygen", "--out", "{dir}"], "--out is a directory"),
+    (["keygen", "--out", "{bad}/sub/k.seed"], "cannot write key file"),
 ]
 
 
@@ -66,3 +69,12 @@ def test_happy_paths_unchanged(env, capsys):
     with pytest.raises(SystemExit) as ex:
         cli.main(["lineage", "verify", "--log", env["log"]])
     assert ex.value.code == 0
+
+
+def test_keygen_refusal_keeps_existing_seed(env, capsys):
+    from pathlib import Path
+    before = Path(env["key"]).read_bytes()
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["keygen", "--out", env["key"]])
+    assert ex.value.code == 2 and "Traceback" not in capsys.readouterr().err
+    assert Path(env["key"]).read_bytes() == before

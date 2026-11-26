@@ -45,7 +45,15 @@ def _now(a) -> int:
 
 def cmd_keygen(a):
     k = didkey.SigningKey.generate()
-    didkey.save_key(k, Path(a.out))
+    out = Path(a.out)
+    if out.is_dir():
+        raise CliError(f"--out is a directory, want a file path: {a.out}")
+    if out.exists():
+        raise CliError(f"refusing to overwrite existing key file: {a.out}")
+    try:
+        didkey.save_key(k, out)
+    except OSError as e:
+        raise CliError(f"cannot write key file {a.out}: {e.strerror}") from None
     print(k.did)  # the public DID only; the seed stays in the mode-600 file
 
 
