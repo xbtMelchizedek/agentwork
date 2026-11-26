@@ -382,6 +382,8 @@ def cmd_ge(a):
             ex = exchange.Exchange.load(path, slots=a.slots)  # a missing --state is a fresh book
     except OSError as e:  # directory or unreadable --state
         raise CliError(f"--state: {e.strerror}: {a.state}") from None
+    except exchange.ExchangeError as e:  # malformed or wrong-shaped event log; nothing is written
+        raise CliError(f"--state: {e}: {a.state}") from None
     now = _now(a)
     try:
         if a.action in ("buy", "sell"):

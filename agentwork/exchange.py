@@ -215,24 +215,43 @@ class Exchange:
     # ---------- persistence: the event log is the state ----------
     @classmethod
     def replay(cls, events: list[dict], slots: int = DEFAULT_SLOTS, asset: str = "tCREDIT") -> "Exchange":
+        """Rebuild state from the event log. A bad event raises ExchangeError naming its 1-based position."""
         ex = cls(slots=slots, asset=asset)
-        for e in events:
+        for i, e in enumerate(events, 1):
+            if not isinstance(e, dict):
+                raise ExchangeError(f"event {i}: must be a JSON object, got {type(e).__name__}")
             op = e.get("op")
-            if op == "place":
-                ex.place(e["agent"], e["side"], e["category"], e["qty"], e["price"], e["ts"])
-            elif op == "abort":
-                ex.abort(e["agent"], e["offer"], e["ts"])
-            elif op == "collect":
-                ex.collect(e["agent"], e["offer"], e["ts"])
-            else:
-                raise ExchangeError(f"unknown event op {op!r}")
+            try:
+                if op == "place":
+                    ex.place(e["agent"], e["side"], e["category"], e["qty"], e["price"], e["ts"])
+                elif op == "abort":
+                    ex.abort(e["agent"], e["offer"], e["ts"])
+                elif op == "collect":
+                    ex.collect(e["agent"], e["offer"], e["ts"])
+                else:
+                    raise ExchangeError(f"unknown event op {op!r}")
+            except KeyError as k:
+                raise ExchangeError(f"event {i}: {op} is missing field {k.args[0]!r}") from None
+            except (TypeError, AttributeError):
+                raise ExchangeError(f"event {i}: {op} has a field of the wrong type") from None
+            except ExchangeError as x:
+                if str(x).startswith(f"event {i}: "):
+                    raise
+                raise ExchangeError(f"event {i}: {x}") from None
         return ex
 
     @classmethod
     def load(cls, path: Path, **kw) -> "Exchange":
         if not path.exists():
             return cls(**kw)
-        events = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+        events = []
+        for n, l in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if not l.strip():
+                continue
+            try:
+                events.append(json.loads(l))
+            except ValueError:
+                raise ExchangeError(f"line {n}: not valid JSON") from None
         return cls.replay(events, **kw)
 
     def save(self, path: Path) -> None:

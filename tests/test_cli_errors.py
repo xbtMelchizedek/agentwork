@@ -194,3 +194,41 @@ def test_non_utf8_input_is_one_line_and_writes_nothing(env, capsys, argv, want):
     assert ex.value.code == 2 and "Traceback" not in err
     assert err.strip().splitlines() == [want + env["binary"]]
     assert {n: (Path(env["dir"]) / n).read_bytes() for n in sorted(os.listdir(env["dir"]))} == before
+
+
+GE_STATE_CASES = [
+    # (state file body, expected stderr after "agentwork ge: --state: ")
+    (b"not json\n", "line 1: not valid JSON"),
+    (b'{"op":"place","agent":"a","side":"sell","category":"c","qty":1,"price":1,"ts":1}\n\n{oops\n', "line 3: not valid JSON"),
+    (b"[1, 2]\n", "event 1: must be a JSON object, got list"),
+    (b'"x"\n', "event 1: must be a JSON object, got str"),
+    (b'{"type":"offer"}\n', "event 1: unknown event op None"),
+    (b'{"op":"place","agent":"a"}\n', "event 1: place is missing field 'side'"),
+    (b'{"op":"place","agent":"a","side":"sell","category":"c","qty":"1","price":1,"ts":1}\n', "event 1:"),
+    (b'{"op":"abort","agent":"a","offer":"nope","ts":1}\n', "event 1: no such offer for this agent"),
+]
+
+
+@pytest.mark.parametrize("body,want", GE_STATE_CASES, ids=[f"ge-state #{i}" for i in range(len(GE_STATE_CASES))])
+def test_malformed_ge_state_is_one_line_and_untouched(tmp_path, capsys, body, want):
+    st = tmp_path / "ge.jsonl"
+    st.write_bytes(body)
+    for argv in (["ge", "book", "--state", str(st)],
+                 ["ge", "sell", "--state", str(st), "--agent", "b", "--category", "c", "--price", "1"]):
+        with pytest.raises(SystemExit) as ex:
+            cli.main(argv)
+        err = capsys.readouterr().err
+        assert ex.value.code == 2 and "Traceback" not in err, err
+        assert err.startswith("agentwork ge: --state: " + want) and err.rstrip().endswith(str(st)) and err.count("\n") == 1
+        assert st.read_bytes() == body
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["ge.jsonl"]  # no .tmp left behind
+
+
+def test_valid_ge_state_still_loads(tmp_path, capsys):
+    st = tmp_path / "ge.jsonl"
+    cli.main(["ge", "sell", "--state", str(st), "--agent", "a", "--category", "c", "--price", "3", "--now", "1"])
+    capsys.readouterr()
+    cli.main(["ge", "book", "--state", str(st), "--category", "c"])
+    import json
+    book = json.loads(capsys.readouterr().out)
+    assert [(o["agent"], o["price"], o["remaining"]) for o in book["sell"]] == [("a", 3, 1)] and book["buy"] == []
