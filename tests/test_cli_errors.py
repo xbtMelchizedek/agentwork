@@ -78,6 +78,11 @@ CASES = [
     (["post", "--line-file", "{line}", "--tc-room", "r", "--key", "{missing}"], "key file not found"),
     (["post", "--line-file", "{line}", "--tc-room", "r", "--key", "{bad}"], "bad key file"),
     (["post", "--line-file", "{line}", "--tc-room", "r", "--key", "{dir}"], "cannot read key file"),
+    (["lineage", "verify", "--log", "{dir}"], "lineage: --log: Is a directory: "),
+    (["lineage", "verify", "--log", "{missing}"], "lineage: --log: No such file or directory: "),
+    (["lineage", "init", "--log", "{dir}", "--key", "{key}", "--fields", '{{"purpose":"x"}}'], "--log: Is a directory: "),
+    (["ge", "book", "--state", "{dir}"], "ge: --state: Is a directory: "),
+    (["ge", "sell", "--state", "{dir}", "--agent", "a", "--category", "c", "--price", "1"], "--state: Is a directory: "),
 ]
 
 
@@ -129,3 +134,19 @@ def test_bad_tz_writes_no_site(env, capsys):
 def test_valid_tz_still_works(env, capsys):
     cli.main(["index", "--src", env["key"], "--tz", "America/New_York", "--json"])
     assert '"items"' in capsys.readouterr().out
+
+
+def test_directory_state_or_log_writes_nothing(env, capsys):
+    import os
+    before = sorted(os.listdir(env["dir"]))
+    for argv in (["ge", "sell", "--state", env["dir"], "--agent", "a", "--category", "c", "--price", "1"],
+                 ["lineage", "init", "--log", env["dir"], "--key", env["key"], "--fields", '{"purpose":"x"}']):
+        with pytest.raises(SystemExit) as ex:
+            cli.main(argv)
+        assert ex.value.code == 2 and "Traceback" not in capsys.readouterr().err
+    assert sorted(os.listdir(env["dir"])) == before
+
+
+def test_missing_ge_state_is_still_a_fresh_book(env, capsys):
+    cli.main(["ge", "book", "--state", env["dir"] + "/new/ge.jsonl"])
+    assert capsys.readouterr().out.strip()

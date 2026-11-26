@@ -267,8 +267,14 @@ def cmd_rep(a):
 
 def cmd_lineage(a):
     log = lineage.LineageLog(Path(a.log))
+    if a.action == "verify" and not log.path.exists():  # init creates the log; verify needs one
+        raise CliError(f"--log: No such file or directory: {a.log}")
+    try:
+        lines = log.lines()  # read once up front so a directory --log fails before anything is written
+    except OSError as e:  # directory or unreadable --log
+        raise CliError(f"--log: {e.strerror}: {a.log}") from None
     if a.action == "verify":
-        rep = lineage.verify_chain(log.lines())
+        rep = lineage.verify_chain(lines)
         print(json.dumps(rep.to_json(), indent=1))
         sys.exit(0 if rep.ok else 1)
     key = _key(a.key, f"lineage {a.action}")
@@ -355,7 +361,10 @@ def _agent_ids(path: str) -> dict:
 def cmd_ge(a):
     from . import exchange
     path = Path(a.state)
-    ex = exchange.Exchange.load(path, slots=a.slots)
+    try:
+        ex = exchange.Exchange.load(path, slots=a.slots)  # a missing --state is a fresh book
+    except OSError as e:  # directory or unreadable --state
+        raise CliError(f"--state: {e.strerror}: {a.state}") from None
     now = _now(a)
     try:
         if a.action in ("buy", "sell"):
