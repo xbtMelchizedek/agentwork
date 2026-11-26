@@ -322,10 +322,23 @@ def _imd(a, imd):
         idx = Index()
         for p in a.src:
             idx.add_file(Path(p))
-        ids = json.loads(Path(a.agent_ids).read_text()) if a.agent_ids else None
+        ids = _agent_ids(a.agent_ids) if a.agent_ids else None
         print(json.dumps(imd.receipt_proof(a.receipt, idx.msgs.values(), agent_ids=ids), indent=1, sort_keys=True))
     elif a.action == "device-did":
         print(imd.did_from_device_key(a.device_key))
+
+
+def _agent_ids(path: str) -> dict:
+    """--agent-ids file: a JSON object mapping did:key -> agentId (decimal string)."""
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raise CliError(f"--agent-ids is not UTF-8 text: {path}") from None
+    ids = _json_obj(text, "--agent-ids")
+    for did, aid in ids.items():
+        if not isinstance(aid, str):
+            raise CliError(f"--agent-ids values must be agentId strings, got {type(aid).__name__} for {did[:60]!r}")
+    return ids
 
 
 def cmd_ge(a):

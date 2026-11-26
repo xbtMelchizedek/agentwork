@@ -16,8 +16,14 @@ def env(tmp_path):
     log = tmp_path / "l.jsonl"
     line = tmp_path / "line.txt"
     line.write_text("agb1 not-a-real-line\n")
+    js = {}
+    for name, body in (("badjson", b"{not json"), ("empty", b""), ("listjson", b"[1, 2]"),
+                       ("intids", b'{"did:key:z6Mk": 52396}'), ("okids", b'{"did:key:z6Mk": "52396"}'),
+                       ("job", b'{"id": "j1"}'), ("job_result", b"{oops"), ("binary", b"\xff\xfe\x00{")):
+        js[name] = tmp_path / f"{name}.json"
+        js[name].write_bytes(body)
     return {"line": str(line), "key": str(kf), "bad": str(bad), "missing": str(tmp_path / "nope.seed"), "log": str(log),
-            "outbox": str(tmp_path / "outbox"), "dir": str(tmp_path)}
+            "outbox": str(tmp_path / "outbox"), "dir": str(tmp_path), **{k: str(v) for k, v in js.items()}}
 
 
 CASES = [
@@ -43,6 +49,15 @@ CASES = [
     (["imd", "proof", "--receipt", "bafyx", "--src", "{missing}"], "proof: No such file or directory: "),
     (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{missing}"], "proof: No such file or directory: "),
     (["imd", "observe", "--out", "{bad}/sub/o.md"], "observe: Not a directory: "),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{badjson}"], "--agent-ids is not valid JSON"),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{empty}"], "--agent-ids is not valid JSON"),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{listjson}"], "--agent-ids must be a JSON object, got list"),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{intids}"], "--agent-ids values must be agentId strings, got int"),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{binary}"], "--agent-ids is not UTF-8 text"),
+    (["imd", "observe", "--src", "{badjson}"], "badjson.json: not valid JSON (Expecting"),
+    (["imd", "observe", "--src", "{binary}"], "binary.json: not UTF-8 text"),
+    (["imd", "observe", "--src", "{job}"], "job_result.json: not valid JSON"),
+    (["imd", "proof", "--receipt", "bafyx", "--agent-ids", "{okids}"], "proof: receipt not found"),
     (["keygen", "--out", "{key}"], "refusing to overwrite existing key file"),
     (["keygen", "--out", "{dir}"], "--out is a directory"),
     (["keygen", "--out", "{bad}/sub/k.seed"], "cannot write key file"),

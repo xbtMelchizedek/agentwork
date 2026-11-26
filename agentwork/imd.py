@@ -153,20 +153,30 @@ def observe_list(listing: dict) -> list[dict]:
     return out
 
 
+def _read_json(p: Path):
+    """json.loads a saved file; malformed or non-UTF-8 content is an ImdError naming the file, not a traceback."""
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise ImdError(f"{p}: not valid JSON ({e.msg} at char {e.pos})") from None
+    except UnicodeDecodeError:
+        raise ImdError(f"{p}: not UTF-8 text") from None
+
+
 def load_observed(paths: Iterable[Path]) -> list[dict]:
     """Read saved IMD JSON files (job docs or /jobs pages). Pairs `<x>_result.json` / `<x>_records.json`."""
     out = []
     for p in map(Path, paths):
         if p.stem.endswith(("_result", "_records")):
             continue
-        doc = json.loads(p.read_text(encoding="utf-8"))
+        doc = _read_json(p)
         if isinstance(doc, dict) and isinstance(doc.get("jobs"), list):
             out += observe_list(doc)
             continue
         extra = {}
         for suf in ("result", "records"):
             q = p.with_name(f"{p.stem}_{suf}.json")
-            extra[suf] = json.loads(q.read_text(encoding="utf-8")) if q.exists() else None
+            extra[suf] = _read_json(q) if q.exists() else None
         out.append(observe_job(doc, extra["result"], extra["records"]))
     return out
 
