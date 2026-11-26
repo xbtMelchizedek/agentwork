@@ -67,6 +67,11 @@ CASES = [
     (["jobs", "--src", "{dir}"], "--src: Is a directory: "),
     (["rep", "--src", "{missing}"], "--src: No such file or directory: "),
     (["rep", "--src", "{key}", "{dir}"], "--src: Is a directory: "),
+    (["index", "--src", "{key}", "--tz", "Bad/Zone", "--json"], "--tz: unknown IANA time zone 'Bad/Zone'"),
+    (["index", "--src", "{key}", "--tz", "America", "--out", "{dir}/site"], "--tz: unknown IANA time zone"),
+    (["jobs", "--src", "{key}", "--tz", "../etc"], "--tz: unknown IANA time zone"),
+    (["rep", "--src", "{key}", "--tz", ""], "--tz: unknown IANA time zone ''"),
+    (["imd", "observe", "--tz", "/etc/passwd"], "--tz: unknown IANA time zone"),
     (["verify", "{dir}"], "verify: Is a directory: "),
     (["post", "--line-file", "{missing}", "--tc-room", "r", "--key", "{key}"], "--line-file: No such file or directory: "),
     (["post", "--line-file", "{dir}", "--tc-room", "r", "--key", "{key}"], "--line-file: Is a directory: "),
@@ -112,3 +117,15 @@ def test_keygen_refusal_keeps_existing_seed(env, capsys):
         cli.main(["keygen", "--out", env["key"]])
     assert ex.value.code == 2 and "Traceback" not in capsys.readouterr().err
     assert Path(env["key"]).read_bytes() == before
+
+
+def test_bad_tz_writes_no_site(env, capsys):
+    from pathlib import Path
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["index", "--src", env["key"], "--tz", "Mars/Olympus", "--out", env["dir"] + "/site"])
+    assert ex.value.code == 2 and not (Path(env["dir"]) / "site").exists()
+
+
+def test_valid_tz_still_works(env, capsys):
+    cli.main(["index", "--src", env["key"], "--tz", "America/New_York", "--json"])
+    assert '"items"' in capsys.readouterr().out

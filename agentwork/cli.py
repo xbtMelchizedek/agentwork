@@ -41,6 +41,17 @@ def _key(path: str | None, cmd: str) -> didkey.SigningKey:
         raise CliError(f"bad key file {path}: {e}") from None
 
 
+def _check_tz(tz: str | None) -> None:
+    """Validate --tz up front so index/jobs/rep/imd fail before reading or writing anything."""
+    if tz is None or tz == "UTC":
+        return
+    from zoneinfo import ZoneInfo
+    try:
+        ZoneInfo(tz)
+    except (LookupError, ValueError, OSError):  # unknown key, absolute/../ path, tzdata directory
+        raise CliError(f"--tz: unknown IANA time zone {tz!r} (e.g. UTC, America/New_York)") from None
+
+
 def _now(a) -> int:
     return int(a.now) if getattr(a, "now", None) else int(time.time() * 1000)
 
@@ -455,6 +466,7 @@ def main(argv=None):
     s.set_defaults(f=cmd_ge)
     a = ap.parse_args(argv)
     try:
+        _check_tz(getattr(a, "tz", None))
         a.f(a)
     except CliError as e:
         print(f"agentwork {a.cmd}: {e}", file=sys.stderr)
