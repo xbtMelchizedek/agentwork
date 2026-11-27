@@ -300,3 +300,53 @@ def test_did_filter_blank_or_non_did_is_refused_not_everyone(cmd, did):
 def test_did_filter_strips_surrounding_space():
     did = _jobs()[0]["from"]
     assert _jobs("--did", f"  {did} ") == _jobs("--did", did)
+
+
+def _bad(args, cwd=ROOT):
+    r = subprocess.run([sys.executable, "-m", "agentwork", *args], cwd=cwd, capture_output=True, text=True)
+    assert r.returncode == 2 and r.stdout == "" and "Traceback" not in r.stderr, r.stderr
+    assert len(r.stderr.strip().splitlines()) == 1
+    return r.stderr
+
+
+@pytest.mark.parametrize("cmd", [["jobs"], ["rep"], ["index", "--json"]])
+@pytest.mark.parametrize("n", ["0", "-1"])
+def test_limit_zero_or_negative_is_refused_before_reading(cmd, n):
+    # a missing --src proves the check runs before any file is read
+    err = _bad([*cmd, "--src", "does/not/exist.json", "--limit", n])
+    assert f"--limit must be a positive integer, got {n}" in err
+
+
+def test_bare_status_is_refused_not_every_status():
+    # --status with no values (an unset "$STATUS") used to drop the filter and print every job
+    err = _bad(["jobs", "--src", "does/not/exist.json", "--status"])
+    assert "--status needs at least one status" in err
+
+
+def test_status_and_limit_still_work():
+    assert [r["status"] for r in _jobs("--status", "open", "--limit", "1")] == ["open"]
+
+
+@pytest.mark.parametrize("n", ["0", "-3"])
+@pytest.mark.parametrize("action", [["buy", "--agent", "did:key:zA", "--category", "x", "--price", "5"], ["book"]])
+def test_ge_slots_zero_or_negative_is_refused_and_nothing_written(tmp_path, n, action):
+    state = tmp_path / "ge.jsonl"
+    err = _bad(["ge", *action, "--state", str(state), "--slots", n, "--now", "1"])
+    assert f"--slots must be a positive integer, got {n}" in err and "offer slots are in use" not in err
+    assert not state.exists()
+
+
+def test_ge_slots_check_runs_before_state_is_read(tmp_path):
+    state = tmp_path / "ge.jsonl"
+    state.write_text("not json\n")
+    assert "--slots" in _bad(["ge", "book", "--state", str(state), "--slots", "0"])
+    assert state.read_text() == "not json\n"
+
+
+def test_ge_one_slot_still_places(tmp_path):
+    state = tmp_path / "ge.jsonl"
+    r = subprocess.run([sys.executable, "-m", "agentwork", "ge", "buy", "--state", str(state), "--agent", "did:key:zA",
+                        "--category", "x", "--price", "5", "--slots", "1", "--now", "1"],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert json.loads(r.stdout)["slots_used"] == 1 and state.exists()

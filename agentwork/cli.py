@@ -113,7 +113,15 @@ def cmd_verify(a):
     sys.exit(1 if bad else 0)
 
 
+def _positive(flag, n):
+    """An int flag that counts things (rows to fetch, offer slots): 0 or negative is refused, not obeyed."""
+    if n is not None and n < 1:
+        raise CliError(f"{flag} must be a positive integer, got {n}")
+    return n
+
+
 def _load(a) -> Index:
+    _positive("--limit", a.limit)  # before any --src is read or room fetched
     idx = Index()
     for p in a.src or []:
         try:
@@ -160,6 +168,8 @@ def _did_filter(raw):
 
 def cmd_jobs(a):
     did = _did_filter(a.did)
+    if a.status == []:  # bare --status (e.g. an unset "$STATUS") must not mean "every status"
+        raise CliError("--status needs at least one status, e.g. --status open")
     now = _now(a)
     idx = _load(a)
     reps = idx.apply_policy(RoomPolicy(), now)
@@ -386,6 +396,7 @@ def _agent_ids(path: str) -> dict:
 
 def cmd_ge(a):
     from . import exchange
+    _positive("--slots", a.slots)  # before --state is read; 0 used to fail later as "all 0 offer slots are in use"
     path = Path(a.state)
     try:
         with _utf8("--state", a.state):
