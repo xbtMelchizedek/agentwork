@@ -82,6 +82,35 @@ def test_stdio_answers_non_object_lines(tmp_path):
     assert p.returncode == 0 and "Traceback" not in p.stderr
 
 
+@pytest.mark.parametrize("name,args,why", [
+    ("list_open_jobs", {"Room": "core/builders"}, "unknown argument 'Room' (allowed: room, status)"),  # typo used to drop the filter: every job
+    ("list_imd_jobs", {"state": "verified"}, "unknown argument 'state' (allowed: status)"),
+    ("render", {"out": "/tmp/x"}, "unknown argument 'out' (allowed: none)"),
+    ("verify_message", {}, "missing required argument 'line'"),  # was "error: 'line'"
+    ("whois", {}, "missing required argument 'who'"),
+    ("whois", {"who": 5}, "argument 'who' must be a string, got int"),  # was -32603 "'int' object has no attribute"
+    ("list_friends", {"who": None}, "argument 'who' must be a string, got NoneType"),
+    ("get_guild", {"guild": None}, "argument 'guild' must be a string, got NoneType"),
+    ("get_reputation", {"did": ["x"]}, "argument 'did' must be a string, got list"),  # was -32603 "unhashable type"
+    ("imd_receipt_proof", {"receipt": {}}, "argument 'receipt' must be a string, got dict"),
+    ("list_open_jobs", {"status": 7}, "argument 'status' must be a string, got int"),  # used to match nothing, silently
+])
+def test_read_tool_args_follow_declared_schema(srv, tmp_path, name, args, why):
+    # read tools declare additionalProperties: false, required keys and string types; previously none were enforced
+    r = srv.handle({"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": name, "arguments": args}})
+    assert "error" not in r, r  # a tool error (isError), same as post_* tools, not -32603 with Python internals
+    res = r["result"]
+    assert res["isError"] is True and "structuredContent" not in res
+    assert res["content"][0]["text"] == f"error: {name}: {why}"
+    assert not (tmp_path / "outbox").exists() and not (tmp_path / "site").exists()  # nothing written
+
+
+def test_read_tool_valid_args_still_work(srv, keys):
+    assert not call(srv, "list_open_jobs", {"room": "core/builders", "status": "open"})["isError"]
+    assert not call(srv, "whois", {"who": keys["a"].did})["isError"]
+    assert call(srv, "verify_message", {"line": "agb1 {}"})["structuredContent"]["ok"] is False
+
+
 def test_no_key_configured(tmp_path):
     s = Server({"AGB_OUTBOX": str(tmp_path / "o")})
     assert call(s, "post_note", {"room": "core/x", "text": "hi"})["isError"]

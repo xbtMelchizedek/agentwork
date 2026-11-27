@@ -120,8 +120,29 @@ class Server:
             out.append({"name": name, "description": desc, "inputSchema": schema})
         return out
 
+    @staticmethod
+    def _check_read_args(name: str, args: dict) -> None:
+        """Hold read-tool arguments to the schema they advertise (no extra keys, required present, strings only).
+
+        A typo like {"Room": ...} used to be ignored, so the filter silently dropped; a non-string value
+        reached the index code and came back as -32603 with a Python internals message."""
+        schema = READ_TOOLS[name][1]
+        props = schema.get("properties", {})
+        for k in args:
+            if k not in props:
+                allowed = ", ".join(sorted(props)) or "none"
+                raise ValueError(f"{name}: unknown argument {k!r} (allowed: {allowed})")
+        for k in schema.get("required", []):
+            if k not in args:
+                raise ValueError(f"{name}: missing required argument {k!r}")
+        for k, v in args.items():
+            if props[k].get("type") == "string" and not isinstance(v, str):
+                raise ValueError(f"{name}: argument {k!r} must be a string, got {type(v).__name__}")
+
     def call(self, name: str, args: dict) -> dict:
         now = int(time.time() * 1000)
+        if name in READ_TOOLS:
+            self._check_read_args(name, args)  # before any source is read or file written
         if name in drafts.SPECS:
             args = self._resolve_handles(args, now)
             env = drafts.make(name, self._key(), args)
