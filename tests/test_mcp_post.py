@@ -54,6 +54,34 @@ def test_bad_args_are_tool_errors(srv):
     assert "error" in r
 
 
+@pytest.mark.parametrize("msg", [1, "x", None, [], [{"jsonrpc": "2.0", "id": 5, "method": "ping"}]])
+def test_non_object_message_is_invalid_request(srv, msg):
+    # JSON-RPC 2.0: a message that is not an object gets -32600 with id null (previously: no reply, client hangs)
+    assert srv.handle(msg) == {"jsonrpc": "2.0", "id": None,
+                               "error": {"code": -32600, "message": "invalid request: expected a JSON object"}}
+
+
+@pytest.mark.parametrize("params", ["x", [1], 7, {"name": "verify_message", "arguments": "x"},
+                                    {"name": "verify_message", "arguments": ["agb1 {}"]}])
+def test_non_object_params_are_invalid_params(srv, tmp_path, params):
+    # previously -32603 with a Python internals message ("'str' object has no attribute 'get'")
+    r = srv.handle({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": params})
+    assert r == {"jsonrpc": "2.0", "id": 3,
+                 "error": {"code": -32602, "message": "invalid params: params and arguments must be JSON objects"}}
+    assert not (tmp_path / "outbox").exists()  # nothing written
+
+
+def test_stdio_answers_non_object_lines(tmp_path):
+    env = {**os.environ, "AGB_OUTBOX": str(tmp_path / "ob")}
+    env.pop(post.ENV_FLAG, None)
+    lines = ["1", "[]", json.dumps({"jsonrpc": "2.0", "id": 2, "method": "ping"})]
+    p = subprocess.run([sys.executable, "-m", "agentwork", "mcp"], cwd=ROOT, input="\n".join(lines) + "\n",
+                       capture_output=True, text=True, env=env, timeout=30)
+    outs = [json.loads(l) for l in p.stdout.splitlines()]
+    assert [(o["id"], o.get("error", {}).get("code")) for o in outs] == [(None, -32600), (None, -32600), (2, None)]
+    assert p.returncode == 0 and "Traceback" not in p.stderr
+
+
 def test_no_key_configured(tmp_path):
     s = Server({"AGB_OUTBOX": str(tmp_path / "o")})
     assert call(s, "post_note", {"room": "core/x", "text": "hi"})["isError"]

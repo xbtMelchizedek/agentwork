@@ -186,7 +186,9 @@ class Server:
         raise KeyError(name)
 
     # ── JSON-RPC ──
-    def handle(self, msg: dict) -> dict | None:
+    def handle(self, msg) -> dict | None:
+        if not isinstance(msg, dict):  # 1, "x", [] or a batch: JSON-RPC -32600 with id null, never silence
+            return {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "invalid request: expected a JSON object"}}
         mid, method = msg.get("id"), msg.get("method")
         if mid is None:
             return None  # notification
@@ -201,6 +203,8 @@ class Server:
                 res = {"tools": self.tools()}
             elif method == "tools/call":
                 p = msg.get("params") or {}
+                if not isinstance(p, dict) or not isinstance(p.get("arguments") or {}, dict):
+                    return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32602, "message": "invalid params: params and arguments must be JSON objects"}}
                 name, args = p.get("name"), p.get("arguments") or {}
                 if name not in drafts.SPECS and name not in READ_TOOLS:
                     return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32602, "message": f"unknown tool {name!r}"}}
@@ -228,7 +232,7 @@ def main() -> None:
             sys.stdout.write(json.dumps({"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}}) + "\n")
             sys.stdout.flush()
             continue
-        out = srv.handle(msg) if isinstance(msg, dict) else None
+        out = srv.handle(msg)
         if out is not None:
             sys.stdout.write(json.dumps(out) + "\n")
             sys.stdout.flush()
