@@ -4,6 +4,8 @@ import json
 import subprocess
 import sys
 
+import pytest
+
 from conftest import ROOT
 
 T = 1794900000000
@@ -283,3 +285,18 @@ def test_jobs_min_age_rejects_bad():
         r = subprocess.run([sys.executable, "-m", "agentwork", "jobs", "--src", "examples/demo_room.json", "--min-age", bad],
                            capture_output=True, text=True)
         assert r.returncode == 2 and "Traceback" not in r.stderr and "--min-age" in r.stderr
+
+
+@pytest.mark.parametrize("cmd", [["jobs"], ["rep"], ["rep", "--rings"]])
+@pytest.mark.parametrize("did", ["", "   ", "alice"])
+def test_did_filter_blank_or_non_did_is_refused_not_everyone(cmd, did):
+    # an unset shell var (--did "$DID") used to drop the filter and print every job / every rep
+    r = subprocess.run([sys.executable, "-m", "agentwork", *cmd, "--src", "examples/demo_room.json",
+                        "--now", str(T + 3_600_000), "--did", did], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 2 and r.stdout == "" and "Traceback" not in r.stderr
+    assert len(r.stderr.strip().splitlines()) == 1 and "--did must be a DID" in r.stderr
+
+
+def test_did_filter_strips_surrounding_space():
+    did = _jobs()[0]["from"]
+    assert _jobs("--did", f"  {did} ") == _jobs("--did", did)

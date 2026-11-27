@@ -148,17 +148,26 @@ def job_summary(j: dict) -> dict:
             "outcome": tip["b"].get("outcome") if tip else None, "attests": len(j["attests"])}
 
 
+def _did_filter(raw):
+    """--did as a filter: None means no filter; blank or non-DID text is refused, never read as 'everyone'."""
+    if raw is None:
+        return None
+    did = raw.strip()
+    if not did.startswith("did:"):
+        raise CliError(f"--did must be a DID (did:key:...), got {raw[:40]!r}")
+    return did
+
+
 def cmd_jobs(a):
+    did = _did_filter(a.did)
     now = _now(a)
     idx = _load(a)
     reps = idx.apply_policy(RoomPolicy(), now)
     rows = [job_summary(j) for j in idx.jobs(now, reps)]
     if a.status:
         rows = [r for r in rows if r["status"] in a.status]
-    if a.did:
-        if not a.did.startswith("did:"):
-            raise CliError(f"--did must be a DID (did:key:...), got {a.did[:40]!r}")
-        rows = [r for r in rows if r["from"] == a.did or a.did in r["payees"]]
+    if did is not None:
+        rows = [r for r in rows if r["from"] == did or did in r["payees"]]
     if a.task:
         needle = " ".join(a.task.split()).casefold()
         if not needle:
@@ -266,17 +275,18 @@ def jobs_markdown(rows: list) -> str:
 
 
 def cmd_rep(a):
+    did = _did_filter(a.did)
     now = _now(a)
     idx = _load(a)
     if a.rings:
         rings = reputation.find_rings(idx.msgs.values(), now)
-        if a.did:
-            rings = [r for r in rings if a.did in r["dids"]]
+        if did is not None:
+            rings = [r for r in rings if did in r["dids"]]
         print(json.dumps(rings, indent=1))
         return
     reps = reputation.compute(idx.msgs.values(), now)
-    if a.did:
-        print(json.dumps(reputation.get(reps, a.did), indent=1))
+    if did is not None:
+        print(json.dumps(reputation.get(reps, did), indent=1))
     else:
         print(json.dumps([r.to_json() for r in sorted(reps.values(), key=lambda r: -r.score)], indent=1))
 
