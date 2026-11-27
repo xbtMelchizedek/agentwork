@@ -232,3 +232,26 @@ def test_valid_ge_state_still_loads(tmp_path, capsys):
     import json
     book = json.loads(capsys.readouterr().out)
     assert [(o["agent"], o["price"], o["remaining"]) for o in book["sell"]] == [("a", 3, 1)] and book["buy"] == []
+
+
+@pytest.mark.parametrize("action,fields,want", [
+    ("entry", '{"ts":20,"what":"note","ref":"r","seq":5}', "field(s) seq are set by the log"),
+    ("entry", '{"ts":20,"what":"note","ref":"r","lin":"x","prev":"y"}', "field(s) lin, prev are set by the log"),
+    ("entry", '{"ts":20,"what":"note","ref":"r","kind":"tombstone"}', "field(s) kind are set by the log"),
+    ("entry", '{"ts":5,"what":"note","ref":"r"}', "entry would not verify: entry 1: timestamp goes backwards"),
+    ("checkpoint", '{"ts":20,"seq":9}', "field(s) seq are set by the log"),
+])
+def test_lineage_append_refuses_chain_breaking_fields(env, capsys, action, fields, want):
+    """--fields must not override seq/lin/prev/kind or go back in time: that wrote an entry that bricked the log."""
+    from pathlib import Path
+    cli.main(["lineage", "init", "--log", env["log"], "--key", env["key"], "--fields", '{"purpose":"t","ts":10}'])
+    before = Path(env["log"]).read_bytes()
+    capsys.readouterr()
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["lineage", action, "--log", env["log"], "--key", env["key"], "--fields", fields])
+    err = capsys.readouterr().err
+    assert ex.value.code == 2 and want in err and err.count("\n") == 1, err
+    assert Path(env["log"]).read_bytes() == before
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["lineage", "verify", "--log", env["log"]])
+    assert ex.value.code == 0

@@ -148,12 +148,15 @@ class LineageLog:
             b["next_key_hash"] = next_key_hash(next_key)
         return self._write(codec.build(key, "lineage", "lineage", b, ts=ts))
 
-    def append(self, key: didkey.SigningKey, kind: str, ts: int | None = None, **fields) -> dict:
+    def append(self, key: didkey.SigningKey, kind: str, /, ts: int | None = None, **fields) -> dict:
         st = self.state()
         if st.tombstoned:
             raise ValueError("lineage is tombstoned")
         if key.did != st.current_key:
             raise ValueError("key is not the lineage's current key")
+        reserved = sorted({"kind", "seq", "lin", "prev"} & fields.keys())
+        if reserved:  # chain fields are set here; letting --fields override them would write an unverifiable entry
+            raise ValueError(f"field(s) {', '.join(reserved)} are set by the log, not by the caller")
         lines = self.lines()
         prev = json.loads(lines[-1][len(codec.PREFIX):])["cid"]
         b = {"kind": kind, "seq": st.entries, "lin": st.lin, "prev": prev, **fields}
@@ -162,4 +165,8 @@ class LineageLog:
             lo, hi = b.setdefault("from_seq", 0), b.setdefault("to_seq", len(cids) - 1)
             b["root"] = merkle_root(cids[lo:hi + 1])
         room = "lineage/" + st.lin
-        return self._write(codec.build(key, "lineage", room, b, ts=ts))
+        env = codec.build(key, "lineage", room, b, ts=ts)
+        check = verify_chain(lines + [codec.encode(env)])  # never append an entry that breaks the chain
+        if not check.ok:
+            raise ValueError("entry would not verify: " + "; ".join(check.errors))
+        return self._write(env)

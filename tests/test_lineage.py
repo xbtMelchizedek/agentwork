@@ -71,8 +71,14 @@ def test_tamper_detected(tmp_path, keys, case):
 def test_rotation_must_match_commitment(tmp_path, keys):
     log = lineage.LineageLog(tmp_path / "l.jsonl")
     log.incept(keys["a"], "x", next_key=keys["b"].did, ts=T)
-    log.append(keys["a"], "rotation", new_key=keys["c"].did, ts=T + 1)  # writer doesn't check; verifier does
-    assert "committed" in " ".join(lineage.verify_chain(log.lines()).errors)
+    before = log.lines()
+    with pytest.raises(ValueError, match="committed next_key_hash"):  # writer refuses; log untouched
+        log.append(keys["a"], "rotation", new_key=keys["c"].did, ts=T + 1)
+    assert log.lines() == before
+    inc = json.loads(before[0][len(codec.PREFIX):])
+    bad = codec.build(keys["a"], "lineage", "lineage/lin:" + inc["cid"], {"kind": "rotation", "seq": 1, "lin": "lin:" + inc["cid"],
+                      "prev": inc["cid"], "new_key": keys["c"].did}, ts=T + 1)
+    assert "committed" in " ".join(lineage.verify_chain(before + [codec.encode(bad)]).errors)  # verifier still checks
 
 
 def test_cli_verify(tmp_path, keys):
